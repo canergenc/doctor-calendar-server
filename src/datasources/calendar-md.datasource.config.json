@@ -1,0 +1,11 @@
+{
+  "name": "calendarMd",
+  "connector": "mongodb",
+  "url": "mongodb+srv://canergenc:caner2020.@doctorcalendarcluster-26y4h.mongodb.net/doctorcalendar?retryWrites=true&w=majority",
+  "host": "doctorcalendarcluster-26y4h.mongodb.net",
+  "port": 27017,
+  "user": "canergenc",
+  "password": "caner2020.",
+  "database": "doctorcalendar",
+  "useNewUrlParser": true
+}
