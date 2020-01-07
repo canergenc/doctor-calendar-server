@@ -1,7 +1,8 @@
 import { Entity, model, property } from '@loopback/repository';
+import { Calendar } from './calendar.model';
 
 @model({ settings: { strict: false } })
-export class Calendar extends Entity {
+export class User extends Entity {
   @property({
     type: 'number',
     id: true,
@@ -10,26 +11,32 @@ export class Calendar extends Entity {
   id?: number;
 
   @property({
+    type: 'string',
+    required: true,
+  })
+  email: string;
+
+  @property({
+    type: 'string',
+    required: true,
+  })
+  password: string;
+
+  @property({
+    type: 'string',
+    required: true,
+  })
+  fullName: string;
+
+  @property({
     type: 'number',
-    required: true,
   })
-  locationId: number;
+  deviceId?: number;
 
   @property({
-    type: 'date',
-    required: true,
+    type: 'object',
   })
-  date: string;
-
-  @property({
-    type: 'string',
-  })
-  description?: string;
-
-  @property({
-    type: 'string',
-  })
-  type?: string;
+  calendar?: Calendar;
 
   // Define well-known properties here
 
@@ -37,13 +44,13 @@ export class Calendar extends Entity {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [prop: string]: any;
 
-  constructor(data?: Partial<Calendar>) {
+  constructor(data?: Partial<User>) {
     super(data);
   }
 }
 
-export interface CalendarRelations {
+export interface UserRelations {
   // describe navigational properties here
 }
 
-export type CalendarWithRelations = Calendar & CalendarRelations;
+export type UserWithRelations = User & UserRelations;

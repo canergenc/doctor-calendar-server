@@ -4,16 +4,16 @@ import {
   LifeCycleObserver,
   ValueOrPromise,
 } from '@loopback/core';
-import {juggler} from '@loopback/repository';
-import config from './calendar-md.datasource.config.json';
+import { juggler } from '@loopback/repository';
+import config from './mongo.datasource.config.json';
 
 @lifeCycleObserver('datasource')
-export class CalendarMdDataSource extends juggler.DataSource
+export class MongoDataSource extends juggler.DataSource
   implements LifeCycleObserver {
-  static dataSourceName = 'calendarMd';
+  static dataSourceName = 'mongo';
 
   constructor(
-    @inject('datasources.config.calendarMd', {optional: true})
+    @inject('datasources.config.mongo', { optional: true })
     dsConfig: object = config,
   ) {
     super(dsConfig);

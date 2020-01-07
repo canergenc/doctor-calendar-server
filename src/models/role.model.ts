@@ -1,19 +1,19 @@
-import {Entity, model, property} from '@loopback/repository';
+import { Entity, model, property } from '@loopback/repository';
 
-@model({settings: {strict: false}})
-export class Calendar2 extends Entity {
+@model({ settings: { strict: false } })
+export class Role extends Entity {
   @property({
-    type: 'string',
+    type: 'number',
     id: true,
     generated: true,
   })
-  name?: string;
+  id?: number;
 
   @property({
     type: 'string',
     required: true,
   })
-  description: string;
+  name: string;
 
   // Define well-known properties here
 
@@ -21,13 +21,13 @@ export class Calendar2 extends Entity {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [prop: string]: any;
 
-  constructor(data?: Partial<Calendar2>) {
+  constructor(data?: Partial<Role>) {
     super(data);
   }
 }
 
-export interface Calendar2Relations {
+export interface RoleRelations {
   // describe navigational properties here
 }
 
-export type Calendar2WithRelations = Calendar2 & Calendar2Relations;
+export type RoleWithRelations = Role & RoleRelations;

@@ -1,6 +1,6 @@
 import {DefaultCrudRepository} from '@loopback/repository';
 import {Calendar, CalendarRelations} from '../models';
-import {CalendarMdDataSource} from '../datasources';
+import {MongoDataSource} from '../datasources';
 import {inject} from '@loopback/core';
 
 export class CalendarRepository extends DefaultCrudRepository<
@@ -9,7 +9,7 @@ export class CalendarRepository extends DefaultCrudRepository<
   CalendarRelations
 > {
   constructor(
-    @inject('datasources.calendarMd') dataSource: CalendarMdDataSource,
+    @inject('datasources.mongo') dataSource: MongoDataSource,
   ) {
     super(Calendar, dataSource);
   }
