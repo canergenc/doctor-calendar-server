@@ -3,7 +3,7 @@ import { HttpErrors } from '@loopback/rest';
 import { promisify } from 'util';
 import { TokenService } from '@loopback/authentication';
 import { TokenServiceBindings } from '../keys';
-import { UserProfile } from '@loopback/security';
+import { UserProfile, securityId } from '@loopback/security';
 
 const jwt = require('jsonwebtoken');
 const signAsync = promisify(jwt.sign);
@@ -20,7 +20,7 @@ export class JWTService implements TokenService {
   async verifyToken(token: string): Promise<UserProfile> {
     if (!token) {
       throw new HttpErrors.Unauthorized(
-        `Error verifying token: 'token' is null`,
+        `Error verifying token : 'token' is null`,
       );
     }
 
@@ -28,36 +28,43 @@ export class JWTService implements TokenService {
 
     try {
       // decode user profile from token
-      const decryptedToken = await verifyAsync(token, this.jwtSecret);
+      const decodedToken = await verifyAsync(token, this.jwtSecret);
       // don't copy over  token field 'iat' and 'exp', nor 'email' to user profile
       userProfile = Object.assign(
-        { id: '', name: '' },
-        { id: decryptedToken.id, name: decryptedToken.name },
+        { [securityId]: '', name: '' },
+        {
+          [securityId]: decodedToken.id,
+          name: decodedToken.name,
+          id: decodedToken.id,
+        },
       );
     } catch (error) {
       throw new HttpErrors.Unauthorized(
-        `Error verifying token: ${error.message}`,
+        `Error verifying token : ${error.message}`,
       );
     }
-
     return userProfile;
   }
 
   async generateToken(userProfile: UserProfile): Promise<string> {
     if (!userProfile) {
       throw new HttpErrors.Unauthorized(
-        'Error generating token: userProfile is null',
+        'Error generating token : userProfile is null',
       );
     }
-
+    const userInfoForToken = {
+      id: userProfile[securityId],
+      name: userProfile.name,
+      email: userProfile.email,
+    };
     // Generate a JSON Web Token
     let token: string;
     try {
-      token = await signAsync(userProfile, this.jwtSecret, {
+      token = await signAsync(userInfoForToken, this.jwtSecret, {
         expiresIn: Number(this.jwtExpiresIn),
       });
     } catch (error) {
-      throw new HttpErrors.Unauthorized(`Error encoding token: ${error}`);
+      throw new HttpErrors.Unauthorized(`Error encoding token : ${error}`);
     }
 
     return token;

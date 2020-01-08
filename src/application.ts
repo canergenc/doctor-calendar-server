@@ -10,12 +10,12 @@ import { ServiceMixin } from '@loopback/service-proxy';
 import path from 'path';
 import { MyAuthenticationSequence } from './sequence';
 import { AuthenticationComponent, registerAuthenticationStrategy } from '@loopback/authentication';
-import { JWTAuthenticationStrategy } from './controllers/authentication-strategies/jwt-strategy';
+import { JWTAuthenticationStrategy } from './authentication-strategies/jwt-strategy';
 import { TokenServiceBindings, TokenServiceConstants, PasswordHasherBindings, UserServiceBindings } from './keys';
 import { JWTService } from './services/jwt-service';
-import { MyUserService } from './services';
 import { BcryptHasher } from './services/hash.password.bcryptjs';
 import { SECURITY_SCHEME_SPEC } from './utils/security-spec';
+import { MyUserService } from './services/user-service';
 
 /**
  * Information from package.json
@@ -53,13 +53,7 @@ export class DoctorCalendarServerApplication extends BootMixin(
 
     // Bind authentication component related elements
     this.component(AuthenticationComponent);
-    this.component(AuthorizationComponent);
 
-    // authorization
-    this.bind('casbin.enforcer').toDynamicValue(createEnforcer);
-    this.bind('authorizationProviders.casbin-provider')
-      .toProvider(CasbinAuthorizationProvider)
-      .tag(AuthorizationTags.AUTHORIZER);
 
     // authentication
     registerAuthenticationStrategy(this, JWTAuthenticationStrategy);

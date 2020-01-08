@@ -1,4 +1,4 @@
-import { Entity, model, property, hasOne, hasMany } from '@loopback/repository';
+import { Entity, model, property, hasOne } from '@loopback/repository';
 import { Calendar } from './calendar.model';
 import { UserCredentials } from './user-credentials.model';
 
@@ -21,19 +21,13 @@ export class User extends Entity {
     type: 'string',
     id: true,
   })
-  id?: number;
+  id: string;
 
   @property({
     type: 'string',
     required: true,
   })
   email: string;
-
-  @property({
-    type: 'string',
-    required: true,
-  })
-  password: string;
 
   @property({
     type: 'string',
@@ -46,17 +40,11 @@ export class User extends Entity {
   })
   deviceId?: number;
 
-  @hasMany(() => Calendar)
+  @hasOne(() => Calendar)
   calendar?: Calendar;
 
   @hasOne(() => UserCredentials)
   userCredentials: UserCredentials;
-
-  // Define well-known properties here
-
-  // Indexer property to allow additional data
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  [prop: string]: any;
 
   constructor(data?: Partial<User>) {
     super(data);

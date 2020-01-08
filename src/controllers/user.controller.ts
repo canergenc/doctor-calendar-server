@@ -18,6 +18,7 @@ import {
   put,
   del,
   requestBody,
+  HttpErrors,
 } from '@loopback/rest';
 import { UserProfile, securityId, SecurityBindings } from '@loopback/security';
 import { User } from '../models';
@@ -54,8 +55,14 @@ export class UserController {
   @post('/users', {
     responses: {
       '200': {
-        description: 'User model instance',
-        content: { 'application/json': { schema: getModelSchemaRef(User) } },
+        description: 'User',
+        content: {
+          'application/json': {
+            schema: {
+              'x-ts-type': User,
+            },
+          },
+        },
       },
     },
   })
@@ -65,14 +72,12 @@ export class UserController {
         'application/json': {
           schema: getModelSchemaRef(NewUserRequest, {
             title: 'NewUser',
-            /*exclude: ['id'],*/
           }),
         },
       },
     })
     newUserRequest: NewUserRequest,
   ): Promise<User> {
-
     // ensure a valid email value and password value
     validateCredentials(_.pick(newUserRequest, ['email', 'password']));
 
@@ -81,17 +86,26 @@ export class UserController {
       newUserRequest.password,
     );
 
-    // create the new user
-    const savedUser = await this.userRepository.create(
-      _.omit(newUserRequest, 'password'),
-    );
+    try {
+      // create the new user
+      const savedUser = await this.userRepository.create(
+        _.omit(newUserRequest, 'password'),
+      );
 
-    // set the password
-    await this.userRepository
-      .userCredentials(savedUser.id)
-      .create({ password });
+      // set the password
+      await this.userRepository
+        .userCredentials(savedUser.id)
+        .create({ password });
 
-    return savedUser;
+      return savedUser;
+    } catch (error) {
+      // MongoError 11000 duplicate key
+      if (error.code === 11000 && error.errmsg.includes('index: uniqueEmail')) {
+        throw new HttpErrors.Conflict('Email value is already taken');
+      } else {
+        throw error;
+      }
+    }
   }
 
   @post('/users/login', {
@@ -208,7 +222,7 @@ export class UserController {
     return this.userRepository.updateAll(user, where);
   }
 
-  @get('/users/{id}', {
+  @get('/users/{userId}', {
     responses: {
       '200': {
         description: 'User model instance',
@@ -221,13 +235,13 @@ export class UserController {
     },
   })
   async findById(
-    @param.path.number('id') id: number,
+    @param.path.string('userId') userId: string,
     @param.query.object('filter', getFilterSchemaFor(User)) filter?: Filter<User>
   ): Promise<User> {
-    return this.userRepository.findById(id, filter);
+    return this.userRepository.findById(userId, filter);
   }
 
-  @patch('/users/{id}', {
+  @patch('/users/{userId}', {
     responses: {
       '204': {
         description: 'User PATCH success',
@@ -235,7 +249,7 @@ export class UserController {
     },
   })
   async updateById(
-    @param.path.number('id') id: number,
+    @param.path.string('userId') userId: string,
     @requestBody({
       content: {
         'application/json': {
@@ -245,10 +259,10 @@ export class UserController {
     })
     user: User,
   ): Promise<void> {
-    await this.userRepository.updateById(id, user);
+    await this.userRepository.updateById(userId, user);
   }
 
-  @put('/users/{id}', {
+  @put('/users/{userId}', {
     responses: {
       '204': {
         description: 'User PUT success',
@@ -256,20 +270,20 @@ export class UserController {
     },
   })
   async replaceById(
-    @param.path.number('id') id: number,
+    @param.path.string('userId') userId: string,
     @requestBody() user: User,
   ): Promise<void> {
-    await this.userRepository.replaceById(id, user);
+    await this.userRepository.replaceById(userId, user);
   }
 
-  @del('/users/{id}', {
+  @del('/users/{userId}', {
     responses: {
       '204': {
         description: 'User DELETE success',
       },
     },
   })
-  async deleteById(@param.path.number('id') id: number): Promise<void> {
-    await this.userRepository.deleteById(id);
+  async deleteById(@param.path.string('userId') userId: string): Promise<void> {
+    await this.userRepository.deleteById(userId);
   }
 }

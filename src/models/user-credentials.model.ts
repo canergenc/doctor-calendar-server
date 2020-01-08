@@ -7,7 +7,7 @@ export class UserCredentials extends Entity {
     id: true,
     mongodb: { dataType: 'ObjectID' },
   })
-  id?: string;
+  id: string;
 
   @property({
     type: 'string',
