@@ -17,20 +17,20 @@ import {
   del,
   requestBody,
 } from '@loopback/rest';
-import {Location} from '../models';
-import {LocationRepository} from '../repositories';
+import { Location } from '../models';
+import { LocationRepository } from '../repositories';
 
 export class LocationController {
   constructor(
     @repository(LocationRepository)
-    public locationRepository : LocationRepository,
-  ) {}
+    public locationRepository: LocationRepository,
+  ) { }
 
   @post('/locations', {
     responses: {
       '200': {
         description: 'Location model instance',
-        content: {'application/json': {schema: getModelSchemaRef(Location)}},
+        content: { 'application/json': { schema: getModelSchemaRef(Location) } },
       },
     },
   })
@@ -40,7 +40,7 @@ export class LocationController {
         'application/json': {
           schema: getModelSchemaRef(Location, {
             title: 'NewLocation',
-            exclude: ['Id'],
+            exclude: ['id'],
           }),
         },
       },
@@ -54,7 +54,7 @@ export class LocationController {
     responses: {
       '200': {
         description: 'Location model count',
-        content: {'application/json': {schema: CountSchema}},
+        content: { 'application/json': { schema: CountSchema } },
       },
     },
   })
@@ -72,7 +72,7 @@ export class LocationController {
           'application/json': {
             schema: {
               type: 'array',
-              items: getModelSchemaRef(Location, {includeRelations: true}),
+              items: getModelSchemaRef(Location, { includeRelations: true }),
             },
           },
         },
@@ -89,7 +89,7 @@ export class LocationController {
     responses: {
       '200': {
         description: 'Location PATCH success count',
-        content: {'application/json': {schema: CountSchema}},
+        content: { 'application/json': { schema: CountSchema } },
       },
     },
   })
@@ -97,7 +97,7 @@ export class LocationController {
     @requestBody({
       content: {
         'application/json': {
-          schema: getModelSchemaRef(Location, {partial: true}),
+          schema: getModelSchemaRef(Location, { partial: true }),
         },
       },
     })
@@ -113,7 +113,7 @@ export class LocationController {
         description: 'Location model instance',
         content: {
           'application/json': {
-            schema: getModelSchemaRef(Location, {includeRelations: true}),
+            schema: getModelSchemaRef(Location, { includeRelations: true }),
           },
         },
       },
@@ -138,7 +138,7 @@ export class LocationController {
     @requestBody({
       content: {
         'application/json': {
-          schema: getModelSchemaRef(Location, {partial: true}),
+          schema: getModelSchemaRef(Location, { partial: true }),
         },
       },
     })
