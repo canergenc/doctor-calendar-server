@@ -7,5 +7,6 @@
   "user": "canergenc",
   "password": "caner2020.",
   "database": "doctorcalendar",
-  "useNewUrlParser": true
+  "useNewUrlParser": true,
+  "useUnifiedTopology": true
 }

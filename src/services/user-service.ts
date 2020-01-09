@@ -27,17 +27,12 @@ export class MyUserService implements UserService<User, Credentials> {
     if (!foundUser) {
       throw new HttpErrors.Unauthorized(invalidCredentialsError);
     }
-    console.log(foundUser.id);
-    const deneme = await this.userCredentialsRepository.find();
-    const deneme2 = await this.userCredentialsRepository.find({ where: { userId: foundUser.id } });
-    console.log("deneme1");
-    console.log(deneme);
-    console.log("deneme2");
-    console.log(deneme2);
-    const credentialsFound = await this.userRepository.findCredentials(
+    /* Geçici çözüm olarak yapıldı. Düzeltme yapılacak.*/
+    const userCredentials = await this.userCredentialsRepository.find();
+    const credentialsFound = userCredentials.find(x => x.userId === foundUser.id);
+    /*const credentialsFound = await this.userRepository.findCredentials(
       foundUser.id,
-    );
-    //console.log(credentialsFound);
+    );*/
     if (!credentialsFound) {
       throw new HttpErrors.Unauthorized(invalidCredentialsError);
     }

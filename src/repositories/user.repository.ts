@@ -1,8 +1,7 @@
 import { DefaultCrudRepository, HasOneRepositoryFactory, repository, juggler } from '@loopback/repository';
-import { User, UserRelations, UserCredentials, Calendar } from '../models';
+import { User, UserRelations, UserCredentials } from '../models';
 import { inject, Getter } from '@loopback/core';
 import { UserCredentialsRepository } from './user-credentials.repository';
-import { CalendarRepository } from './calendar.repository';
 
 export type Credentials = {
   email: string;
