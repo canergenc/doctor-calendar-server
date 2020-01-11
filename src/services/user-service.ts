@@ -54,4 +54,13 @@ export class MyUserService implements UserService<User, Credentials> {
     if (user.fullName) userName = `${user.fullName}`;
     return { [securityId]: user.id, name: userName, id: user.id };
   }
+
+  async emailCheck(email: string): Promise<boolean> {
+    const foundEmail = await this.userRepository.findOne({
+      where: { email: email },
+    });
+    if (!foundEmail)
+      throw new HttpErrors.BadRequest("invalidEmailError");
+    return true;
+  }
 }

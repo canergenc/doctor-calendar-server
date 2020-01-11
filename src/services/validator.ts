@@ -15,3 +15,13 @@ export function validateCredentials(credentials: Credentials) {
     );
   }
 }
+
+export function validateEmailCheck(email: string) {
+  // Validate Email
+  if (!isemail.validate(email)) {
+    throw new HttpErrors.UnprocessableEntity('invalid email');
+  }
+
+  // Validate Email Check
+
+}

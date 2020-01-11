@@ -142,21 +142,8 @@ export class UserController {
     return { token };
   }
 
-  @get('/users/count', {
-    responses: {
-      '200': {
-        description: 'User model count',
-        content: { 'application/json': { schema: CountSchema } },
-      },
-    },
-  })
-  async count(
-    @param.query.object('where', getWhereSchemaFor(User)) where?: Where<User>,
-  ): Promise<Count> {
-    return this.userRepository.count(where);
-  }
-
   @get('/users', {
+    security: OPERATION_SECURITY_SPEC,
     responses: {
       '200': {
         description: 'Array of User model instances',
@@ -171,6 +158,7 @@ export class UserController {
       },
     },
   })
+  @authenticate('jwt')
   async find(
     @param.query.object('filter', getFilterSchemaFor(User)) filter?: Filter<User>,
   ): Promise<User[]> {
@@ -200,40 +188,47 @@ export class UserController {
     return currentUserProfile;
   }
 
-  @patch('/users', {
+  @get('/users/emailCheck', {
     responses: {
       '200': {
-        description: 'User PATCH success count',
-        content: { 'application/json': { schema: CountSchema } },
-      },
-    },
-  })
-  async updateAll(
-    @requestBody({
-      content: {
-        'application/json': {
-          schema: getModelSchemaRef(User, { partial: true }),
-        },
-      },
-    })
-    user: User,
-    @param.query.object('where', getWhereSchemaFor(User)) where?: Where<User>,
-  ): Promise<Count> {
-    return this.userRepository.updateAll(user, where);
-  }
-
-  @get('/users/{userId}', {
-    responses: {
-      '200': {
-        description: 'User model instance',
+        description: 'Email',
         content: {
           'application/json': {
-            schema: getModelSchemaRef(User, { includeRelations: true }),
+            schema: {
+              type: 'object',
+              properties: {
+                email: {
+                  type: 'string',
+                  format: 'email'
+                },
+              },
+            },
           },
         },
       },
     },
   })
+  async emailCheckControl(
+    @requestBody() email: string
+  ): Promise<Boolean> {
+
+    return await this.userService.;
+  }
+
+  @get('/users/{userId}', {
+    security: OPERATION_SECURITY_SPEC,
+    responses: {
+      '200': {
+        description: 'User model instance',
+        content: {
+          'application/json': {
+            schema: getModelSchemaRef(User),
+          },
+        },
+      },
+    },
+  })
+  @authenticate('jwt')
   async findById(
     @param.path.string('userId') userId: string,
     @param.query.object('filter', getFilterSchemaFor(User)) filter?: Filter<User>
@@ -242,12 +237,14 @@ export class UserController {
   }
 
   @patch('/users/{userId}', {
+    security: OPERATION_SECURITY_SPEC,
     responses: {
       '204': {
         description: 'User PATCH success',
       },
     },
   })
+  @authenticate('jwt')
   async updateById(
     @param.path.string('userId') userId: string,
     @requestBody({
@@ -263,12 +260,14 @@ export class UserController {
   }
 
   @put('/users/{userId}', {
+    security: OPERATION_SECURITY_SPEC,
     responses: {
       '204': {
         description: 'User PUT success',
       },
     },
   })
+  @authenticate('jwt')
   async replaceById(
     @param.path.string('userId') userId: string,
     @requestBody() user: User,
@@ -277,12 +276,14 @@ export class UserController {
   }
 
   @del('/users/{userId}', {
+    security: OPERATION_SECURITY_SPEC,
     responses: {
       '204': {
         description: 'User DELETE success',
       },
     },
   })
+  @authenticate('jwt')
   async deleteById(@param.path.string('userId') userId: string): Promise<void> {
     await this.userRepository.deleteById(userId);
   }
