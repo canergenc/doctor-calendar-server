@@ -19,7 +19,9 @@ import {
 } from '@loopback/rest';
 import { UserRole } from '../models';
 import { UserRoleRepository } from '../repositories';
+import { authenticate } from '@loopback/authentication';
 
+@authenticate('jwt')
 export class UserRoleController {
   constructor(
     @repository(UserRoleRepository)

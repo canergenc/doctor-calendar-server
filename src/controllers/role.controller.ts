@@ -17,20 +17,22 @@ import {
   del,
   requestBody,
 } from '@loopback/rest';
-import {Role} from '../models';
-import {RoleRepository} from '../repositories';
+import { Role } from '../models';
+import { RoleRepository } from '../repositories';
+import { authenticate } from '@loopback/authentication';
 
+@authenticate('jwt')
 export class RoleController {
   constructor(
     @repository(RoleRepository)
-    public roleRepository : RoleRepository,
-  ) {}
+    public roleRepository: RoleRepository,
+  ) { }
 
   @post('/roles', {
     responses: {
       '200': {
         description: 'Role model instance',
-        content: {'application/json': {schema: getModelSchemaRef(Role)}},
+        content: { 'application/json': { schema: getModelSchemaRef(Role) } },
       },
     },
   })
@@ -54,7 +56,7 @@ export class RoleController {
     responses: {
       '200': {
         description: 'Role model count',
-        content: {'application/json': {schema: CountSchema}},
+        content: { 'application/json': { schema: CountSchema } },
       },
     },
   })
@@ -72,7 +74,7 @@ export class RoleController {
           'application/json': {
             schema: {
               type: 'array',
-              items: getModelSchemaRef(Role, {includeRelations: true}),
+              items: getModelSchemaRef(Role, { includeRelations: true }),
             },
           },
         },
@@ -89,7 +91,7 @@ export class RoleController {
     responses: {
       '200': {
         description: 'Role PATCH success count',
-        content: {'application/json': {schema: CountSchema}},
+        content: { 'application/json': { schema: CountSchema } },
       },
     },
   })
@@ -97,7 +99,7 @@ export class RoleController {
     @requestBody({
       content: {
         'application/json': {
-          schema: getModelSchemaRef(Role, {partial: true}),
+          schema: getModelSchemaRef(Role, { partial: true }),
         },
       },
     })
@@ -113,7 +115,7 @@ export class RoleController {
         description: 'Role model instance',
         content: {
           'application/json': {
-            schema: getModelSchemaRef(Role, {includeRelations: true}),
+            schema: getModelSchemaRef(Role, { includeRelations: true }),
           },
         },
       },
@@ -138,7 +140,7 @@ export class RoleController {
     @requestBody({
       content: {
         'application/json': {
-          schema: getModelSchemaRef(Role, {partial: true}),
+          schema: getModelSchemaRef(Role, { partial: true }),
         },
       },
     })

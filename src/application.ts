@@ -16,6 +16,9 @@ import { JWTService } from './services/jwt-service';
 import { BcryptHasher } from './services/hash.password.bcryptjs';
 import { SECURITY_SCHEME_SPEC } from './utils/security-spec';
 import { MyUserService } from './services/user-service';
+import { AuthorizationComponent, AuthorizationTags } from '@loopback/authorization';
+import { createEnforcer } from './services/enforcer';
+import { CasbinAuthorizationProvider } from './services/authorizor';
 
 /**
  * Information from package.json
@@ -53,6 +56,13 @@ export class DoctorCalendarServerApplication extends BootMixin(
 
     // Bind authentication component related elements
     this.component(AuthenticationComponent);
+    this.component(AuthorizationComponent);
+
+    // authorization
+    this.bind('casbin.enforcer').toDynamicValue(createEnforcer);
+    this.bind('authorizationProviders.casbin-provider')
+      .toProvider(CasbinAuthorizationProvider)
+      .tag(AuthorizationTags.AUTHORIZER);
 
 
     // authentication
@@ -84,6 +94,8 @@ export class DoctorCalendarServerApplication extends BootMixin(
   }
 
   setUpBindings(): void {
+    // Bind package.json to the application context
+    this.bind(PackageKey).to(pkg);
 
     this.bind(TokenServiceBindings.TOKEN_SECRET).to(
       TokenServiceConstants.TOKEN_SECRET_VALUE,

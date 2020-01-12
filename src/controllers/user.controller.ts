@@ -1,9 +1,6 @@
 import {
-  Count,
-  CountSchema,
   Filter,
   repository,
-  Where,
   model,
   property,
 } from '@loopback/repository';
@@ -13,7 +10,6 @@ import {
   get,
   getFilterSchemaFor,
   getModelSchemaRef,
-  getWhereSchemaFor,
   patch,
   put,
   del,
@@ -31,6 +27,7 @@ import { PasswordHasher } from '../services/hash.password.bcryptjs';
 import { validateCredentials } from '../services/validator';
 import _ from 'lodash';
 import { OPERATION_SECURITY_SPEC } from '../utils/security-spec';
+import isemail from 'isemail';
 
 @model()
 export class NewUserRequest extends User {
@@ -49,7 +46,7 @@ export class UserController {
     @inject(TokenServiceBindings.TOKEN_SERVICE)
     public jwtService: TokenService,
     @inject(UserServiceBindings.USER_SERVICE)
-    public userService: UserService<User, Credentials>,
+    public userService: UserService<User, Credentials>
   ) { }
 
   @post('/users', {
@@ -99,6 +96,7 @@ export class UserController {
 
       return savedUser;
     } catch (error) {
+      console.log(error)
       // MongoError 11000 duplicate key
       if (error.code === 11000 && error.errmsg.includes('index: uniqueEmail')) {
         throw new HttpErrors.Conflict('Email value is already taken');
@@ -189,30 +187,33 @@ export class UserController {
   }
 
   @get('/users/emailCheck', {
+    parameters: [{ name: 'email', schema: { type: 'string' }, in: 'query', required: true }],
     responses: {
       '200': {
-        description: 'Email',
+        description: 'Email check control api.',
         content: {
           'application/json': {
             schema: {
-              type: 'object',
-              properties: {
-                email: {
-                  type: 'string',
-                  format: 'email'
-                },
-              },
+              type: 'boolean'
             },
           },
         },
       },
     },
   })
-  async emailCheckControl(
-    @requestBody() email: string
-  ): Promise<Boolean> {
+  async emailCheckControl(@param.query.string('email') email: string): Promise<Boolean> {
+    console.log(email);
+    // Validate Email
+    if (!isemail.validate(email)) {
+      throw new HttpErrors.UnprocessableEntity('invalid email');
+    }
 
-    return await this.userService.;
+    const foundEmail = await this.userRepository.findOne({
+      where: { email: email },
+    });
+    if (foundEmail)
+      return true;
+    return false;
   }
 
   @get('/users/{userId}', {

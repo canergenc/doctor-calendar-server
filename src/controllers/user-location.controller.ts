@@ -19,7 +19,9 @@ import {
 } from '@loopback/rest';
 import { UserLocation } from '../models';
 import { UserLocationRepository } from '../repositories';
+import { authenticate } from '@loopback/authentication';
 
+@authenticate('jwt')
 export class UserLocationController {
   constructor(
     @repository(UserLocationRepository)
