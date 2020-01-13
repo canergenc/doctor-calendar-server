@@ -41,8 +41,7 @@ export class RoleController {
       content: {
         'application/json': {
           schema: getModelSchemaRef(Role, {
-            title: 'NewRole',
-            exclude: ['Id'],
+            title: 'NewRole'
           }),
         },
       },

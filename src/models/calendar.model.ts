@@ -31,12 +31,6 @@ export class Calendar extends Entity {
   })
   type?: string;
 
-  // Define well-known properties here
-
-  // Indexer property to allow additional data
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  [prop: string]: any;
-
   constructor(data?: Partial<Calendar>) {
     super(data);
   }
