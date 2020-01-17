@@ -20,12 +20,15 @@ import {
 import { UserLocation } from '../models';
 import { UserLocationRepository } from '../repositories';
 import { authenticate } from '@loopback/authentication';
+import { service } from '@loopback/core';
+import { UserLocationService } from '../services';
 
 @authenticate('jwt')
 export class UserLocationController {
   constructor(
     @repository(UserLocationRepository)
     public userLocationRepository: UserLocationRepository,
+    @service(UserLocationService) public userLocationService: UserLocationService
   ) { }
 
   @post('/user-locations', {

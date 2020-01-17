@@ -20,12 +20,15 @@ import {
 import { UserRole } from '../models';
 import { UserRoleRepository } from '../repositories';
 import { authenticate } from '@loopback/authentication';
+import { service } from '@loopback/core';
+import { UserRoleService } from '../services';
 
 @authenticate('jwt')
 export class UserRoleController {
   constructor(
     @repository(UserRoleRepository)
     public userRoleRepository: UserRoleRepository,
+    @service(UserRoleService) public userRoleService: UserRoleService
   ) { }
 
   @post('/user-roles', {

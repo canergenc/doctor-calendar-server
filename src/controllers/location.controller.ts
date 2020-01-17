@@ -19,15 +19,17 @@ import {
 } from '@loopback/rest';
 import { Location } from '../models';
 import { LocationRepository } from '../repositories';
-import { authorize } from '@loopback/authorization';
 import { authenticate } from '@loopback/authentication';
-import { compareId } from '../services/id.compare.authorizor';
+import { LocationService } from '../services';
+import { service } from '@loopback/core';
 
 @authenticate('jwt')
 export class LocationController {
   constructor(
     @repository(LocationRepository)
     public locationRepository: LocationRepository,
+    @service(LocationService)
+    public locationService: LocationService
   ) { }
 
   @post('/locations', {

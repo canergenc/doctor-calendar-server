@@ -20,12 +20,16 @@ import {
 import { Role } from '../models';
 import { RoleRepository } from '../repositories';
 import { authenticate } from '@loopback/authentication';
+import { RoleService } from '../services';
+import { service } from '@loopback/core';
 
 @authenticate('jwt')
 export class RoleController {
   constructor(
     @repository(RoleRepository)
     public roleRepository: RoleRepository,
+    @service(RoleService)
+    public roleService: RoleService
   ) { }
 
   @post('/roles', {
