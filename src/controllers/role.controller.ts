@@ -23,7 +23,7 @@ import { authenticate } from '@loopback/authentication';
 import { RoleService } from '../services';
 import { service } from '@loopback/core';
 
-@authenticate('jwt')
+//@authenticate('jwt')
 export class RoleController {
   constructor(
     @repository(RoleRepository)

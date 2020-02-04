@@ -23,7 +23,7 @@ import { authenticate } from '@loopback/authentication';
 import { LocationService } from '../services';
 import { service } from '@loopback/core';
 
-@authenticate('jwt')
+//@authenticate('jwt')
 export class LocationController {
   constructor(
     @repository(LocationRepository)

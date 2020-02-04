@@ -156,7 +156,7 @@ export class UserController {
       },
     },
   })
-  @authenticate('jwt')
+  //@authenticate('jwt')
   async find(
     @param.query.object('filter', getFilterSchemaFor(User)) filter?: Filter<User>,
   ): Promise<User[]> {
@@ -176,7 +176,7 @@ export class UserController {
       },
     },
   })
-  @authenticate('jwt')
+  //@authenticate('jwt')
   async printCurrentUser(
     @inject(SecurityBindings.USER)
     currentUserProfile: UserProfile,
@@ -229,7 +229,7 @@ export class UserController {
       },
     },
   })
-  @authenticate('jwt')
+  //@authenticate('jwt')
   async findById(
     @param.path.string('userId') userId: string,
     @param.query.object('filter', getFilterSchemaFor(User)) filter?: Filter<User>
@@ -245,7 +245,7 @@ export class UserController {
       },
     },
   })
-  @authenticate('jwt')
+  //@authenticate('jwt')
   async updateById(
     @param.path.string('userId') userId: string,
     @requestBody({
@@ -268,7 +268,7 @@ export class UserController {
       },
     },
   })
-  @authenticate('jwt')
+  //@authenticate('jwt')
   async replaceById(
     @param.path.string('userId') userId: string,
     @requestBody() user: User,
@@ -284,7 +284,7 @@ export class UserController {
       },
     },
   })
-  @authenticate('jwt')
+  //@authenticate('jwt')
   async deleteById(@param.path.string('userId') userId: string): Promise<void> {
     await this.userRepository.deleteById(userId);
   }
