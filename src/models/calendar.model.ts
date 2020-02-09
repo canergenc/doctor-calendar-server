@@ -1,35 +1,42 @@
-import { Entity, model, property } from '@loopback/repository';
+import {Entity, model, property} from "@loopback/repository";
+import {CalendarType} from "../enums/calendarType.enum";
 
-@model({ settings: { strict: false } })
+@model({settings: {strict: false}})
 export class Calendar extends Entity {
   @property({
-    type: 'number',
+    type: "number",
     id: true,
     generated: true,
   })
   id?: number;
 
   @property({
-    type: 'number',
+    type: "number",
     required: true,
   })
   locationId: number;
 
   @property({
-    type: 'date',
+    type: "number",
+    required: true,
+  })
+  userId: number;
+
+  @property({
+    type: "date",
     required: true,
   })
   date: string;
 
   @property({
-    type: 'string',
+    type: "string",
   })
   description?: string;
 
   @property({
-    type: 'string',
+    type: "object",
   })
-  type?: string;
+  type?: CalendarType;
 
   constructor(data?: Partial<Calendar>) {
     super(data);

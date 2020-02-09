@@ -4,3 +4,4 @@ export * from './user-role.controller';
 export * from './user-location.controller';
 export * from './role.controller';
 export * from './location.controller';
+export * from './calendar.controller';
