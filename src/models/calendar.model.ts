@@ -1,7 +1,7 @@
-import {Entity, model, property} from "@loopback/repository";
-import {CalendarType} from "../enums/calendarType.enum";
+import { Entity, model, property } from "@loopback/repository";
+import { CalendarType } from "../enums/calendarType.enum";
 
-@model({settings: {strict: false}})
+@model({ settings: { strict: false } })
 export class Calendar extends Entity {
   @property({
     type: "number",
@@ -11,16 +11,16 @@ export class Calendar extends Entity {
   id?: number;
 
   @property({
-    type: "number",
+    type: "string",
     required: true,
   })
-  locationId: number;
+  locationId: string;
 
   @property({
-    type: "number",
+    type: "string",
     required: true,
   })
-  userId: number;
+  userId: string;
 
   @property({
     type: "date",
