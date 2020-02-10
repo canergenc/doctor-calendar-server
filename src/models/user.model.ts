@@ -37,6 +37,11 @@ export class User extends Entity {
   fullName: string;
 
   @property({
+    type: 'string'
+  })
+  title: string;
+
+  @property({
     type: 'number',
   })
   deviceId?: number;
