@@ -1,6 +1,7 @@
 import { DefaultCrudRepository, juggler } from '@loopback/repository';
 import { UserLocation, UserLocationRelations } from '../models';
 import { inject } from '@loopback/core';
+import { DataSourceName } from '../keys';
 
 export class UserLocationRepository extends DefaultCrudRepository<
   UserLocation,
@@ -8,7 +9,7 @@ export class UserLocationRepository extends DefaultCrudRepository<
   UserLocationRelations
   > {
   constructor(
-    @inject('datasources.mongo') dataSource: juggler.DataSource,
+    @inject(DataSourceName.Data_Source_Name) dataSource: juggler.DataSource,
   ) {
     super(UserLocation, dataSource);
   }

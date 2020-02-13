@@ -1,6 +1,7 @@
 import { DefaultCrudRepository, juggler } from '@loopback/repository';
 import { UserCredentials, UserCredentialsRelations } from '../models';
 import { inject } from '@loopback/core';
+import { DataSourceName } from '../keys';
 
 export class UserCredentialsRepository extends DefaultCrudRepository<
   UserCredentials,
@@ -8,7 +9,7 @@ export class UserCredentialsRepository extends DefaultCrudRepository<
   UserCredentialsRelations
   > {
   constructor(
-    @inject('datasources.mongo') dataSource: juggler.DataSource,
+    @inject(DataSourceName.Data_Source_Name) dataSource: juggler.DataSource,
   ) {
     super(UserCredentials, dataSource);
   }

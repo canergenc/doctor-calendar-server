@@ -2,6 +2,7 @@ import { DefaultCrudRepository, HasOneRepositoryFactory, repository, juggler } f
 import { User, UserRelations, UserCredentials } from '../models';
 import { inject, Getter } from '@loopback/core';
 import { UserCredentialsRepository } from './user-credentials.repository';
+import { DataSourceName } from '../keys';
 
 export type Credentials = {
   email: string;
@@ -19,7 +20,7 @@ export class UserRepository extends DefaultCrudRepository<
     typeof User.prototype.id
   >;
   constructor(
-    @inject('datasources.mongo') dataSource: juggler.DataSource,
+    @inject(DataSourceName.Data_Source_Name) dataSource: juggler.DataSource,
     //@repository(CalendarRepository) protected calendarRepository: CalendarRepository,
     @repository.getter('UserCredentialsRepository')
     protected userCredentialsRepositoryGetter: Getter<

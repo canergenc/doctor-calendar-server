@@ -9,6 +9,10 @@ export namespace TokenServiceConstants {
   export const TOKEN_EXPIRES_IN_VALUE = '86400';
 }
 
+export namespace DataSourceName {
+  export const Data_Source_Name = 'datasources.firestore';
+}
+
 export namespace TokenServiceBindings {
   export const TOKEN_SECRET = BindingKey.create<string>(
     'authentication.jwt.secret',
