@@ -125,7 +125,7 @@ export class UserRoleController {
     },
   })
   async findById(
-    @param.path.number('id') id: number,
+    @param.path.string('id') id: string,
     @param.query.object('filter', getFilterSchemaFor(UserRole)) filter?: Filter<UserRole>
   ): Promise<UserRole> {
     return this.userRoleRepository.findById(id, filter);
@@ -139,7 +139,7 @@ export class UserRoleController {
     },
   })
   async updateById(
-    @param.path.number('id') id: number,
+    @param.path.string('id') id: string,
     @requestBody({
       content: {
         'application/json': {
@@ -160,7 +160,7 @@ export class UserRoleController {
     },
   })
   async replaceById(
-    @param.path.number('id') id: number,
+    @param.path.string('id') id: string,
     @requestBody() userRole: UserRole,
   ): Promise<void> {
     await this.userRoleRepository.replaceById(id, userRole);
@@ -173,7 +173,7 @@ export class UserRoleController {
       },
     },
   })
-  async deleteById(@param.path.number('id') id: number): Promise<void> {
+  async deleteById(@param.path.string('id') id: string): Promise<void> {
     await this.userRoleRepository.deleteById(id);
   }
 }

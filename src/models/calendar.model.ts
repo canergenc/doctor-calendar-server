@@ -26,7 +26,7 @@ export class Calendar extends Entity {
     type: "date",
     required: true,
   })
-  date: string;
+  date: Date;
 
   @property({
     type: "string",

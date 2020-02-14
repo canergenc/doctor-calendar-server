@@ -17,11 +17,11 @@ import {
   del,
   requestBody,
 } from "@loopback/rest";
-import {Location} from "../models";
-import {LocationRepository} from "../repositories";
-import {authenticate} from "@loopback/authentication";
-import {LocationService} from "../services";
-import {service} from "@loopback/core";
+import { Location } from "../models";
+import { LocationRepository } from "../repositories";
+import { authenticate } from "@loopback/authentication";
+import { LocationService } from "../services";
+import { service } from "@loopback/core";
 
 //@authenticate('jwt')
 export class LocationController {
@@ -30,13 +30,13 @@ export class LocationController {
     public locationRepository: LocationRepository,
     @service(LocationService)
     public locationService: LocationService,
-  ) {}
+  ) { }
 
   @post("/locations", {
     responses: {
       "200": {
         description: "Location model instance",
-        content: {"application/json": {schema: getModelSchemaRef(Location)}},
+        content: { "application/json": { schema: getModelSchemaRef(Location) } },
       },
     },
   })
@@ -60,7 +60,7 @@ export class LocationController {
     responses: {
       "200": {
         description: "Location model count",
-        content: {"application/json": {schema: CountSchema}},
+        content: { "application/json": { schema: CountSchema } },
       },
     },
   })
@@ -79,7 +79,7 @@ export class LocationController {
           "application/json": {
             schema: {
               type: "array",
-              items: getModelSchemaRef(Location, {includeRelations: true}),
+              items: getModelSchemaRef(Location, { includeRelations: true }),
             },
           },
         },
@@ -97,7 +97,7 @@ export class LocationController {
     responses: {
       "200": {
         description: "Location PATCH success count",
-        content: {"application/json": {schema: CountSchema}},
+        content: { "application/json": { schema: CountSchema } },
       },
     },
   })
@@ -105,7 +105,7 @@ export class LocationController {
     @requestBody({
       content: {
         "application/json": {
-          schema: getModelSchemaRef(Location, {partial: true}),
+          schema: getModelSchemaRef(Location, { partial: true }),
         },
       },
     })
@@ -122,14 +122,14 @@ export class LocationController {
         description: "Location model instance",
         content: {
           "application/json": {
-            schema: getModelSchemaRef(Location, {includeRelations: true}),
+            schema: getModelSchemaRef(Location, { includeRelations: true }),
           },
         },
       },
     },
   })
   async findById(
-    @param.path.number("id") id: number,
+    @param.path.string("id") id: string,
     @param.query.object("filter", getFilterSchemaFor(Location))
     filter?: Filter<Location>,
   ): Promise<Location> {
@@ -144,11 +144,11 @@ export class LocationController {
     },
   })
   async updateById(
-    @param.path.number("id") id: number,
+    @param.path.string("id") id: string,
     @requestBody({
       content: {
         "application/json": {
-          schema: getModelSchemaRef(Location, {partial: true}),
+          schema: getModelSchemaRef(Location, { partial: true }),
         },
       },
     })
@@ -165,7 +165,7 @@ export class LocationController {
     },
   })
   async replaceById(
-    @param.path.number("id") id: number,
+    @param.path.string("id") id: string,
     @requestBody() location: Location,
   ): Promise<void> {
     await this.locationRepository.replaceById(id, location);
@@ -178,7 +178,7 @@ export class LocationController {
       },
     },
   })
-  async deleteById(@param.path.number("id") id: number): Promise<void> {
+  async deleteById(@param.path.string("id") id: string): Promise<void> {
     await this.locationRepository.deleteById(id);
   }
 }

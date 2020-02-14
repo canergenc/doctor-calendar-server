@@ -42,9 +42,9 @@ export class User extends Entity {
   title: string;
 
   @property({
-    type: 'number',
+    type: 'string',
   })
-  deviceId?: number;
+  deviceId?: string;
 
   @hasOne(() => Calendar)
   calendar?: Calendar;

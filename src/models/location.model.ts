@@ -4,11 +4,11 @@ import { Calendar } from './calendar.model';
 @model()
 export class Location extends Entity {
   @property({
-    type: 'number',
+    type: 'string',
     id: true,
     generated: true,
   })
-  id?: number;
+  id?: string;
 
   @property({
     type: 'string',

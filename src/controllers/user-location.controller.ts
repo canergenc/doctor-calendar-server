@@ -125,7 +125,7 @@ export class UserLocationController {
     },
   })
   async findById(
-    @param.path.number('id') id: number,
+    @param.path.string('id') id: string,
     @param.query.object('filter', getFilterSchemaFor(UserLocation)) filter?: Filter<UserLocation>
   ): Promise<UserLocation> {
     return this.userLocationRepository.findById(id, filter);
@@ -139,7 +139,7 @@ export class UserLocationController {
     },
   })
   async updateById(
-    @param.path.number('id') id: number,
+    @param.path.string('id') id: string,
     @requestBody({
       content: {
         'application/json': {
@@ -160,7 +160,7 @@ export class UserLocationController {
     },
   })
   async replaceById(
-    @param.path.number('id') id: number,
+    @param.path.string('id') id: string,
     @requestBody() userLocation: UserLocation,
   ): Promise<void> {
     await this.userLocationRepository.replaceById(id, userLocation);
@@ -173,7 +173,7 @@ export class UserLocationController {
       },
     },
   })
-  async deleteById(@param.path.number('id') id: number): Promise<void> {
+  async deleteById(@param.path.string('id') id: string): Promise<void> {
     await this.userLocationRepository.deleteById(id);
   }
 }

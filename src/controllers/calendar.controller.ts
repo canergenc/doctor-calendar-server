@@ -17,20 +17,20 @@ import {
   del,
   requestBody,
 } from "@loopback/rest";
-import {Calendar} from "../models";
-import {CalendarRepository} from "../repositories";
+import { Calendar } from "../models";
+import { CalendarRepository } from "../repositories";
 
 export class CalendarController {
   constructor(
     @repository(CalendarRepository)
     public calendarRepository: CalendarRepository,
-  ) {}
+  ) { }
 
   @post("/calendars", {
     responses: {
       "200": {
         description: "Calendar model instance",
-        content: {"application/json": {schema: getModelSchemaRef(Calendar)}},
+        content: { "application/json": { schema: getModelSchemaRef(Calendar) } },
       },
     },
   })
@@ -54,7 +54,7 @@ export class CalendarController {
     responses: {
       "200": {
         description: "Calendar model count",
-        content: {"application/json": {schema: CountSchema}},
+        content: { "application/json": { schema: CountSchema } },
       },
     },
   })
@@ -73,7 +73,7 @@ export class CalendarController {
           "application/json": {
             schema: {
               type: "array",
-              items: getModelSchemaRef(Calendar, {includeRelations: true}),
+              items: getModelSchemaRef(Calendar, { includeRelations: true }),
             },
           },
         },
@@ -91,7 +91,7 @@ export class CalendarController {
     responses: {
       "200": {
         description: "Calendar PATCH success count",
-        content: {"application/json": {schema: CountSchema}},
+        content: { "application/json": { schema: CountSchema } },
       },
     },
   })
@@ -99,7 +99,7 @@ export class CalendarController {
     @requestBody({
       content: {
         "application/json": {
-          schema: getModelSchemaRef(Calendar, {partial: true}),
+          schema: getModelSchemaRef(Calendar, { partial: true }),
         },
       },
     })
@@ -116,14 +116,14 @@ export class CalendarController {
         description: "Calendar model instance",
         content: {
           "application/json": {
-            schema: getModelSchemaRef(Calendar, {includeRelations: true}),
+            schema: getModelSchemaRef(Calendar, { includeRelations: true }),
           },
         },
       },
     },
   })
   async findById(
-    @param.path.number("id") id: number,
+    @param.path.string("id") id: string,
     @param.query.object("filter", getFilterSchemaFor(Calendar))
     filter?: Filter<Calendar>,
   ): Promise<Calendar> {
@@ -138,11 +138,11 @@ export class CalendarController {
     },
   })
   async updateById(
-    @param.path.number("id") id: number,
+    @param.path.string("id") id: string,
     @requestBody({
       content: {
         "application/json": {
-          schema: getModelSchemaRef(Calendar, {partial: true}),
+          schema: getModelSchemaRef(Calendar, { partial: true }),
         },
       },
     })
@@ -159,7 +159,7 @@ export class CalendarController {
     },
   })
   async replaceById(
-    @param.path.number("id") id: number,
+    @param.path.string("id") id: string,
     @requestBody() calendar: Calendar,
   ): Promise<void> {
     await this.calendarRepository.replaceById(id, calendar);
@@ -172,7 +172,7 @@ export class CalendarController {
       },
     },
   })
-  async deleteById(@param.path.number("id") id: number): Promise<void> {
+  async deleteById(@param.path.string("id") id: string): Promise<void> {
     await this.calendarRepository.deleteById(id);
   }
 }
