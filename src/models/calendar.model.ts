@@ -4,11 +4,11 @@ import { CalendarType } from "../enums/calendarType.enum";
 @model({ settings: { strict: false } })
 export class Calendar extends Entity {
   @property({
-    type: "number",
+    type: "string",
     id: true,
     generated: true,
   })
-  id?: number;
+  id?: string;
 
   @property({
     type: "string",
