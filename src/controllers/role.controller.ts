@@ -102,7 +102,7 @@ export class RoleController {
     @requestBody({
       content: {
         'application/json': {
-          schema: getModelSchemaRef(Role, { partial: true }),
+          schema: getModelSchemaRef(Role),
         },
       },
     })
@@ -143,7 +143,7 @@ export class RoleController {
     @requestBody({
       content: {
         'application/json': {
-          schema: getModelSchemaRef(Role, { partial: true }),
+          schema: getModelSchemaRef(Role),
         },
       },
     })

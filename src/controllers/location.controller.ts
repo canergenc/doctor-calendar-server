@@ -105,7 +105,7 @@ export class LocationController {
     @requestBody({
       content: {
         "application/json": {
-          schema: getModelSchemaRef(Location, { partial: true }),
+          schema: getModelSchemaRef(Location),
         },
       },
     })
@@ -148,7 +148,7 @@ export class LocationController {
     @requestBody({
       content: {
         "application/json": {
-          schema: getModelSchemaRef(Location, { partial: true }),
+          schema: getModelSchemaRef(Location),
         },
       },
     })

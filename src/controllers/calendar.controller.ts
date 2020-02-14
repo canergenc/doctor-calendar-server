@@ -99,7 +99,7 @@ export class CalendarController {
     @requestBody({
       content: {
         "application/json": {
-          schema: getModelSchemaRef(Calendar, { partial: true }),
+          schema: getModelSchemaRef(Calendar),
         },
       },
     })
@@ -142,7 +142,7 @@ export class CalendarController {
     @requestBody({
       content: {
         "application/json": {
-          schema: getModelSchemaRef(Calendar, { partial: true }),
+          schema: getModelSchemaRef(Calendar),
         },
       },
     })

@@ -2,5 +2,4 @@
   applications:
    - name: DoctorCalendarServerApp
      random-route: true
-     host: doctorcalendar
      memory: 256M
