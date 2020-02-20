@@ -1,7 +1,7 @@
 import { Entity, model, property } from "@loopback/repository";
 import { CalendarType } from "../enums/calendarType.enum";
 
-@model({ settings: { strict: false } })
+@model()
 export class Calendar extends Entity {
   @property({
     type: "string",

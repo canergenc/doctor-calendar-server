@@ -3,6 +3,7 @@ import { User, UserRelations, UserCredentials } from '../models';
 import { inject, Getter } from '@loopback/core';
 import { UserCredentialsRepository } from './user-credentials.repository';
 import { DataSourceName } from '../keys';
+import { HttpErrors } from '@loopback/rest';
 
 export type Credentials = {
   email: string;
@@ -14,14 +15,14 @@ export class UserRepository extends DefaultCrudRepository<
   typeof User.prototype.id,
   UserRelations
   > {
-  //public calendar: HasOneRepositoryFactory<Calendar, typeof User.prototype.id>;
   public readonly userCredentials: HasOneRepositoryFactory<
     UserCredentials,
     typeof User.prototype.id
   >;
   constructor(
     @inject(DataSourceName.Data_Source_Name) dataSource: juggler.DataSource,
-    //@repository(CalendarRepository) protected calendarRepository: CalendarRepository,
+    @repository(UserCredentialsRepository)
+    public userCredentialsRepository: UserCredentialsRepository,
     @repository.getter('UserCredentialsRepository')
     protected userCredentialsRepositoryGetter: Getter<
       UserCredentialsRepository
@@ -29,7 +30,6 @@ export class UserRepository extends DefaultCrudRepository<
   ) {
     super(User, dataSource);
     this.userCredentials = this.createHasOneRepositoryFactoryFor('userCredentials', userCredentialsRepositoryGetter);
-    //this.calendar = this.createHasOneRepositoryFactoryFor('calendar', async () => calendarRepository);
   }
   async findCredentials(
     userId: typeof User.prototype.id,
@@ -42,5 +42,27 @@ export class UserRepository extends DefaultCrudRepository<
       }
       throw err;
     }
+  }
+
+  async findEmail(email: typeof User.prototype.email): Promise<Boolean> {
+    const foundUser = await this.findOne({
+      where: { email: email }
+    });
+    if (foundUser)
+      return true;
+    return false;
+  }
+
+  async deleteByNavigation(userId: typeof User.prototype.id): Promise<void> {
+    await this.deleteById(userId).catch(ex => {
+      throw new HttpErrors.NotFound(ex);
+    });
+    await this.userCredentialsRepository.findOne({ where: { userId: userId } }).then(result => {
+      if (result)
+        this.userCredentialsRepository.deleteById(result.id)
+    }
+    ).catch(ex => {
+      throw new HttpErrors.NotFound(ex);
+    })
   }
 }

@@ -5,12 +5,12 @@ import { HttpErrors } from '@loopback/rest';
 export function validateCredentials(credentials: Credentials) {
   // Validate Email
   if (!isemail.validate(credentials.email)) {
-    throw new HttpErrors.UnprocessableEntity('invalid email');
+    throw new HttpErrors.BadRequest('invalid email');
   }
 
   // Validate Password Length
   if (!credentials.password || credentials.password.length < 8) {
-    throw new HttpErrors.UnprocessableEntity(
+    throw new HttpErrors.BadRequest(
       'password must be minimum 8 characters',
     );
   }

@@ -25,7 +25,7 @@ export class MyUserService implements UserService<User, Credentials> {
     });
 
     if (!foundUser) {
-      throw new HttpErrors.Unauthorized(invalidCredentialsError);
+      throw new HttpErrors.BadRequest(invalidCredentialsError);
     }
     /* Geçici çözüm olarak yapıldı. Düzeltme yapılacak.*/
     const userCredentials = await this.userCredentialsRepository.find();
@@ -34,7 +34,7 @@ export class MyUserService implements UserService<User, Credentials> {
       foundUser.id,
     );*/
     if (!credentialsFound) {
-      throw new HttpErrors.Unauthorized(invalidCredentialsError);
+      throw new HttpErrors.BadRequest(invalidCredentialsError);
     }
 
     const passwordMatched = await this.passwordHasher.comparePassword(
@@ -42,7 +42,7 @@ export class MyUserService implements UserService<User, Credentials> {
       credentialsFound.password,
     );
     if (!passwordMatched) {
-      throw new HttpErrors.Unauthorized(invalidCredentialsError);
+      throw new HttpErrors.BadRequest(invalidCredentialsError);
     }
 
     return foundUser;

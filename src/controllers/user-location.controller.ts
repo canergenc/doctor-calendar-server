@@ -17,25 +17,20 @@ import {
   del,
   requestBody,
 } from '@loopback/rest';
-import { UserLocation } from '../models';
-import { UserLocationRepository } from '../repositories';
-import { authenticate } from '@loopback/authentication';
-import { service } from '@loopback/core';
-import { UserLocationService } from '../services';
+import {UserLocation} from '../models';
+import {UserLocationRepository} from '../repositories';
 
-//@authenticate('jwt')
 export class UserLocationController {
   constructor(
     @repository(UserLocationRepository)
-    public userLocationRepository: UserLocationRepository,
-    @service(UserLocationService) public userLocationService: UserLocationService
-  ) { }
+    public userLocationRepository : UserLocationRepository,
+  ) {}
 
   @post('/user-locations', {
     responses: {
       '200': {
         description: 'UserLocation model instance',
-        content: { 'application/json': { schema: getModelSchemaRef(UserLocation) } },
+        content: {'application/json': {schema: getModelSchemaRef(UserLocation)}},
       },
     },
   })
@@ -45,12 +40,12 @@ export class UserLocationController {
         'application/json': {
           schema: getModelSchemaRef(UserLocation, {
             title: 'NewUserLocation',
-            exclude: ['id'],
+            
           }),
         },
       },
     })
-    userLocation: Omit<UserLocation, 'Id'>,
+    userLocation: UserLocation,
   ): Promise<UserLocation> {
     return this.userLocationRepository.create(userLocation);
   }
@@ -59,7 +54,7 @@ export class UserLocationController {
     responses: {
       '200': {
         description: 'UserLocation model count',
-        content: { 'application/json': { schema: CountSchema } },
+        content: {'application/json': {schema: CountSchema}},
       },
     },
   })
@@ -77,7 +72,7 @@ export class UserLocationController {
           'application/json': {
             schema: {
               type: 'array',
-              items: getModelSchemaRef(UserLocation, { includeRelations: true }),
+              items: getModelSchemaRef(UserLocation, {includeRelations: true}),
             },
           },
         },
@@ -94,7 +89,7 @@ export class UserLocationController {
     responses: {
       '200': {
         description: 'UserLocation PATCH success count',
-        content: { 'application/json': { schema: CountSchema } },
+        content: {'application/json': {schema: CountSchema}},
       },
     },
   })
@@ -102,7 +97,7 @@ export class UserLocationController {
     @requestBody({
       content: {
         'application/json': {
-          schema: getModelSchemaRef(UserLocation),
+          schema: getModelSchemaRef(UserLocation, {partial: true}),
         },
       },
     })
@@ -118,7 +113,7 @@ export class UserLocationController {
         description: 'UserLocation model instance',
         content: {
           'application/json': {
-            schema: getModelSchemaRef(UserLocation, { includeRelations: true }),
+            schema: getModelSchemaRef(UserLocation, {includeRelations: true}),
           },
         },
       },
@@ -143,7 +138,7 @@ export class UserLocationController {
     @requestBody({
       content: {
         'application/json': {
-          schema: getModelSchemaRef(UserLocation),
+          schema: getModelSchemaRef(UserLocation, {partial: true}),
         },
       },
     })

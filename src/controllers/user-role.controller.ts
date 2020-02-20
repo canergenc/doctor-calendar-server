@@ -17,25 +17,20 @@ import {
   del,
   requestBody,
 } from '@loopback/rest';
-import { UserRole } from '../models';
-import { UserRoleRepository } from '../repositories';
-import { authenticate } from '@loopback/authentication';
-import { service } from '@loopback/core';
-import { UserRoleService } from '../services';
+import {UserRole} from '../models';
+import {UserRoleRepository} from '../repositories';
 
-//@authenticate('jwt')
 export class UserRoleController {
   constructor(
     @repository(UserRoleRepository)
-    public userRoleRepository: UserRoleRepository,
-    @service(UserRoleService) public userRoleService: UserRoleService
-  ) { }
+    public userRoleRepository : UserRoleRepository,
+  ) {}
 
   @post('/user-roles', {
     responses: {
       '200': {
         description: 'UserRole model instance',
-        content: { 'application/json': { schema: getModelSchemaRef(UserRole) } },
+        content: {'application/json': {schema: getModelSchemaRef(UserRole)}},
       },
     },
   })
@@ -45,12 +40,12 @@ export class UserRoleController {
         'application/json': {
           schema: getModelSchemaRef(UserRole, {
             title: 'NewUserRole',
-            exclude: ['id'],
+            
           }),
         },
       },
     })
-    userRole: Omit<UserRole, 'Id'>,
+    userRole: UserRole,
   ): Promise<UserRole> {
     return this.userRoleRepository.create(userRole);
   }
@@ -59,7 +54,7 @@ export class UserRoleController {
     responses: {
       '200': {
         description: 'UserRole model count',
-        content: { 'application/json': { schema: CountSchema } },
+        content: {'application/json': {schema: CountSchema}},
       },
     },
   })
@@ -77,7 +72,7 @@ export class UserRoleController {
           'application/json': {
             schema: {
               type: 'array',
-              items: getModelSchemaRef(UserRole, { includeRelations: true }),
+              items: getModelSchemaRef(UserRole, {includeRelations: true}),
             },
           },
         },
@@ -94,7 +89,7 @@ export class UserRoleController {
     responses: {
       '200': {
         description: 'UserRole PATCH success count',
-        content: { 'application/json': { schema: CountSchema } },
+        content: {'application/json': {schema: CountSchema}},
       },
     },
   })
@@ -102,7 +97,7 @@ export class UserRoleController {
     @requestBody({
       content: {
         'application/json': {
-          schema: getModelSchemaRef(UserRole),
+          schema: getModelSchemaRef(UserRole, {partial: true}),
         },
       },
     })
@@ -118,7 +113,7 @@ export class UserRoleController {
         description: 'UserRole model instance',
         content: {
           'application/json': {
-            schema: getModelSchemaRef(UserRole, { includeRelations: true }),
+            schema: getModelSchemaRef(UserRole, {includeRelations: true}),
           },
         },
       },
@@ -143,7 +138,7 @@ export class UserRoleController {
     @requestBody({
       content: {
         'application/json': {
-          schema: getModelSchemaRef(UserRole),
+          schema: getModelSchemaRef(UserRole, {partial: true}),
         },
       },
     })

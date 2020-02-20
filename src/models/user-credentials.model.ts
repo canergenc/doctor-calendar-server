@@ -4,8 +4,7 @@ import { Entity, model, property } from '@loopback/repository';
 export class UserCredentials extends Entity {
   @property({
     type: 'string',
-    id: true,
-    mongodb: { dataType: 'ObjectID' },
+    id: true
   })
   id: string;
 
@@ -17,8 +16,7 @@ export class UserCredentials extends Entity {
 
   @property({
     type: 'string',
-    required: true,
-    mongodb: { dataType: 'ObjectID' },
+    required: true
   })
   userId: string;
 

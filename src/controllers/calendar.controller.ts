@@ -4,7 +4,7 @@ import {
   Filter,
   repository,
   Where,
-} from "@loopback/repository";
+} from '@loopback/repository';
 import {
   post,
   param,
@@ -16,9 +16,9 @@ import {
   put,
   del,
   requestBody,
-} from "@loopback/rest";
-import { Calendar } from "../models";
-import { CalendarRepository } from "../repositories";
+} from '@loopback/rest';
+import { Calendar } from '../models';
+import { CalendarRepository } from '../repositories';
 
 export class CalendarController {
   constructor(
@@ -26,54 +26,53 @@ export class CalendarController {
     public calendarRepository: CalendarRepository,
   ) { }
 
-  @post("/calendars", {
+  @post('/calendars', {
     responses: {
-      "200": {
-        description: "Calendar model instance",
-        content: { "application/json": { schema: getModelSchemaRef(Calendar) } },
+      '200': {
+        description: 'Calendar model instance',
+        content: { 'application/json': { schema: getModelSchemaRef(Calendar) } },
       },
     },
   })
   async create(
     @requestBody({
       content: {
-        "application/json": {
+        'application/json': {
           schema: getModelSchemaRef(Calendar, {
-            title: "NewCalendar",
-            exclude: ["id"],
+            title: 'NewCalendar',
+
           }),
         },
       },
     })
-    calendar: Omit<Calendar, "id">,
+    calendar: Calendar,
   ): Promise<Calendar> {
     return this.calendarRepository.create(calendar);
   }
 
-  @get("/calendars/count", {
+  @get('/calendars/count', {
     responses: {
-      "200": {
-        description: "Calendar model count",
-        content: { "application/json": { schema: CountSchema } },
+      '200': {
+        description: 'Calendar model count',
+        content: { 'application/json': { schema: CountSchema } },
       },
     },
   })
   async count(
-    @param.query.object("where", getWhereSchemaFor(Calendar))
-    where?: Where<Calendar>,
+    @param.query.object('where', getWhereSchemaFor(Calendar)) where?: Where<Calendar>,
   ): Promise<Count> {
     return this.calendarRepository.count(where);
   }
 
-  @get("/calendars", {
+  @get('/calendars', {
     responses: {
-      "200": {
-        description: "Array of Calendar model instances",
+      '200': {
+        description: 'Array of Calendar model instances',
         content: {
-          "application/json": {
+          'application/json': {
             schema: {
-              type: "array",
-              items: getModelSchemaRef(Calendar, { includeRelations: true }),
+              type: 'array',
+              items: getModelSchemaRef(Calendar),
             },
           },
         },
@@ -81,41 +80,39 @@ export class CalendarController {
     },
   })
   async find(
-    @param.query.object("filter", getFilterSchemaFor(Calendar))
-    filter?: Filter<Calendar>,
+    @param.query.object('filter', getFilterSchemaFor(Calendar)) filter?: Filter<Calendar>,
   ): Promise<Calendar[]> {
     return this.calendarRepository.find(filter);
   }
 
-  @patch("/calendars", {
+  @patch('/calendars', {
     responses: {
-      "200": {
-        description: "Calendar PATCH success count",
-        content: { "application/json": { schema: CountSchema } },
+      '200': {
+        description: 'Calendar PATCH success count',
+        content: { 'application/json': { schema: CountSchema } },
       },
     },
   })
   async updateAll(
     @requestBody({
       content: {
-        "application/json": {
-          schema: getModelSchemaRef(Calendar),
+        'application/json': {
+          schema: getModelSchemaRef(Calendar, { partial: true }),
         },
       },
     })
     calendar: Calendar,
-    @param.query.object("where", getWhereSchemaFor(Calendar))
-    where?: Where<Calendar>,
+    @param.query.object('where', getWhereSchemaFor(Calendar)) where?: Where<Calendar>,
   ): Promise<Count> {
     return this.calendarRepository.updateAll(calendar, where);
   }
 
-  @get("/calendars/{id}", {
+  @get('/calendars/{id}', {
     responses: {
-      "200": {
-        description: "Calendar model instance",
+      '200': {
+        description: 'Calendar model instance',
         content: {
-          "application/json": {
+          'application/json': {
             schema: getModelSchemaRef(Calendar, { includeRelations: true }),
           },
         },
@@ -123,26 +120,25 @@ export class CalendarController {
     },
   })
   async findById(
-    @param.path.string("id") id: string,
-    @param.query.object("filter", getFilterSchemaFor(Calendar))
-    filter?: Filter<Calendar>,
+    @param.path.string('id') id: string,
+    @param.query.object('filter', getFilterSchemaFor(Calendar)) filter?: Filter<Calendar>
   ): Promise<Calendar> {
     return this.calendarRepository.findById(id, filter);
   }
 
-  @patch("/calendars/{id}", {
+  @patch('/calendars/{id}', {
     responses: {
-      "204": {
-        description: "Calendar PATCH success",
+      '204': {
+        description: 'Calendar PATCH success',
       },
     },
   })
   async updateById(
-    @param.path.string("id") id: string,
+    @param.path.string('id') id: string,
     @requestBody({
       content: {
-        "application/json": {
-          schema: getModelSchemaRef(Calendar),
+        'application/json': {
+          schema: getModelSchemaRef(Calendar, { partial: true }),
         },
       },
     })
@@ -151,28 +147,28 @@ export class CalendarController {
     await this.calendarRepository.updateById(id, calendar);
   }
 
-  @put("/calendars/{id}", {
+  @put('/calendars/{id}', {
     responses: {
-      "204": {
-        description: "Calendar PUT success",
+      '204': {
+        description: 'Calendar PUT success',
       },
     },
   })
   async replaceById(
-    @param.path.string("id") id: string,
+    @param.path.string('id') id: string,
     @requestBody() calendar: Calendar,
   ): Promise<void> {
     await this.calendarRepository.replaceById(id, calendar);
   }
 
-  @del("/calendars/{id}", {
+  @del('/calendars/{id}', {
     responses: {
-      "204": {
-        description: "Calendar DELETE success",
+      '204': {
+        description: 'Calendar DELETE success',
       },
     },
   })
-  async deleteById(@param.path.string("id") id: string): Promise<void> {
+  async deleteById(@param.path.string('id') id: string): Promise<void> {
     await this.calendarRepository.deleteById(id);
   }
 }

@@ -75,6 +75,12 @@ export class UserController {
     })
     newUserRequest: NewUserRequest,
   ): Promise<User> {
+
+    newUserRequest.email = newUserRequest.email.trim().toLowerCase();
+
+    const foundUser = await this.userRepository.findEmail(newUserRequest.email);
+    if (foundUser) { throw new HttpErrors.Conflict('Email value is already taken'); }
+
     // ensure a valid email value and password value
     validateCredentials(_.pick(newUserRequest, ['email', 'password']));
 
@@ -96,10 +102,10 @@ export class UserController {
 
       return savedUser;
     } catch (error) {
-      console.log(error)
+
       // MongoError 11000 duplicate key
       if (error.code === 11000 && error.errmsg.includes('index: uniqueEmail')) {
-        throw new HttpErrors.Conflict('Email value is already taken');
+        throw new HttpErrors.BadRequest('Email value is already taken');
       } else {
         throw error;
       }
@@ -202,18 +208,12 @@ export class UserController {
     },
   })
   async emailCheckControl(@param.query.string('email') email: string): Promise<Boolean> {
-    console.log(email);
+
     // Validate Email
     if (!isemail.validate(email)) {
-      throw new HttpErrors.UnprocessableEntity('invalid email');
+      throw new HttpErrors.BadRequest('invalid email');
     }
-
-    const foundEmail = await this.userRepository.findOne({
-      where: { email: email },
-    });
-    if (foundEmail)
-      return true;
-    return false;
+    return await this.userRepository.findEmail(email);
   }
 
   @get('/users/{userId}', {
@@ -286,6 +286,6 @@ export class UserController {
   })
   //@authenticate('jwt')
   async deleteById(@param.path.string('userId') userId: string): Promise<void> {
-    await this.userRepository.deleteById(userId);
+    await this.userRepository.deleteByNavigation(userId);
   }
 }
