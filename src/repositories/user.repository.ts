@@ -57,9 +57,10 @@ export class UserRepository extends DefaultCrudRepository<
     await this.deleteById(userId).catch(ex => {
       throw new HttpErrors.NotFound(ex);
     });
-    await this.userCredentialsRepository.findOne({ where: { userId: userId } }).then(result => {
-      if (result)
-        this.userCredentialsRepository.deleteById(result.id)
+    await this.userCredentialsRepository.findOne({ where: { userId: userId } }).then(async result => {
+      if (result) {
+        await this.userCredentialsRepository.deleteById(result.id);
+      }
     }
     ).catch(ex => {
       throw new HttpErrors.NotFound(ex);

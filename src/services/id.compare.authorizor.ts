@@ -25,12 +25,7 @@ export async function compareId(
       'email',
     ]);
     currentUser = { [securityId]: user.id, name: user.name, email: user.email };
-    console.log(currentUser)
-    console.log(securityId)
   } else {
-    console.log("elsetarafı")
-    console.log(authorizationCtx)
-    console.log(securityId)
     return AuthorizationDecision.DENY;
   }
 

@@ -1,9 +1,6 @@
 import {
-  Count,
-  CountSchema,
   Filter,
   repository,
-  Where,
 } from '@loopback/repository';
 import {
   post,
@@ -11,26 +8,23 @@ import {
   get,
   getFilterSchemaFor,
   getModelSchemaRef,
-  getWhereSchemaFor,
-  patch,
-  put,
   del,
   requestBody,
 } from '@loopback/rest';
-import {UserLocation} from '../models';
-import {UserLocationRepository} from '../repositories';
+import { UserLocation } from '../models';
+import { UserLocationRepository } from '../repositories';
 
 export class UserLocationController {
   constructor(
     @repository(UserLocationRepository)
-    public userLocationRepository : UserLocationRepository,
-  ) {}
+    public userLocationRepository: UserLocationRepository,
+  ) { }
 
   @post('/user-locations', {
     responses: {
       '200': {
         description: 'UserLocation model instance',
-        content: {'application/json': {schema: getModelSchemaRef(UserLocation)}},
+        content: { 'application/json': { schema: getModelSchemaRef(UserLocation) } },
       },
     },
   })
@@ -40,7 +34,7 @@ export class UserLocationController {
         'application/json': {
           schema: getModelSchemaRef(UserLocation, {
             title: 'NewUserLocation',
-            
+
           }),
         },
       },
@@ -48,20 +42,6 @@ export class UserLocationController {
     userLocation: UserLocation,
   ): Promise<UserLocation> {
     return this.userLocationRepository.create(userLocation);
-  }
-
-  @get('/user-locations/count', {
-    responses: {
-      '200': {
-        description: 'UserLocation model count',
-        content: {'application/json': {schema: CountSchema}},
-      },
-    },
-  })
-  async count(
-    @param.query.object('where', getWhereSchemaFor(UserLocation)) where?: Where<UserLocation>,
-  ): Promise<Count> {
-    return this.userLocationRepository.count(where);
   }
 
   @get('/user-locations', {
@@ -72,7 +52,7 @@ export class UserLocationController {
           'application/json': {
             schema: {
               type: 'array',
-              items: getModelSchemaRef(UserLocation, {includeRelations: true}),
+              items: getModelSchemaRef(UserLocation, { includeRelations: true }),
             },
           },
         },
@@ -85,35 +65,13 @@ export class UserLocationController {
     return this.userLocationRepository.find(filter);
   }
 
-  @patch('/user-locations', {
-    responses: {
-      '200': {
-        description: 'UserLocation PATCH success count',
-        content: {'application/json': {schema: CountSchema}},
-      },
-    },
-  })
-  async updateAll(
-    @requestBody({
-      content: {
-        'application/json': {
-          schema: getModelSchemaRef(UserLocation, {partial: true}),
-        },
-      },
-    })
-    userLocation: UserLocation,
-    @param.query.object('where', getWhereSchemaFor(UserLocation)) where?: Where<UserLocation>,
-  ): Promise<Count> {
-    return this.userLocationRepository.updateAll(userLocation, where);
-  }
-
   @get('/user-locations/{id}', {
     responses: {
       '200': {
         description: 'UserLocation model instance',
         content: {
           'application/json': {
-            schema: getModelSchemaRef(UserLocation, {includeRelations: true}),
+            schema: getModelSchemaRef(UserLocation),
           },
         },
       },
@@ -126,10 +84,10 @@ export class UserLocationController {
     return this.userLocationRepository.findById(id, filter);
   }
 
-  @patch('/user-locations/{id}', {
+  @post('/user-locations/{id}', {
     responses: {
-      '204': {
-        description: 'UserLocation PATCH success',
+      '200': {
+        description: 'UserLocation update success',
       },
     },
   })
@@ -138,27 +96,13 @@ export class UserLocationController {
     @requestBody({
       content: {
         'application/json': {
-          schema: getModelSchemaRef(UserLocation, {partial: true}),
+          schema: getModelSchemaRef(UserLocation),
         },
       },
     })
     userLocation: UserLocation,
   ): Promise<void> {
     await this.userLocationRepository.updateById(id, userLocation);
-  }
-
-  @put('/user-locations/{id}', {
-    responses: {
-      '204': {
-        description: 'UserLocation PUT success',
-      },
-    },
-  })
-  async replaceById(
-    @param.path.string('id') id: string,
-    @requestBody() userLocation: UserLocation,
-  ): Promise<void> {
-    await this.userLocationRepository.replaceById(id, userLocation);
   }
 
   @del('/user-locations/{id}', {

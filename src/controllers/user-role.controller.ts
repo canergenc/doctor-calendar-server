@@ -1,9 +1,6 @@
 import {
-  Count,
-  CountSchema,
   Filter,
   repository,
-  Where,
 } from '@loopback/repository';
 import {
   post,
@@ -11,26 +8,23 @@ import {
   get,
   getFilterSchemaFor,
   getModelSchemaRef,
-  getWhereSchemaFor,
-  patch,
-  put,
   del,
   requestBody,
 } from '@loopback/rest';
-import {UserRole} from '../models';
-import {UserRoleRepository} from '../repositories';
+import { UserRole } from '../models';
+import { UserRoleRepository } from '../repositories';
 
 export class UserRoleController {
   constructor(
     @repository(UserRoleRepository)
-    public userRoleRepository : UserRoleRepository,
-  ) {}
+    public userRoleRepository: UserRoleRepository,
+  ) { }
 
   @post('/user-roles', {
     responses: {
       '200': {
         description: 'UserRole model instance',
-        content: {'application/json': {schema: getModelSchemaRef(UserRole)}},
+        content: { 'application/json': { schema: getModelSchemaRef(UserRole) } },
       },
     },
   })
@@ -40,7 +34,7 @@ export class UserRoleController {
         'application/json': {
           schema: getModelSchemaRef(UserRole, {
             title: 'NewUserRole',
-            
+
           }),
         },
       },
@@ -48,20 +42,6 @@ export class UserRoleController {
     userRole: UserRole,
   ): Promise<UserRole> {
     return this.userRoleRepository.create(userRole);
-  }
-
-  @get('/user-roles/count', {
-    responses: {
-      '200': {
-        description: 'UserRole model count',
-        content: {'application/json': {schema: CountSchema}},
-      },
-    },
-  })
-  async count(
-    @param.query.object('where', getWhereSchemaFor(UserRole)) where?: Where<UserRole>,
-  ): Promise<Count> {
-    return this.userRoleRepository.count(where);
   }
 
   @get('/user-roles', {
@@ -72,7 +52,7 @@ export class UserRoleController {
           'application/json': {
             schema: {
               type: 'array',
-              items: getModelSchemaRef(UserRole, {includeRelations: true}),
+              items: getModelSchemaRef(UserRole, { includeRelations: true }),
             },
           },
         },
@@ -85,35 +65,13 @@ export class UserRoleController {
     return this.userRoleRepository.find(filter);
   }
 
-  @patch('/user-roles', {
-    responses: {
-      '200': {
-        description: 'UserRole PATCH success count',
-        content: {'application/json': {schema: CountSchema}},
-      },
-    },
-  })
-  async updateAll(
-    @requestBody({
-      content: {
-        'application/json': {
-          schema: getModelSchemaRef(UserRole, {partial: true}),
-        },
-      },
-    })
-    userRole: UserRole,
-    @param.query.object('where', getWhereSchemaFor(UserRole)) where?: Where<UserRole>,
-  ): Promise<Count> {
-    return this.userRoleRepository.updateAll(userRole, where);
-  }
-
   @get('/user-roles/{id}', {
     responses: {
       '200': {
         description: 'UserRole model instance',
         content: {
           'application/json': {
-            schema: getModelSchemaRef(UserRole, {includeRelations: true}),
+            schema: getModelSchemaRef(UserRole, { includeRelations: true }),
           },
         },
       },
@@ -126,10 +84,10 @@ export class UserRoleController {
     return this.userRoleRepository.findById(id, filter);
   }
 
-  @patch('/user-roles/{id}', {
+  @post('/user-roles/{id}', {
     responses: {
-      '204': {
-        description: 'UserRole PATCH success',
+      '200': {
+        description: 'UserRole update success',
       },
     },
   })
@@ -138,27 +96,13 @@ export class UserRoleController {
     @requestBody({
       content: {
         'application/json': {
-          schema: getModelSchemaRef(UserRole, {partial: true}),
+          schema: getModelSchemaRef(UserRole),
         },
       },
     })
     userRole: UserRole,
   ): Promise<void> {
     await this.userRoleRepository.updateById(id, userRole);
-  }
-
-  @put('/user-roles/{id}', {
-    responses: {
-      '204': {
-        description: 'UserRole PUT success',
-      },
-    },
-  })
-  async replaceById(
-    @param.path.string('id') id: string,
-    @requestBody() userRole: UserRole,
-  ): Promise<void> {
-    await this.userRoleRepository.replaceById(id, userRole);
   }
 
   @del('/user-roles/{id}', {

@@ -10,8 +10,6 @@ import {
   get,
   getFilterSchemaFor,
   getModelSchemaRef,
-  patch,
-  put,
   del,
   requestBody,
   HttpErrors,
@@ -21,7 +19,7 @@ import { User } from '../models';
 import { UserRepository, Credentials } from '../repositories';
 import { authenticate, TokenService, UserService } from '@loopback/authentication';
 import { inject } from '@loopback/core';
-import { UserProfileSchema, CredentialsRequestBody } from './specs/user-controller.specs';
+import { CredentialsRequestBody } from './specs/user-controller.specs';
 import { PasswordHasherBindings, TokenServiceBindings, UserServiceBindings } from '../keys';
 import { PasswordHasher } from '../services/hash.password.bcryptjs';
 import { validateCredentials } from '../services/validator';
@@ -169,29 +167,6 @@ export class UserController {
     return this.userRepository.find(filter);
   }
 
-  @get('/users/me', {
-    security: OPERATION_SECURITY_SPEC,
-    responses: {
-      '200': {
-        description: 'The current user profile',
-        content: {
-          'application/json': {
-            schema: UserProfileSchema,
-          },
-        },
-      },
-    },
-  })
-  //@authenticate('jwt')
-  async printCurrentUser(
-    @inject(SecurityBindings.USER)
-    currentUserProfile: UserProfile,
-  ): Promise<UserProfile> {
-    currentUserProfile.id = currentUserProfile[securityId];
-    delete currentUserProfile[securityId];
-    return currentUserProfile;
-  }
-
   @get('/users/emailCheck', {
     parameters: [{ name: 'email', schema: { type: 'string' }, in: 'query', required: true }],
     responses: {
@@ -237,11 +212,11 @@ export class UserController {
     return this.userRepository.findById(userId, filter);
   }
 
-  @patch('/users/{userId}', {
+  @post('/users/{userId}', {
     security: OPERATION_SECURITY_SPEC,
     responses: {
-      '204': {
-        description: 'User PATCH success',
+      '200': {
+        description: 'User update success',
       },
     },
   })
@@ -258,22 +233,6 @@ export class UserController {
     user: User,
   ): Promise<void> {
     await this.userRepository.updateById(userId, user);
-  }
-
-  @put('/users/{userId}', {
-    security: OPERATION_SECURITY_SPEC,
-    responses: {
-      '204': {
-        description: 'User PUT success',
-      },
-    },
-  })
-  //@authenticate('jwt')
-  async replaceById(
-    @param.path.string('userId') userId: string,
-    @requestBody() user: User,
-  ): Promise<void> {
-    await this.userRepository.replaceById(userId, user);
   }
 
   @del('/users/{userId}', {

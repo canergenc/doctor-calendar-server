@@ -1,9 +1,6 @@
 import {
-  Count,
-  CountSchema,
   Filter,
   repository,
-  Where,
 } from '@loopback/repository';
 import {
   post,
@@ -11,26 +8,23 @@ import {
   get,
   getFilterSchemaFor,
   getModelSchemaRef,
-  getWhereSchemaFor,
-  patch,
-  put,
   del,
   requestBody,
 } from '@loopback/rest';
-import {GroupLocation} from '../models';
-import {GroupLocationRepository} from '../repositories';
+import { GroupLocation } from '../models';
+import { GroupLocationRepository } from '../repositories';
 
 export class GroupLocationController {
   constructor(
     @repository(GroupLocationRepository)
-    public groupLocationRepository : GroupLocationRepository,
-  ) {}
+    public groupLocationRepository: GroupLocationRepository,
+  ) { }
 
   @post('/group-locations', {
     responses: {
       '200': {
         description: 'GroupLocation model instance',
-        content: {'application/json': {schema: getModelSchemaRef(GroupLocation)}},
+        content: { 'application/json': { schema: getModelSchemaRef(GroupLocation) } },
       },
     },
   })
@@ -40,7 +34,7 @@ export class GroupLocationController {
         'application/json': {
           schema: getModelSchemaRef(GroupLocation, {
             title: 'NewGroupLocation',
-            
+
           }),
         },
       },
@@ -48,20 +42,6 @@ export class GroupLocationController {
     groupLocation: GroupLocation,
   ): Promise<GroupLocation> {
     return this.groupLocationRepository.create(groupLocation);
-  }
-
-  @get('/group-locations/count', {
-    responses: {
-      '200': {
-        description: 'GroupLocation model count',
-        content: {'application/json': {schema: CountSchema}},
-      },
-    },
-  })
-  async count(
-    @param.query.object('where', getWhereSchemaFor(GroupLocation)) where?: Where<GroupLocation>,
-  ): Promise<Count> {
-    return this.groupLocationRepository.count(where);
   }
 
   @get('/group-locations', {
@@ -72,7 +52,7 @@ export class GroupLocationController {
           'application/json': {
             schema: {
               type: 'array',
-              items: getModelSchemaRef(GroupLocation, {includeRelations: true}),
+              items: getModelSchemaRef(GroupLocation, { includeRelations: true }),
             },
           },
         },
@@ -85,35 +65,13 @@ export class GroupLocationController {
     return this.groupLocationRepository.find(filter);
   }
 
-  @patch('/group-locations', {
-    responses: {
-      '200': {
-        description: 'GroupLocation PATCH success count',
-        content: {'application/json': {schema: CountSchema}},
-      },
-    },
-  })
-  async updateAll(
-    @requestBody({
-      content: {
-        'application/json': {
-          schema: getModelSchemaRef(GroupLocation, {partial: true}),
-        },
-      },
-    })
-    groupLocation: GroupLocation,
-    @param.query.object('where', getWhereSchemaFor(GroupLocation)) where?: Where<GroupLocation>,
-  ): Promise<Count> {
-    return this.groupLocationRepository.updateAll(groupLocation, where);
-  }
-
   @get('/group-locations/{id}', {
     responses: {
       '200': {
         description: 'GroupLocation model instance',
         content: {
           'application/json': {
-            schema: getModelSchemaRef(GroupLocation, {includeRelations: true}),
+            schema: getModelSchemaRef(GroupLocation, { includeRelations: true }),
           },
         },
       },
@@ -126,10 +84,10 @@ export class GroupLocationController {
     return this.groupLocationRepository.findById(id, filter);
   }
 
-  @patch('/group-locations/{id}', {
+  @post('/group-locations/{id}', {
     responses: {
-      '204': {
-        description: 'GroupLocation PATCH success',
+      '200': {
+        description: 'GroupLocation update success',
       },
     },
   })
@@ -138,25 +96,10 @@ export class GroupLocationController {
     @requestBody({
       content: {
         'application/json': {
-          schema: getModelSchemaRef(GroupLocation, {partial: true}),
+          schema: getModelSchemaRef(GroupLocation),
         },
       },
-    })
-    groupLocation: GroupLocation,
-  ): Promise<void> {
-    await this.groupLocationRepository.updateById(id, groupLocation);
-  }
-
-  @put('/group-locations/{id}', {
-    responses: {
-      '204': {
-        description: 'GroupLocation PUT success',
-      },
-    },
-  })
-  async replaceById(
-    @param.path.string('id') id: string,
-    @requestBody() groupLocation: GroupLocation,
+    }) groupLocation: GroupLocation,
   ): Promise<void> {
     await this.groupLocationRepository.replaceById(id, groupLocation);
   }

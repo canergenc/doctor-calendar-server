@@ -1,9 +1,6 @@
 import {
-  Count,
-  CountSchema,
   Filter,
-  repository,
-  Where,
+  repository
 } from '@loopback/repository';
 import {
   post,
@@ -11,26 +8,23 @@ import {
   get,
   getFilterSchemaFor,
   getModelSchemaRef,
-  getWhereSchemaFor,
-  patch,
-  put,
   del,
   requestBody,
 } from '@loopback/rest';
-import {Location} from '../models';
-import {LocationRepository} from '../repositories';
+import { Location } from '../models';
+import { LocationRepository } from '../repositories';
 
 export class LocationController {
   constructor(
     @repository(LocationRepository)
-    public locationRepository : LocationRepository,
-  ) {}
+    public locationRepository: LocationRepository,
+  ) { }
 
   @post('/locations', {
     responses: {
       '200': {
         description: 'Location model instance',
-        content: {'application/json': {schema: getModelSchemaRef(Location)}},
+        content: { 'application/json': { schema: getModelSchemaRef(Location) } },
       },
     },
   })
@@ -40,7 +34,7 @@ export class LocationController {
         'application/json': {
           schema: getModelSchemaRef(Location, {
             title: 'NewLocation',
-            
+
           }),
         },
       },
@@ -48,20 +42,6 @@ export class LocationController {
     location: Location,
   ): Promise<Location> {
     return this.locationRepository.create(location);
-  }
-
-  @get('/locations/count', {
-    responses: {
-      '200': {
-        description: 'Location model count',
-        content: {'application/json': {schema: CountSchema}},
-      },
-    },
-  })
-  async count(
-    @param.query.object('where', getWhereSchemaFor(Location)) where?: Where<Location>,
-  ): Promise<Count> {
-    return this.locationRepository.count(where);
   }
 
   @get('/locations', {
@@ -72,7 +52,7 @@ export class LocationController {
           'application/json': {
             schema: {
               type: 'array',
-              items: getModelSchemaRef(Location, {includeRelations: true}),
+              items: getModelSchemaRef(Location, { includeRelations: true }),
             },
           },
         },
@@ -85,35 +65,13 @@ export class LocationController {
     return this.locationRepository.find(filter);
   }
 
-  @patch('/locations', {
-    responses: {
-      '200': {
-        description: 'Location PATCH success count',
-        content: {'application/json': {schema: CountSchema}},
-      },
-    },
-  })
-  async updateAll(
-    @requestBody({
-      content: {
-        'application/json': {
-          schema: getModelSchemaRef(Location, {partial: true}),
-        },
-      },
-    })
-    location: Location,
-    @param.query.object('where', getWhereSchemaFor(Location)) where?: Where<Location>,
-  ): Promise<Count> {
-    return this.locationRepository.updateAll(location, where);
-  }
-
   @get('/locations/{id}', {
     responses: {
       '200': {
         description: 'Location model instance',
         content: {
           'application/json': {
-            schema: getModelSchemaRef(Location, {includeRelations: true}),
+            schema: getModelSchemaRef(Location, { includeRelations: true }),
           },
         },
       },
@@ -126,10 +84,10 @@ export class LocationController {
     return this.locationRepository.findById(id, filter);
   }
 
-  @patch('/locations/{id}', {
+  @post('/locations/{id}', {
     responses: {
-      '204': {
-        description: 'Location PATCH success',
+      '200': {
+        description: 'Location update success'
       },
     },
   })
@@ -138,27 +96,13 @@ export class LocationController {
     @requestBody({
       content: {
         'application/json': {
-          schema: getModelSchemaRef(Location, {partial: true}),
+          schema: getModelSchemaRef(Location),
         },
       },
     })
     location: Location,
   ): Promise<void> {
     await this.locationRepository.updateById(id, location);
-  }
-
-  @put('/locations/{id}', {
-    responses: {
-      '204': {
-        description: 'Location PUT success',
-      },
-    },
-  })
-  async replaceById(
-    @param.path.string('id') id: string,
-    @requestBody() location: Location,
-  ): Promise<void> {
-    await this.locationRepository.replaceById(id, location);
   }
 
   @del('/locations/{id}', {

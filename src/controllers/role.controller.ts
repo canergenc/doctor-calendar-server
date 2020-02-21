@@ -1,9 +1,6 @@
 import {
-  Count,
-  CountSchema,
   Filter,
   repository,
-  Where,
 } from '@loopback/repository';
 import {
   post,
@@ -11,26 +8,23 @@ import {
   get,
   getFilterSchemaFor,
   getModelSchemaRef,
-  getWhereSchemaFor,
-  patch,
-  put,
   del,
   requestBody,
 } from '@loopback/rest';
-import {Role} from '../models';
-import {RoleRepository} from '../repositories';
+import { Role } from '../models';
+import { RoleRepository } from '../repositories';
 
 export class RoleController {
   constructor(
     @repository(RoleRepository)
-    public roleRepository : RoleRepository,
-  ) {}
+    public roleRepository: RoleRepository,
+  ) { }
 
   @post('/roles', {
     responses: {
       '200': {
         description: 'Role model instance',
-        content: {'application/json': {schema: getModelSchemaRef(Role)}},
+        content: { 'application/json': { schema: getModelSchemaRef(Role) } },
       },
     },
   })
@@ -40,7 +34,7 @@ export class RoleController {
         'application/json': {
           schema: getModelSchemaRef(Role, {
             title: 'NewRole',
-            
+
           }),
         },
       },
@@ -48,20 +42,6 @@ export class RoleController {
     role: Role,
   ): Promise<Role> {
     return this.roleRepository.create(role);
-  }
-
-  @get('/roles/count', {
-    responses: {
-      '200': {
-        description: 'Role model count',
-        content: {'application/json': {schema: CountSchema}},
-      },
-    },
-  })
-  async count(
-    @param.query.object('where', getWhereSchemaFor(Role)) where?: Where<Role>,
-  ): Promise<Count> {
-    return this.roleRepository.count(where);
   }
 
   @get('/roles', {
@@ -72,7 +52,7 @@ export class RoleController {
           'application/json': {
             schema: {
               type: 'array',
-              items: getModelSchemaRef(Role, {includeRelations: true}),
+              items: getModelSchemaRef(Role, { includeRelations: true }),
             },
           },
         },
@@ -85,35 +65,13 @@ export class RoleController {
     return this.roleRepository.find(filter);
   }
 
-  @patch('/roles', {
-    responses: {
-      '200': {
-        description: 'Role PATCH success count',
-        content: {'application/json': {schema: CountSchema}},
-      },
-    },
-  })
-  async updateAll(
-    @requestBody({
-      content: {
-        'application/json': {
-          schema: getModelSchemaRef(Role, {partial: true}),
-        },
-      },
-    })
-    role: Role,
-    @param.query.object('where', getWhereSchemaFor(Role)) where?: Where<Role>,
-  ): Promise<Count> {
-    return this.roleRepository.updateAll(role, where);
-  }
-
   @get('/roles/{id}', {
     responses: {
       '200': {
         description: 'Role model instance',
         content: {
           'application/json': {
-            schema: getModelSchemaRef(Role, {includeRelations: true}),
+            schema: getModelSchemaRef(Role, { includeRelations: true }),
           },
         },
       },
@@ -126,10 +84,10 @@ export class RoleController {
     return this.roleRepository.findById(id, filter);
   }
 
-  @patch('/roles/{id}', {
+  @post('/roles/{id}', {
     responses: {
-      '204': {
-        description: 'Role PATCH success',
+      '200': {
+        description: 'Role update success',
       },
     },
   })
@@ -138,27 +96,13 @@ export class RoleController {
     @requestBody({
       content: {
         'application/json': {
-          schema: getModelSchemaRef(Role, {partial: true}),
+          schema: getModelSchemaRef(Role),
         },
       },
     })
     role: Role,
   ): Promise<void> {
     await this.roleRepository.updateById(id, role);
-  }
-
-  @put('/roles/{id}', {
-    responses: {
-      '204': {
-        description: 'Role PUT success',
-      },
-    },
-  })
-  async replaceById(
-    @param.path.string('id') id: string,
-    @requestBody() role: Role,
-  ): Promise<void> {
-    await this.roleRepository.replaceById(id, role);
   }
 
   @del('/roles/{id}', {

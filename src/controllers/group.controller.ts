@@ -1,9 +1,6 @@
 import {
-  Count,
-  CountSchema,
   Filter,
-  repository,
-  Where,
+  repository
 } from '@loopback/repository';
 import {
   post,
@@ -11,26 +8,23 @@ import {
   get,
   getFilterSchemaFor,
   getModelSchemaRef,
-  getWhereSchemaFor,
-  patch,
-  put,
   del,
   requestBody,
 } from '@loopback/rest';
-import {Group} from '../models';
-import {GroupRepository} from '../repositories';
+import { Group } from '../models';
+import { GroupRepository } from '../repositories';
 
 export class GroupController {
   constructor(
     @repository(GroupRepository)
-    public groupRepository : GroupRepository,
-  ) {}
+    public groupRepository: GroupRepository,
+  ) { }
 
   @post('/groups', {
     responses: {
       '200': {
         description: 'Group model instance',
-        content: {'application/json': {schema: getModelSchemaRef(Group)}},
+        content: { 'application/json': { schema: getModelSchemaRef(Group) } },
       },
     },
   })
@@ -40,7 +34,7 @@ export class GroupController {
         'application/json': {
           schema: getModelSchemaRef(Group, {
             title: 'NewGroup',
-            
+
           }),
         },
       },
@@ -48,20 +42,6 @@ export class GroupController {
     group: Group,
   ): Promise<Group> {
     return this.groupRepository.create(group);
-  }
-
-  @get('/groups/count', {
-    responses: {
-      '200': {
-        description: 'Group model count',
-        content: {'application/json': {schema: CountSchema}},
-      },
-    },
-  })
-  async count(
-    @param.query.object('where', getWhereSchemaFor(Group)) where?: Where<Group>,
-  ): Promise<Count> {
-    return this.groupRepository.count(where);
   }
 
   @get('/groups', {
@@ -72,7 +52,7 @@ export class GroupController {
           'application/json': {
             schema: {
               type: 'array',
-              items: getModelSchemaRef(Group, {includeRelations: true}),
+              items: getModelSchemaRef(Group, { includeRelations: true }),
             },
           },
         },
@@ -85,35 +65,13 @@ export class GroupController {
     return this.groupRepository.find(filter);
   }
 
-  @patch('/groups', {
-    responses: {
-      '200': {
-        description: 'Group PATCH success count',
-        content: {'application/json': {schema: CountSchema}},
-      },
-    },
-  })
-  async updateAll(
-    @requestBody({
-      content: {
-        'application/json': {
-          schema: getModelSchemaRef(Group, {partial: true}),
-        },
-      },
-    })
-    group: Group,
-    @param.query.object('where', getWhereSchemaFor(Group)) where?: Where<Group>,
-  ): Promise<Count> {
-    return this.groupRepository.updateAll(group, where);
-  }
-
   @get('/groups/{id}', {
     responses: {
       '200': {
         description: 'Group model instance',
         content: {
           'application/json': {
-            schema: getModelSchemaRef(Group, {includeRelations: true}),
+            schema: getModelSchemaRef(Group, { includeRelations: true }),
           },
         },
       },
@@ -126,10 +84,10 @@ export class GroupController {
     return this.groupRepository.findById(id, filter);
   }
 
-  @patch('/groups/{id}', {
+  @post('/groups/{id}', {
     responses: {
-      '204': {
-        description: 'Group PATCH success',
+      '200': {
+        description: 'Group update success',
       },
     },
   })
@@ -138,27 +96,12 @@ export class GroupController {
     @requestBody({
       content: {
         'application/json': {
-          schema: getModelSchemaRef(Group, {partial: true}),
+          schema: getModelSchemaRef(Group),
         },
       },
-    })
-    group: Group,
+    }) group: Group,
   ): Promise<void> {
     await this.groupRepository.updateById(id, group);
-  }
-
-  @put('/groups/{id}', {
-    responses: {
-      '204': {
-        description: 'Group PUT success',
-      },
-    },
-  })
-  async replaceById(
-    @param.path.string('id') id: string,
-    @requestBody() group: Group,
-  ): Promise<void> {
-    await this.groupRepository.replaceById(id, group);
   }
 
   @del('/groups/{id}', {

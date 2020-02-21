@@ -1,9 +1,6 @@
 import {
-  Count,
-  CountSchema,
   Filter,
   repository,
-  Where,
 } from '@loopback/repository';
 import {
   post,
@@ -11,9 +8,6 @@ import {
   get,
   getFilterSchemaFor,
   getModelSchemaRef,
-  getWhereSchemaFor,
-  patch,
-  put,
   del,
   requestBody,
 } from '@loopback/rest';
@@ -50,20 +44,6 @@ export class CalendarController {
     return this.calendarRepository.create(calendar);
   }
 
-  @get('/calendars/count', {
-    responses: {
-      '200': {
-        description: 'Calendar model count',
-        content: { 'application/json': { schema: CountSchema } },
-      },
-    },
-  })
-  async count(
-    @param.query.object('where', getWhereSchemaFor(Calendar)) where?: Where<Calendar>,
-  ): Promise<Count> {
-    return this.calendarRepository.count(where);
-  }
-
   @get('/calendars', {
     responses: {
       '200': {
@@ -85,28 +65,6 @@ export class CalendarController {
     return this.calendarRepository.find(filter);
   }
 
-  @patch('/calendars', {
-    responses: {
-      '200': {
-        description: 'Calendar PATCH success count',
-        content: { 'application/json': { schema: CountSchema } },
-      },
-    },
-  })
-  async updateAll(
-    @requestBody({
-      content: {
-        'application/json': {
-          schema: getModelSchemaRef(Calendar, { partial: true }),
-        },
-      },
-    })
-    calendar: Calendar,
-    @param.query.object('where', getWhereSchemaFor(Calendar)) where?: Where<Calendar>,
-  ): Promise<Count> {
-    return this.calendarRepository.updateAll(calendar, where);
-  }
-
   @get('/calendars/{id}', {
     responses: {
       '200': {
@@ -126,10 +84,10 @@ export class CalendarController {
     return this.calendarRepository.findById(id, filter);
   }
 
-  @patch('/calendars/{id}', {
+  @post('/calendars/{id}', {
     responses: {
-      '204': {
-        description: 'Calendar PATCH success',
+      '200': {
+        description: 'Calendar update success',
       },
     },
   })
@@ -138,27 +96,12 @@ export class CalendarController {
     @requestBody({
       content: {
         'application/json': {
-          schema: getModelSchemaRef(Calendar, { partial: true }),
+          schema: getModelSchemaRef(Calendar),
         },
       },
-    })
-    calendar: Calendar,
+    }) calendar: Calendar,
   ): Promise<void> {
     await this.calendarRepository.updateById(id, calendar);
-  }
-
-  @put('/calendars/{id}', {
-    responses: {
-      '204': {
-        description: 'Calendar PUT success',
-      },
-    },
-  })
-  async replaceById(
-    @param.path.string('id') id: string,
-    @requestBody() calendar: Calendar,
-  ): Promise<void> {
-    await this.calendarRepository.replaceById(id, calendar);
   }
 
   @del('/calendars/{id}', {
