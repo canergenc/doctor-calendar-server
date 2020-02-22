@@ -1,4 +1,4 @@
-import {Entity, model, property} from '@loopback/repository';
+import { Entity, model, property } from '@loopback/repository';
 
 @model()
 export class Group extends Entity {
@@ -6,8 +6,9 @@ export class Group extends Entity {
     type: 'string',
     id: true,
     generated: true,
+    required: true
   })
-  id?: string;
+  id: string;
 
   @property({
     type: 'string',
@@ -18,12 +19,12 @@ export class Group extends Entity {
   @property({
     type: 'string',
   })
-  locationId?: string;
+  locationId: string;
 
   @property({
     type: 'string',
   })
-  parentId?: string;
+  parentId: string;
 
 
   constructor(data?: Partial<Group>) {

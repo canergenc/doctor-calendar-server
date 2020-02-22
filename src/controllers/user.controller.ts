@@ -19,7 +19,7 @@ import { User } from '../models';
 import { UserRepository, Credentials } from '../repositories';
 import { authenticate, TokenService, UserService } from '@loopback/authentication';
 import { inject } from '@loopback/core';
-import { CredentialsRequestBody } from './specs/user-controller.specs';
+import { CredentialsRequestBody, UserProfileSchema } from './specs/user-controller.specs';
 import { PasswordHasherBindings, TokenServiceBindings, UserServiceBindings } from '../keys';
 import { PasswordHasher } from '../services/hash.password.bcryptjs';
 import { validateCredentials } from '../services/validator';
@@ -165,6 +165,29 @@ export class UserController {
     @param.query.object('filter', getFilterSchemaFor(User)) filter?: Filter<User>,
   ): Promise<User[]> {
     return this.userRepository.find(filter);
+  }
+
+  @get('/users/me', {
+    security: OPERATION_SECURITY_SPEC,
+    responses: {
+      '200': {
+        description: 'The current user profile',
+        content: {
+          'application/json': {
+            schema: UserProfileSchema,
+          },
+        },
+      },
+    },
+  })
+  @authenticate('jwt')
+  async printCurrentUser(
+    @inject(SecurityBindings.USER)
+    currentUserProfile: UserProfile,
+  ): Promise<UserProfile> {
+    currentUserProfile.id = currentUserProfile[securityId];
+    delete currentUserProfile[securityId];
+    return currentUserProfile;
   }
 
   @get('/users/emailCheck', {

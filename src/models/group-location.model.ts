@@ -1,4 +1,4 @@
-import {Entity, model, property} from '@loopback/repository';
+import { Entity, model, property } from '@loopback/repository';
 
 @model()
 export class GroupLocation extends Entity {
@@ -6,8 +6,9 @@ export class GroupLocation extends Entity {
     type: 'string',
     id: true,
     generated: true,
+    required: true
   })
-  id?: string;
+  id: string;
 
   @property({
     type: 'string',
