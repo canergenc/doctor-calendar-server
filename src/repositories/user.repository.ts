@@ -15,10 +15,8 @@ export class UserRepository extends DefaultCrudRepository<
   typeof User.prototype.id,
   UserRelations
   > {
-  public readonly userCredentials: HasOneRepositoryFactory<
-    UserCredentials,
-    typeof User.prototype.id
-  >;
+  public readonly userCredentials: HasOneRepositoryFactory<UserCredentials, typeof User.prototype.id>;
+
   constructor(
     @inject(DataSourceName.Data_Source_Name) dataSource: juggler.DataSource,
     @repository(UserCredentialsRepository)
@@ -26,7 +24,7 @@ export class UserRepository extends DefaultCrudRepository<
     @repository.getter('UserCredentialsRepository')
     protected userCredentialsRepositoryGetter: Getter<
       UserCredentialsRepository
-    >
+    >,
   ) {
     super(User, dataSource);
     this.userCredentials = this.createHasOneRepositoryFactoryFor('userCredentials', userCredentialsRepositoryGetter);

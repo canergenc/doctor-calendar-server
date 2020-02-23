@@ -1,5 +1,8 @@
-import { Entity, model, property } from "@loopback/repository";
+import { Entity, model, property, hasOne, belongsTo} from "@loopback/repository";
 import { CalendarType } from "../enums/calendarType.enum";
+import { User } from './user.model';
+import {Group} from './group.model';
+import {Location} from './location.model';
 
 @model()
 export class Calendar extends Entity {
@@ -9,19 +12,6 @@ export class Calendar extends Entity {
     generated: true,
   })
   id?: string;
-
-  @property({
-    type: "string",
-    required: true,
-  })
-  locationId: string;
-
-  @property({
-    type: "string",
-    required: true,
-  })
-  userId: string;
-
   @property({
     type: "date",
     required: true,
@@ -37,6 +27,15 @@ export class Calendar extends Entity {
     type: "object",
   })
   type?: CalendarType;
+
+  @belongsTo(() => User)
+  userId: string;
+
+  @belongsTo(() => Group)
+  groupId: string;
+
+  @belongsTo(() => Location)
+  locationId: string;
 
   constructor(data?: Partial<Calendar>) {
     super(data);

@@ -10,7 +10,7 @@ export namespace TokenServiceConstants {
 }
 
 export namespace DataSourceName {
-  export const Data_Source_Name = 'datasources.firestore';
+  export const Data_Source_Name = 'datasources.mongo';
 }
 
 export namespace TokenServiceBindings {

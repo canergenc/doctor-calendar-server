@@ -1,13 +1,13 @@
 import { Entity, model, property } from '@loopback/repository';
 
 @model()
-export class UserLocation extends Entity {
+export class UserGroup extends Entity {
   @property({
     type: 'string',
     id: true,
     generated: true,
   })
-  id?: string;
+  id: string;
 
   @property({
     type: 'string',
@@ -19,16 +19,16 @@ export class UserLocation extends Entity {
     type: 'string',
     required: true,
   })
-  locationId: string;
+  groupId: string;
 
 
-  constructor(data?: Partial<UserLocation>) {
+  constructor(data?: Partial<UserGroup>) {
     super(data);
   }
 }
 
-export interface UserLocationRelations {
+export interface UserGroupRelations {
   // describe navigational properties here
 }
 
-export type UserLocationWithRelations = UserLocation & UserLocationRelations;
+export type UserGroupWithRelations = UserGroup & UserGroupRelations;

@@ -52,7 +52,7 @@ export class CalendarController {
           'application/json': {
             schema: {
               type: 'array',
-              items: getModelSchemaRef(Calendar),
+              items: getModelSchemaRef(Calendar, { includeRelations: true }),
             },
           },
         },
@@ -62,7 +62,9 @@ export class CalendarController {
   async find(
     @param.query.object('filter', getFilterSchemaFor(Calendar)) filter?: Filter<Calendar>,
   ): Promise<Calendar[]> {
-    return this.calendarRepository.find(filter);
+    return this
+      .calendarRepository
+      .find(filter);
   }
 
   @get('/calendars/{id}', {

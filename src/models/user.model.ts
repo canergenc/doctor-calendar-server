@@ -1,5 +1,4 @@
 import { Entity, model, property, hasOne } from '@loopback/repository';
-import { Calendar } from './calendar.model';
 import { UserCredentials } from './user-credentials.model';
 
 @model({
@@ -19,7 +18,7 @@ import { UserCredentials } from './user-credentials.model';
 export class User extends Entity {
   @property({
     type: 'string',
-    id: true,
+    id: true
   })
   id: string;
 
@@ -45,9 +44,6 @@ export class User extends Entity {
     type: 'string',
   })
   deviceId?: string;
-
-  @hasOne(() => Calendar)
-  calendar?: Calendar;
 
   @hasOne(() => UserCredentials)
   userCredentials: UserCredentials;

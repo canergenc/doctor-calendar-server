@@ -153,7 +153,7 @@ export class UserController {
           'application/json': {
             schema: {
               type: 'array',
-              items: getModelSchemaRef(User, { includeRelations: true }),
+              items: getModelSchemaRef(User),
             },
           },
         },
@@ -164,7 +164,7 @@ export class UserController {
   async find(
     @param.query.object('filter', getFilterSchemaFor(User)) filter?: Filter<User>,
   ): Promise<User[]> {
-    return this.userRepository.find(filter);
+    return await this.userRepository.find(filter);
   }
 
   @get('/users/me', {

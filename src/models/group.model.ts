@@ -5,8 +5,7 @@ export class Group extends Entity {
   @property({
     type: 'string',
     id: true,
-    generated: true,
-    required: true
+    generated: true
   })
   id: string;
 
@@ -15,11 +14,6 @@ export class Group extends Entity {
     required: true,
   })
   name: string;
-
-  @property({
-    type: 'string',
-  })
-  locationId: string;
 
   @property({
     type: 'string',

@@ -1,5 +1,5 @@
-import { Entity, model, property } from '@loopback/repository';
-import { Calendar } from './calendar.model';
+import { Entity, model, property, belongsTo } from '@loopback/repository';
+import { Group } from './group.model';
 
 @model()
 export class Location extends Entity {
@@ -8,7 +8,7 @@ export class Location extends Entity {
     id: true,
     generated: true,
   })
-  id?: string;
+  id: string;
 
   @property({
     type: 'string',
@@ -17,10 +17,9 @@ export class Location extends Entity {
   name: string;
 
   @property({
-    type: 'object',
+    type: 'string',
   })
-  calendar?: Calendar;
-
+  groupId: string;
 
   constructor(data?: Partial<Location>) {
     super(data);
