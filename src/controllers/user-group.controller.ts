@@ -1,9 +1,6 @@
 import {
-  Count,
-  CountSchema,
   Filter,
   repository,
-  Where,
 } from '@loopback/repository';
 import {
   post,
@@ -11,26 +8,23 @@ import {
   get,
   getFilterSchemaFor,
   getModelSchemaRef,
-  getWhereSchemaFor,
-  patch,
-  put,
   del,
   requestBody,
 } from '@loopback/rest';
-import {UserGroup} from '../models';
-import {UserGroupRepository} from '../repositories';
+import { UserGroup } from '../models';
+import { UserGroupRepository } from '../repositories';
 
 export class UserGroupController {
   constructor(
     @repository(UserGroupRepository)
-    public userGroupRepository : UserGroupRepository,
-  ) {}
+    public userGroupRepository: UserGroupRepository,
+  ) { }
 
   @post('/user-groups', {
     responses: {
       '200': {
         description: 'UserGroup model instance',
-        content: {'application/json': {schema: getModelSchemaRef(UserGroup)}},
+        content: { 'application/json': { schema: getModelSchemaRef(UserGroup) } },
       },
     },
   })
@@ -40,7 +34,7 @@ export class UserGroupController {
         'application/json': {
           schema: getModelSchemaRef(UserGroup, {
             title: 'NewUserGroup',
-            
+
           }),
         },
       },
@@ -48,20 +42,6 @@ export class UserGroupController {
     userGroup: UserGroup,
   ): Promise<UserGroup> {
     return this.userGroupRepository.create(userGroup);
-  }
-
-  @get('/user-groups/count', {
-    responses: {
-      '200': {
-        description: 'UserGroup model count',
-        content: {'application/json': {schema: CountSchema}},
-      },
-    },
-  })
-  async count(
-    @param.query.object('where', getWhereSchemaFor(UserGroup)) where?: Where<UserGroup>,
-  ): Promise<Count> {
-    return this.userGroupRepository.count(where);
   }
 
   @get('/user-groups', {
@@ -72,7 +52,7 @@ export class UserGroupController {
           'application/json': {
             schema: {
               type: 'array',
-              items: getModelSchemaRef(UserGroup, {includeRelations: true}),
+              items: getModelSchemaRef(UserGroup, { includeRelations: true }),
             },
           },
         },
@@ -85,35 +65,13 @@ export class UserGroupController {
     return this.userGroupRepository.find(filter);
   }
 
-  @patch('/user-groups', {
-    responses: {
-      '200': {
-        description: 'UserGroup PATCH success count',
-        content: {'application/json': {schema: CountSchema}},
-      },
-    },
-  })
-  async updateAll(
-    @requestBody({
-      content: {
-        'application/json': {
-          schema: getModelSchemaRef(UserGroup, {partial: true}),
-        },
-      },
-    })
-    userGroup: UserGroup,
-    @param.query.object('where', getWhereSchemaFor(UserGroup)) where?: Where<UserGroup>,
-  ): Promise<Count> {
-    return this.userGroupRepository.updateAll(userGroup, where);
-  }
-
   @get('/user-groups/{id}', {
     responses: {
       '200': {
         description: 'UserGroup model instance',
         content: {
           'application/json': {
-            schema: getModelSchemaRef(UserGroup, {includeRelations: true}),
+            schema: getModelSchemaRef(UserGroup, { includeRelations: true }),
           },
         },
       },
@@ -126,10 +84,10 @@ export class UserGroupController {
     return this.userGroupRepository.findById(id, filter);
   }
 
-  @patch('/user-groups/{id}', {
+  @post('/user-groups/{id}', {
     responses: {
-      '204': {
-        description: 'UserGroup PATCH success',
+      '200': {
+        description: 'UserGroup update success',
       },
     },
   })
@@ -138,27 +96,13 @@ export class UserGroupController {
     @requestBody({
       content: {
         'application/json': {
-          schema: getModelSchemaRef(UserGroup, {partial: true}),
+          schema: getModelSchemaRef(UserGroup, { partial: true }),
         },
       },
     })
     userGroup: UserGroup,
   ): Promise<void> {
     await this.userGroupRepository.updateById(id, userGroup);
-  }
-
-  @put('/user-groups/{id}', {
-    responses: {
-      '204': {
-        description: 'UserGroup PUT success',
-      },
-    },
-  })
-  async replaceById(
-    @param.path.string('id') id: string,
-    @requestBody() userGroup: UserGroup,
-  ): Promise<void> {
-    await this.userGroupRepository.replaceById(id, userGroup);
   }
 
   @del('/user-groups/{id}', {
