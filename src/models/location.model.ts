@@ -16,9 +16,7 @@ export class Location extends Entity {
   })
   name: string;
 
-  @property({
-    type: 'string',
-  })
+  @belongsTo(() => Group)
   groupId: string;
 
   constructor(data?: Partial<Location>) {

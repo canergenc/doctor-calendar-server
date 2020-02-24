@@ -8,3 +8,8 @@ export * from './user-group.controller';
 export * from './calendar-user.controller';
 export * from './calendar-group.controller';
 export * from './calendar-location.controller';
+export * from './location-group.controller';
+export * from './user-group-group.controller';
+export * from './user-group-user.controller';
+export * from './user-role-user.controller';
+export * from './user-role-role.controller';
