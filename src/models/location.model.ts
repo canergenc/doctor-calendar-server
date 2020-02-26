@@ -16,6 +16,11 @@ export class Location extends Entity {
   })
   name: string;
 
+  @property({
+    type: 'string',
+  })
+  colorCode: string;
+
   @belongsTo(() => Group)
   groupId: string;
 
