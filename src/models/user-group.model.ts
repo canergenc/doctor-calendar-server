@@ -20,13 +20,13 @@ export class UserGroup extends Entity {
     type: 'date',
     default: () => new Date(),
   })
-  createdAt?: Date;
+  createdDate?: Date;
 
   @property({
     type: 'date',
     default: () => new Date(),
   })
-  updateAt?: Date;
+  updatedDate?: Date;
 
   constructor(data?: Partial<UserGroup>) {
     super(data);

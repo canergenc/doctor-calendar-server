@@ -19,13 +19,13 @@ export class Role extends Entity {
     type: 'date',
     default: () => new Date(),
   })
-  createdAt?: Date;
+  createdDate?: Date;
 
   @property({
     type: 'date',
     default: () => new Date(),
   })
-  updateAt?: Date;
+  updatedDate?: Date;
 
   constructor(data?: Partial<Role>) {
     super(data);

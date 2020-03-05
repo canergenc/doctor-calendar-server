@@ -1,6 +1,9 @@
 import {
   Filter,
   repository,
+  CountSchema,
+  Where,
+  Count,
 } from '@loopback/repository';
 import {
   post,
@@ -10,6 +13,7 @@ import {
   getModelSchemaRef,
   del,
   requestBody,
+  getWhereSchemaFor,
 } from '@loopback/rest';
 import { Calendar } from '../models';
 import { CalendarRepository } from '../repositories';
@@ -42,6 +46,20 @@ export class CalendarController {
     calendar: Calendar,
   ): Promise<Calendar> {
     return this.calendarRepository.create(calendar);
+  }
+
+  @get('/calendars/count', {
+    responses: {
+      '200': {
+        description: 'Calendar model count',
+        content: { 'application/json': { schema: CountSchema } },
+      },
+    },
+  })
+  async count(
+    @param.query.object('where', getWhereSchemaFor(Calendar)) where?: Where<Calendar>,
+  ): Promise<Count> {
+    return this.calendarRepository.count(where);
   }
 
   @get('/calendars', {
@@ -103,7 +121,7 @@ export class CalendarController {
       },
     }) calendar: Calendar,
   ): Promise<void> {
-    calendar.updateAt = new Date();
+    calendar.updatedDate = new Date();
     await this.calendarRepository.updateById(id, calendar);
   }
 

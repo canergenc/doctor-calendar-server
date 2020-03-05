@@ -1,6 +1,9 @@
 import {
   Filter,
-  repository
+  repository,
+  CountSchema,
+  Where,
+  Count
 } from '@loopback/repository';
 import {
   post,
@@ -10,6 +13,7 @@ import {
   getModelSchemaRef,
   del,
   requestBody,
+  getWhereSchemaFor,
 } from '@loopback/rest';
 import { Location } from '../models';
 import { LocationRepository } from '../repositories';
@@ -42,6 +46,20 @@ export class LocationController {
     location: Location,
   ): Promise<Location> {
     return this.locationRepository.create(location);
+  }
+
+  @get('/locations/count', {
+    responses: {
+      '200': {
+        description: 'Location model count',
+        content: { 'application/json': { schema: CountSchema } },
+      },
+    },
+  })
+  async count(
+    @param.query.object('where', getWhereSchemaFor(Location)) where?: Where<Location>,
+  ): Promise<Count> {
+    return this.locationRepository.count(where);
   }
 
   @get('/locations', {
@@ -102,7 +120,7 @@ export class LocationController {
     })
     location: Location,
   ): Promise<void> {
-    location.updateAt = new Date();
+    location.updatedDate = new Date();
     await this.locationRepository.updateById(id, location);
   }
 

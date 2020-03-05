@@ -3,6 +3,9 @@ import {
   repository,
   model,
   property,
+  CountSchema,
+  Count,
+  Where,
 } from '@loopback/repository';
 import {
   post,
@@ -13,6 +16,7 @@ import {
   del,
   requestBody,
   HttpErrors,
+  getWhereSchemaFor,
 } from '@loopback/rest';
 import { UserProfile, securityId, SecurityBindings } from '@loopback/security';
 import { User } from '../models';
@@ -28,14 +32,37 @@ import { OPERATION_SECURITY_SPEC } from '../utils/security-spec';
 import isemail from 'isemail';
 
 @model()
-export class NewUserRequest extends User {
+export class NewUserRequest {
+  @property({
+    type: 'string',
+    format: 'email',
+    required: true,
+  })
+  email: string;
+
   @property({
     type: 'string',
     required: true,
-    itemType: 'password'
   })
   password: string;
+
+  @property({
+    type: 'string',
+    required: true,
+  })
+  fullName: string;
+
+  @property({
+    type: 'string'
+  })
+  title: string;
+
+  @property({
+    type: 'string',
+  })
+  deviceId?: string;
 }
+
 export class UserController {
   constructor(
     @repository(UserRepository)
@@ -142,6 +169,20 @@ export class UserController {
     const token = await this.jwtService.generateToken(userProfile);
 
     return { token };
+  }
+
+  @get('/users/count', {
+    responses: {
+      '200': {
+        description: 'Users model count',
+        content: { 'application/json': { schema: CountSchema } },
+      },
+    },
+  })
+  async count(
+    @param.query.object('where', getWhereSchemaFor(User)) where?: Where<User>,
+  ): Promise<Count> {
+    return this.userRepository.count(where);
   }
 
   @get('/users', {
@@ -255,7 +296,7 @@ export class UserController {
     })
     user: User,
   ): Promise<void> {
-    user.updateAt = new Date();
+    user.updatedDate = new Date();
     await this.userRepository.updateById(userId, user);
   }
 

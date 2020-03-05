@@ -1,6 +1,9 @@
 import {
   Filter,
   repository,
+  CountSchema,
+  Where,
+  Count,
 } from '@loopback/repository';
 import {
   post,
@@ -10,6 +13,7 @@ import {
   getModelSchemaRef,
   del,
   requestBody,
+  getWhereSchemaFor,
 } from '@loopback/rest';
 import { UserGroup } from '../models';
 import { UserGroupRepository } from '../repositories';
@@ -42,6 +46,20 @@ export class UserGroupController {
     userGroup: UserGroup,
   ): Promise<UserGroup> {
     return this.userGroupRepository.create(userGroup);
+  }
+
+  @get('/user-groups/count', {
+    responses: {
+      '200': {
+        description: 'UserGroup model count',
+        content: { 'application/json': { schema: CountSchema } },
+      },
+    },
+  })
+  async count(
+    @param.query.object('where', getWhereSchemaFor(UserGroup)) where?: Where<UserGroup>,
+  ): Promise<Count> {
+    return this.userGroupRepository.count(where);
   }
 
   @get('/user-groups', {
@@ -102,7 +120,7 @@ export class UserGroupController {
     })
     userGroup: UserGroup,
   ): Promise<void> {
-    userGroup.updateAt = new Date();
+    userGroup.updatedDate = new Date();
     await this.userGroupRepository.updateById(id, userGroup);
   }
 

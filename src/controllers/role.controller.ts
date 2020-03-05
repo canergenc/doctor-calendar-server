@@ -1,6 +1,9 @@
 import {
   Filter,
   repository,
+  Count,
+  Where,
+  CountSchema,
 } from '@loopback/repository';
 import {
   post,
@@ -10,6 +13,7 @@ import {
   getModelSchemaRef,
   del,
   requestBody,
+  getWhereSchemaFor,
 } from '@loopback/rest';
 import { Role } from '../models';
 import { RoleRepository } from '../repositories';
@@ -42,6 +46,20 @@ export class RoleController {
     role: Role,
   ): Promise<Role> {
     return this.roleRepository.create(role);
+  }
+
+  @get('/roles/count', {
+    responses: {
+      '200': {
+        description: 'Role model count',
+        content: { 'application/json': { schema: CountSchema } },
+      },
+    },
+  })
+  async count(
+    @param.query.object('where', getWhereSchemaFor(Role)) where?: Where<Role>,
+  ): Promise<Count> {
+    return this.roleRepository.count(where);
   }
 
   @get('/roles', {
@@ -102,7 +120,7 @@ export class RoleController {
     })
     role: Role,
   ): Promise<void> {
-    role.updateAt = new Date();
+    role.updatedDate = new Date();
     await this.roleRepository.updateById(id, role);
   }
 
