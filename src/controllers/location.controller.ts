@@ -102,6 +102,7 @@ export class LocationController {
     })
     location: Location,
   ): Promise<void> {
+    location.updateAt = new Date();
     await this.locationRepository.updateById(id, location);
   }
 

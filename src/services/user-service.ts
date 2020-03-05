@@ -18,7 +18,7 @@ export class MyUserService implements UserService<User, Credentials> {
   ) { }
 
   async verifyCredentials(credentials: Credentials): Promise<User> {
-    const invalidCredentialsError = 'Invalid email or password.';
+    const invalidCredentialsError = 'Geçersiz email veya parola!';
 
     const foundUser = await this.userRepository.findOne({
       where: { email: credentials.email },

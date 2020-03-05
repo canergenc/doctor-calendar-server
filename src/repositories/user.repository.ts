@@ -1,5 +1,5 @@
 import { DefaultCrudRepository, HasOneRepositoryFactory, repository, juggler } from '@loopback/repository';
-import { User, UserRelations, UserCredentials } from '../models';
+import { User, UserCredentials } from '../models';
 import { inject, Getter } from '@loopback/core';
 import { UserCredentialsRepository } from './user-credentials.repository';
 import { DataSourceName } from '../keys';
@@ -12,13 +12,12 @@ export type Credentials = {
 
 export class UserRepository extends DefaultCrudRepository<
   User,
-  typeof User.prototype.id,
-  UserRelations
+  typeof User.prototype.id
   > {
   public readonly userCredentials: HasOneRepositoryFactory<UserCredentials, typeof User.prototype.id>;
 
   constructor(
-    @inject(DataSourceName.Data_Source_Name) dataSource: juggler.DataSource,
+    @inject(DataSourceName.DATA_SOURCE_NAME) dataSource: juggler.DataSource,
     @repository(UserCredentialsRepository)
     public userCredentialsRepository: UserCredentialsRepository,
     @repository.getter('UserCredentialsRepository')

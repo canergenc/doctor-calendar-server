@@ -15,15 +15,20 @@ export class Role extends Entity {
   })
   name: string;
 
-  // Define well-known properties here
+  @property({
+    type: 'date',
+    default: () => new Date(),
+  })
+  createdAt?: Date;
+
+  @property({
+    type: 'date',
+    default: () => new Date(),
+  })
+  updateAt?: Date;
 
   constructor(data?: Partial<Role>) {
     super(data);
   }
 }
 
-export interface RoleRelations {
-  // describe navigational properties here
-}
-
-export type RoleWithRelations = Role & RoleRelations;

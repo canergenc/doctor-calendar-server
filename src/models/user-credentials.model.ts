@@ -20,6 +20,18 @@ export class UserCredentials extends Entity {
   })
   userId: string;
 
+  @property({
+    type: 'date',
+    default: () => new Date(),
+  })
+  createdAt?: Date;
+
+  @property({
+    type: 'date',
+    default: () => new Date(),
+  })
+  updateAt?: Date;
+
 
   constructor(data?: Partial<UserCredentials>) {
     super(data);

@@ -24,13 +24,19 @@ export class Location extends Entity {
   @belongsTo(() => Group)
   groupId: string;
 
+  @property({
+    type: 'date',
+    default: () => new Date(),
+  })
+  createdAt?: Date;
+
+  @property({
+    type: 'date',
+    default: () => new Date(),
+  })
+  updateAt?: Date;
+
   constructor(data?: Partial<Location>) {
     super(data);
   }
 }
-
-export interface LocationRelations {
-  // describe navigational properties here
-}
-
-export type LocationWithRelations = Location & LocationRelations;

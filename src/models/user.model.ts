@@ -48,13 +48,19 @@ export class User extends Entity {
   @hasOne(() => UserCredentials)
   userCredentials: UserCredentials;
 
+  @property({
+    type: 'date',
+    default: () => new Date(),
+  })
+  createdAt?: Date;
+
+  @property({
+    type: 'date',
+    default: () => new Date(),
+  })
+  updateAt?: Date;
+
   constructor(data?: Partial<User>) {
     super(data);
   }
 }
-
-export interface UserRelations {
-  // describe navigational properties here
-}
-
-export type UserWithRelations = User & UserRelations;

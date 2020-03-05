@@ -20,14 +20,20 @@ export class Group extends Entity {
   })
   parentId: string;
 
+  @property({
+    type: 'date',
+    default: () => new Date(),
+  })
+  createdAt?: Date;
+
+  @property({
+    type: 'date',
+    default: () => new Date(),
+  })
+  updateAt?: Date;
+
 
   constructor(data?: Partial<Group>) {
     super(data);
   }
 }
-
-export interface GroupRelations {
-  // describe navigational properties here
-}
-
-export type GroupWithRelations = Group & GroupRelations;

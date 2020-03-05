@@ -1,8 +1,8 @@
-import { Entity, model, property, hasOne, belongsTo} from "@loopback/repository";
+import { Entity, model, property, belongsTo } from "@loopback/repository";
 import { CalendarType } from "../enums/calendarType.enum";
 import { User } from './user.model';
-import {Group} from './group.model';
-import {Location} from './location.model';
+import { Group } from './group.model';
+import { Location } from './location.model';
 
 @model()
 export class Calendar extends Entity {
@@ -37,13 +37,19 @@ export class Calendar extends Entity {
   @belongsTo(() => Location)
   locationId: string;
 
+  @property({
+    type: 'date',
+    default: () => new Date(),
+  })
+  createdAt?: Date;
+
+  @property({
+    type: 'date',
+    default: () => new Date(),
+  })
+  updateAt?: Date;
+
   constructor(data?: Partial<Calendar>) {
     super(data);
   }
 }
-
-export interface CalendarRelations {
-  // describe navigational properties here
-}
-
-export type CalendarWithRelations = Calendar & CalendarRelations;

@@ -103,6 +103,7 @@ export class CalendarController {
       },
     }) calendar: Calendar,
   ): Promise<void> {
+    calendar.updateAt = new Date();
     await this.calendarRepository.updateById(id, calendar);
   }
 

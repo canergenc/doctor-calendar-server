@@ -102,6 +102,7 @@ export class UserRoleController {
     })
     userRole: UserRole,
   ): Promise<void> {
+    userRole.updateAt = new Date();
     await this.userRoleRepository.updateById(id, userRole);
   }
 

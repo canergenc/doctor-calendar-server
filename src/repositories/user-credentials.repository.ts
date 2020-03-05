@@ -9,7 +9,7 @@ export class UserCredentialsRepository extends DefaultCrudRepository<
   UserCredentialsRelations
   > {
   constructor(
-    @inject(DataSourceName.Data_Source_Name) dataSource: juggler.DataSource,
+    @inject(DataSourceName.DATA_SOURCE_NAME) dataSource: juggler.DataSource,
   ) {
     super(UserCredentials, dataSource);
   }

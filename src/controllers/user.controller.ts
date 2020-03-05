@@ -32,6 +32,7 @@ export class NewUserRequest extends User {
   @property({
     type: 'string',
     required: true,
+    itemType: 'password'
   })
   password: string;
 }
@@ -77,11 +78,10 @@ export class UserController {
     newUserRequest.email = newUserRequest.email.trim().toLowerCase();
 
     const foundUser = await this.userRepository.findEmail(newUserRequest.email);
-    if (foundUser) { throw new HttpErrors.Conflict('Email value is already taken'); }
+    if (foundUser) { throw new HttpErrors.Conflict('Email daha önce kullanılmış!'); }
 
     // ensure a valid email value and password value
     validateCredentials(_.pick(newUserRequest, ['email', 'password']));
-
     // encrypt the password
     const password = await this.passwordHasher.hashPassword(
       newUserRequest.password,
@@ -103,7 +103,7 @@ export class UserController {
 
       // MongoError 11000 duplicate key
       if (error.code === 11000 && error.errmsg.includes('index: uniqueEmail')) {
-        throw new HttpErrors.BadRequest('Email value is already taken');
+        throw new HttpErrors.BadRequest('Email daha önce kullanılmış!');
       } else {
         throw error;
       }
@@ -164,7 +164,7 @@ export class UserController {
   async find(
     @param.query.object('filter', getFilterSchemaFor(User)) filter?: Filter<User>,
   ): Promise<User[]> {
-    return await this.userRepository.find(filter);
+    return this.userRepository.find(filter);
   }
 
   @get('/users/me', {
@@ -211,7 +211,7 @@ export class UserController {
     if (!isemail.validate(email)) {
       throw new HttpErrors.BadRequest('invalid email');
     }
-    return await this.userRepository.findEmail(email);
+    return this.userRepository.findEmail(email);
   }
 
   @get('/users/{userId}', {
@@ -255,6 +255,7 @@ export class UserController {
     })
     user: User,
   ): Promise<void> {
+    user.updateAt = new Date();
     await this.userRepository.updateById(userId, user);
   }
 

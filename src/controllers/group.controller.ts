@@ -101,6 +101,7 @@ export class GroupController {
       },
     }) group: Group,
   ): Promise<void> {
+    group.updateAt = new Date();
     await this.groupRepository.updateById(id, group);
   }
 

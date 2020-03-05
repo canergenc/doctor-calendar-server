@@ -6,11 +6,11 @@ import { Credentials } from "./repositories/user.repository";
 
 export namespace TokenServiceConstants {
   export const TOKEN_SECRET_VALUE = 'myjwtDctrClndrs3cr3t';
-  export const TOKEN_EXPIRES_IN_VALUE = '86400';
+  export const TOKEN_EXPIRES_IN_VALUE = '2592000';
 }
 
 export namespace DataSourceName {
-  export const Data_Source_Name = 'datasources.mongo';
+  export const DATA_SOURCE_NAME = 'datasources.mongo';
 }
 
 export namespace TokenServiceBindings {
