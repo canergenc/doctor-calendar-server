@@ -6,7 +6,7 @@ import { repository } from "@loopback/repository";
 import { PasswordHasherBindings } from '../keys';
 import { PasswordHasher } from "./hash.password.bcryptjs";
 import { inject } from "@loopback/context";
-import { UserProfile, securityId, SecurityBindings } from '@loopback/security';
+import { UserProfile, securityId } from '@loopback/security';
 import { UserCredentialsRepository } from "../repositories/user-credentials.repository";
 
 export class MyUserService implements UserService<User, Credentials> {
@@ -14,13 +14,13 @@ export class MyUserService implements UserService<User, Credentials> {
     @repository(UserRepository) public userRepository: UserRepository,
     @repository(UserCredentialsRepository) public userCredentialsRepository: UserCredentialsRepository,
     @inject(PasswordHasherBindings.PASSWORD_HASHER) public passwordHasher: PasswordHasher,
-    @inject(SecurityBindings.USER) public currentUserProfile: UserProfile
+    // @inject(SecurityBindings.USER) public currentUserProfile: UserProfile
   ) { }
 
   async updateById(id: string, user: User): Promise<void> {
     user.updatedDate = new Date();
-    user.updatedUserId = this.currentUserProfile[securityId];
-    delete this.currentUserProfile[securityId];
+    // user.updatedUserId = this.currentUserProfile[securityId];
+    // delete this.currentUserProfile[securityId];
     await this.userRepository.updateById(id, user);
   }
 
