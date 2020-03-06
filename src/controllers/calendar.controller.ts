@@ -17,11 +17,17 @@ import {
 } from '@loopback/rest';
 import { Calendar } from '../models';
 import { CalendarRepository } from '../repositories';
+import { service } from '@loopback/core';
+import { authenticate } from '@loopback/authentication';
+import { CalendarService } from '../services';
 
+@authenticate('jwt')
 export class CalendarController {
   constructor(
     @repository(CalendarRepository)
     public calendarRepository: CalendarRepository,
+    @service(CalendarService)
+    public calendarService: CalendarService
   ) { }
 
   @post('/calendars', {
@@ -45,7 +51,7 @@ export class CalendarController {
     })
     calendar: Calendar,
   ): Promise<Calendar> {
-    return this.calendarRepository.create(calendar);
+    return this.calendarService.create(calendar);
   }
 
   @get('/calendars/count', {
@@ -121,8 +127,7 @@ export class CalendarController {
       },
     }) calendar: Calendar,
   ): Promise<void> {
-    calendar.updatedDate = new Date();
-    await this.calendarRepository.updateById(id, calendar);
+    await this.calendarService.updateById(id, calendar);
   }
 
   @del('/calendars/{id}', {

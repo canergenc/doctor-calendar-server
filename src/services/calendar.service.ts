@@ -1,25 +1,27 @@
-import { bind, /* inject, */ BindingScope } from '@loopback/core';
-import { repository, Filter } from '@loopback/repository';
-import { CalendarRepository, GroupRepository } from '../repositories';
+import { bind, BindingScope, inject } from '@loopback/core';
+import { repository } from '@loopback/repository';
+import { CalendarRepository } from '../repositories';
 import { Calendar } from '../models';
+import { UserProfile, SecurityBindings, securityId } from '@loopback/security';
 
 @bind({ scope: BindingScope.TRANSIENT })
 export class CalendarService {
+
   constructor(
     @repository(CalendarRepository) public calendarRepository: CalendarRepository,
-    @repository(GroupRepository) public groupRepository: GroupRepository
+    @inject(SecurityBindings.USER) public currentUserProfile: UserProfile
   ) { }
 
-  // async find(filter: Filter<Calendar>): Promise<CalendarOutpuModel> {
-  //   const output = new CalendarOutpuModel();
-  //   const resultCalendar = this.calendarRepository.find(filter);
-  //   if (resultCalendar) {
-  //     (await resultCalendar).forEach((calendar) => {
-  //       if (calendar.groupId) {
-  //         output.group = this.groupRepository.findById(calendar.groupId);
-  //       }
+  async create(calendar: Calendar): Promise<Calendar> {
+    calendar.createdUserId = calendar.updatedUserId = this.currentUserProfile[securityId];
+    delete this.currentUserProfile[securityId];
+    return this.calendarRepository.create(calendar);
+  }
 
-  //     })
-  //   }
-  // }
+  async updateById(id: string, calendar: Calendar): Promise<void> {
+    calendar.updatedDate = new Date();
+    calendar.updatedUserId = this.currentUserProfile[securityId];
+    delete this.currentUserProfile[securityId];
+    await this.calendarRepository.updateById(id, calendar);
+  }
 }

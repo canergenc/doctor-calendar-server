@@ -36,6 +36,16 @@ export class Location extends Entity {
   })
   updatedDate?: Date;
 
+  @property({
+    type: 'string',
+  })
+  createdUserId?: string;
+
+  @property({
+    type: 'string',
+  })
+  updatedUserId?: string;
+
   constructor(data?: Partial<Location>) {
     super(data);
   }

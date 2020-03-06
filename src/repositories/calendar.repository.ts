@@ -17,8 +17,13 @@ export class CalendarRepository extends DefaultCrudRepository<
 
   public readonly location: BelongsToAccessor<Location, typeof Calendar.prototype.id>;
 
+
+
   constructor(
-    @inject(DataSourceName.DATA_SOURCE_NAME) dataSource: juggler.DataSource, @repository.getter('UserRepository') protected userRepositoryGetter: Getter<UserRepository>, @repository.getter('GroupRepository') protected groupRepositoryGetter: Getter<GroupRepository>, @repository.getter('LocationRepository') protected locationRepositoryGetter: Getter<LocationRepository>,
+    @inject(DataSourceName.DATA_SOURCE_NAME) dataSource: juggler.DataSource,
+    @repository.getter('UserRepository') protected userRepositoryGetter: Getter<UserRepository>,
+    @repository.getter('GroupRepository') protected groupRepositoryGetter: Getter<GroupRepository>,
+    @repository.getter('LocationRepository') protected locationRepositoryGetter: Getter<LocationRepository>,
   ) {
     super(Calendar, dataSource);
     this.location = this.createBelongsToAccessorFor('location', locationRepositoryGetter);
@@ -29,4 +34,5 @@ export class CalendarRepository extends DefaultCrudRepository<
     this.registerInclusionResolver('user', this.user.inclusionResolver);
 
   }
+
 }

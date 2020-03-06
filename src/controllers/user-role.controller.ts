@@ -17,9 +17,14 @@ import {
 } from '@loopback/rest';
 import { UserRole } from '../models';
 import { UserRoleRepository } from '../repositories';
+import { service } from '@loopback/core';
+import { UserRoleService } from '../services';
+import { authenticate } from '@loopback/authentication';
 
+@authenticate('jwt')
 export class UserRoleController {
   constructor(
+    @service(UserRoleService) public userRoleService: UserRoleService,
     @repository(UserRoleRepository)
     public userRoleRepository: UserRoleRepository,
   ) { }
@@ -45,7 +50,7 @@ export class UserRoleController {
     })
     userRole: UserRole,
   ): Promise<UserRole> {
-    return this.userRoleRepository.create(userRole);
+    return this.userRoleService.create(userRole);
   }
 
   @get('/user-roles/count', {
@@ -121,7 +126,7 @@ export class UserRoleController {
     userRole: UserRole,
   ): Promise<void> {
     userRole.updatedDate = new Date();
-    await this.userRoleRepository.updateById(id, userRole);
+    await this.userRoleService.updateById(id, userRole);
   }
 
   @del('/user-roles/{id}', {

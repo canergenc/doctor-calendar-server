@@ -17,9 +17,14 @@ import {
 } from '@loopback/rest';
 import { Group } from '../models';
 import { GroupRepository } from '../repositories';
+import { service } from '@loopback/core';
+import { GroupService } from '../services';
+import { authenticate } from '@loopback/authentication';
 
+@authenticate('jwt')
 export class GroupController {
   constructor(
+    @service(GroupService) public groupService: GroupService,
     @repository(GroupRepository)
     public groupRepository: GroupRepository,
   ) { }
@@ -45,7 +50,7 @@ export class GroupController {
     })
     group: Group,
   ): Promise<Group> {
-    return this.groupRepository.create(group);
+    return this.groupService.create(group);
   }
 
   @get('/groups/count', {
@@ -120,7 +125,7 @@ export class GroupController {
     }) group: Group,
   ): Promise<void> {
     group.updatedDate = new Date();
-    await this.groupRepository.updateById(id, group);
+    await this.groupService.updateById(id, group);
   }
 
   @del('/groups/{id}', {

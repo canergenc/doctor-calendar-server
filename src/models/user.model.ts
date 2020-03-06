@@ -60,6 +60,11 @@ export class User extends Entity {
   })
   updatedDate?: Date;
 
+  @property({
+    type: 'string',
+  })
+  updatedUserId?: string;
+
   constructor(data?: Partial<User>) {
     super(data);
   }

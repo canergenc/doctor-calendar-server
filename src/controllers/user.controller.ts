@@ -22,7 +22,7 @@ import { UserProfile, securityId, SecurityBindings } from '@loopback/security';
 import { User } from '../models';
 import { UserRepository, Credentials } from '../repositories';
 import { authenticate, TokenService, UserService } from '@loopback/authentication';
-import { inject } from '@loopback/core';
+import { inject, service } from '@loopback/core';
 import { CredentialsRequestBody, UserProfileSchema } from './specs/user-controller.specs';
 import { PasswordHasherBindings, TokenServiceBindings, UserServiceBindings } from '../keys';
 import { PasswordHasher } from '../services/hash.password.bcryptjs';
@@ -30,6 +30,7 @@ import { validateCredentials } from '../services/validator';
 import _ from 'lodash';
 import { OPERATION_SECURITY_SPEC } from '../utils/security-spec';
 import isemail from 'isemail';
+import { MyUserService } from '../services/user-service';
 
 @model()
 export class NewUserRequest {
@@ -72,7 +73,8 @@ export class UserController {
     @inject(TokenServiceBindings.TOKEN_SERVICE)
     public jwtService: TokenService,
     @inject(UserServiceBindings.USER_SERVICE)
-    public userService: UserService<User, Credentials>
+    public userService: UserService<User, Credentials>,
+    @service(MyUserService) public myUserService: MyUserService
   ) { }
 
   @post('/users', {
@@ -179,6 +181,7 @@ export class UserController {
       },
     },
   })
+  @authenticate('jwt')
   async count(
     @param.query.object('where', getWhereSchemaFor(User)) where?: Where<User>,
   ): Promise<Count> {
@@ -201,7 +204,7 @@ export class UserController {
       },
     },
   })
-  //@authenticate('jwt')
+  @authenticate('jwt')
   async find(
     @param.query.object('filter', getFilterSchemaFor(User)) filter?: Filter<User>,
   ): Promise<User[]> {
@@ -268,7 +271,7 @@ export class UserController {
       },
     },
   })
-  //@authenticate('jwt')
+  @authenticate('jwt')
   async findById(
     @param.path.string('userId') userId: string,
     @param.query.object('filter', getFilterSchemaFor(User)) filter?: Filter<User>
@@ -284,7 +287,7 @@ export class UserController {
       },
     },
   })
-  //@authenticate('jwt')
+  @authenticate('jwt')
   async updateById(
     @param.path.string('userId') userId: string,
     @requestBody({
@@ -297,7 +300,7 @@ export class UserController {
     user: User,
   ): Promise<void> {
     user.updatedDate = new Date();
-    await this.userRepository.updateById(userId, user);
+    await this.myUserService.updateById(userId, user);
   }
 
   @del('/users/{userId}', {
@@ -308,7 +311,7 @@ export class UserController {
       },
     },
   })
-  //@authenticate('jwt')
+  @authenticate('jwt')
   async deleteById(@param.path.string('userId') userId: string): Promise<void> {
     await this.userRepository.deleteByNavigation(userId);
   }

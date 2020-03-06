@@ -49,6 +49,16 @@ export class Calendar extends Entity {
   })
   updatedDate?: Date;
 
+  @property({
+    type: 'string',
+  })
+  createdUserId?: string;
+
+  @property({
+    type: 'string',
+  })
+  updatedUserId?: string;
+
   constructor(data?: Partial<Calendar>) {
     super(data);
   }

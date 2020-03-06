@@ -17,11 +17,15 @@ import {
 } from '@loopback/rest';
 import { Location } from '../models';
 import { LocationRepository } from '../repositories';
+import { service } from '@loopback/core';
+import { LocationService } from '../services';
+import { authenticate } from '@loopback/authentication';
 
+@authenticate('jwt')
 export class LocationController {
   constructor(
-    @repository(LocationRepository)
-    public locationRepository: LocationRepository,
+    @service(LocationService) public locationService: LocationService,
+    @repository(LocationRepository) public locationRepository: LocationRepository,
   ) { }
 
   @post('/locations', {
@@ -45,7 +49,7 @@ export class LocationController {
     })
     location: Location,
   ): Promise<Location> {
-    return this.locationRepository.create(location);
+    return this.locationService.create(location);
   }
 
   @get('/locations/count', {
@@ -120,8 +124,7 @@ export class LocationController {
     })
     location: Location,
   ): Promise<void> {
-    location.updatedDate = new Date();
-    await this.locationRepository.updateById(id, location);
+    await this.locationService.updateById(id, location);
   }
 
   @del('/locations/{id}', {

@@ -17,9 +17,14 @@ import {
 } from '@loopback/rest';
 import { UserGroup } from '../models';
 import { UserGroupRepository } from '../repositories';
+import { UserGroupService } from '../services';
+import { service } from '@loopback/core';
+import { authenticate } from '@loopback/authentication';
 
+@authenticate('jwt')
 export class UserGroupController {
   constructor(
+    @service(UserGroupService) public userGroupService: UserGroupService,
     @repository(UserGroupRepository)
     public userGroupRepository: UserGroupRepository,
   ) { }
@@ -45,7 +50,7 @@ export class UserGroupController {
     })
     userGroup: UserGroup,
   ): Promise<UserGroup> {
-    return this.userGroupRepository.create(userGroup);
+    return this.userGroupService.create(userGroup);
   }
 
   @get('/user-groups/count', {
@@ -121,7 +126,7 @@ export class UserGroupController {
     userGroup: UserGroup,
   ): Promise<void> {
     userGroup.updatedDate = new Date();
-    await this.userGroupRepository.updateById(id, userGroup);
+    await this.userGroupService.updateById(id, userGroup);
   }
 
   @del('/user-groups/{id}', {

@@ -28,6 +28,16 @@ export class UserGroup extends Entity {
   })
   updatedDate?: Date;
 
+  @property({
+    type: 'string',
+  })
+  createdUserId?: string;
+
+  @property({
+    type: 'string',
+  })
+  updatedUserId?: string;
+
   constructor(data?: Partial<UserGroup>) {
     super(data);
   }
