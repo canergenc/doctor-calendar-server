@@ -24,9 +24,9 @@ export class Calendar extends Entity {
   description?: string;
 
   @property({
-    type: "object",
+    type: "number",
   })
-  type?: CalendarType;
+  type?: number;
 
   @belongsTo(() => User)
   userId: string;

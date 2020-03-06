@@ -19,7 +19,7 @@ import {
   getWhereSchemaFor,
 } from '@loopback/rest';
 import { UserProfile, securityId, SecurityBindings } from '@loopback/security';
-import { User } from '../models';
+import { User, UserInfoOutputModel } from '../models';
 import { UserRepository, Credentials } from '../repositories';
 import { authenticate, TokenService, UserService } from '@loopback/authentication';
 import { inject, service } from '@loopback/core';
@@ -228,10 +228,10 @@ export class UserController {
   async printCurrentUser(
     @inject(SecurityBindings.USER)
     currentUserProfile: UserProfile,
-  ): Promise<UserProfile> {
+  ): Promise<UserInfoOutputModel> {
     currentUserProfile.id = currentUserProfile[securityId];
     delete currentUserProfile[securityId];
-    return currentUserProfile;
+    return this.myUserService.printCurrentUser(currentUserProfile);
   }
 
   @get('/users/emailCheck', {

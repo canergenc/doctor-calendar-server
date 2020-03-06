@@ -107,28 +107,6 @@ export class UserRoleController {
     return this.userRoleRepository.findById(id, filter);
   }
 
-  @post('/user-roles/{id}', {
-    responses: {
-      '200': {
-        description: 'UserRole update success',
-      },
-    },
-  })
-  async updateById(
-    @param.path.string('id') id: string,
-    @requestBody({
-      content: {
-        'application/json': {
-          schema: getModelSchemaRef(UserRole),
-        },
-      },
-    })
-    userRole: UserRole,
-  ): Promise<void> {
-    userRole.updatedDate = new Date();
-    await this.userRoleService.updateById(id, userRole);
-  }
-
   @del('/user-roles/{id}', {
     responses: {
       '204': {

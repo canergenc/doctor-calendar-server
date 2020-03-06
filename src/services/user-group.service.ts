@@ -3,6 +3,7 @@ import { UserGroup } from '../models';
 import { UserGroupRepository } from '../repositories';
 import { SecurityBindings, UserProfile, securityId } from '@loopback/security';
 import { repository } from '@loopback/repository';
+import { HttpErrors } from '@loopback/rest';
 
 @bind({ scope: BindingScope.TRANSIENT })
 export class UserGroupService {
@@ -12,8 +13,16 @@ export class UserGroupService {
   ) { }
 
   async create(userGroup: UserGroup): Promise<UserGroup> {
+
+    /*audit set*/
     userGroup.createdUserId = userGroup.updatedUserId = this.currentUserProfile[securityId];
     delete this.currentUserProfile[securityId];
+
+    /*Duplicate Data Control*/
+    const foundDuplicateData = this.userGroupRepository.find({ where: { userId: { like: userGroup.userId }, groupId: { like: userGroup.groupId } } });
+    if (foundDuplicateData)
+      throw new HttpErrors.BadRequest('Daha önce ilişkilendirme yapılmış!');
+
     return this.userGroupRepository.create(userGroup);
   }
 

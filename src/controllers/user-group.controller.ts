@@ -107,28 +107,6 @@ export class UserGroupController {
     return this.userGroupRepository.findById(id, filter);
   }
 
-  @post('/user-groups/{id}', {
-    responses: {
-      '200': {
-        description: 'UserGroup update success',
-      },
-    },
-  })
-  async updateById(
-    @param.path.string('id') id: string,
-    @requestBody({
-      content: {
-        'application/json': {
-          schema: getModelSchemaRef(UserGroup, { partial: true }),
-        },
-      },
-    })
-    userGroup: UserGroup,
-  ): Promise<void> {
-    userGroup.updatedDate = new Date();
-    await this.userGroupService.updateById(id, userGroup);
-  }
-
   @del('/user-groups/{id}', {
     responses: {
       '204': {

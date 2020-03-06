@@ -3,6 +3,8 @@ import { repository } from '@loopback/repository';
 import { CalendarRepository } from '../repositories';
 import { Calendar } from '../models';
 import { UserProfile, SecurityBindings, securityId } from '@loopback/security';
+import { CalendarType } from '../enums/calendarType.enum';
+import { HttpErrors } from '@loopback/rest';
 
 @bind({ scope: BindingScope.TRANSIENT })
 export class CalendarService {
@@ -13,8 +15,14 @@ export class CalendarService {
   ) { }
 
   async create(calendar: Calendar): Promise<Calendar> {
+    /*audit set */
     calendar.createdUserId = calendar.updatedUserId = this.currentUserProfile[securityId];
     delete this.currentUserProfile[securityId];
+
+    /*calendar rest day control */
+    const result = await this.calendarRepository.find({ where: { date: calendar.date, userId: { like: calendar.userId }, type: CalendarType.İzin } });
+    if (result) throw new HttpErrors.BadRequest('İlgili kullanıcın bu tarihe ait izin kaydı bulunmaktadır!');
+
     return this.calendarRepository.create(calendar);
   }
 

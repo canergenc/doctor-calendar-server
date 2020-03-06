@@ -1,5 +1,5 @@
 import { UserService } from "@loopback/authentication";
-import { User } from "../models";
+import { User, UserInfoOutputModel, Group } from "../models";
 import { Credentials, UserRepository } from "../repositories/user.repository";
 import { HttpErrors } from "@loopback/rest";
 import { repository } from "@loopback/repository";
@@ -8,10 +8,15 @@ import { PasswordHasher } from "./hash.password.bcryptjs";
 import { inject } from "@loopback/context";
 import { UserProfile, securityId } from '@loopback/security';
 import { UserCredentialsRepository } from "../repositories/user-credentials.repository";
+import { UserGroupRepository, UserRoleRepository, GroupRepository, RoleRepository } from "../repositories";
 
 export class MyUserService implements UserService<User, Credentials> {
   constructor(
     @repository(UserRepository) public userRepository: UserRepository,
+    @repository(UserGroupRepository) public userGroupRepository: UserGroupRepository,
+    @repository(GroupRepository) public groupRepository: GroupRepository,
+    @repository(UserRoleRepository) public userRoleRepository: UserRoleRepository,
+    @repository(RoleRepository) public roleRepository: RoleRepository,
     @repository(UserCredentialsRepository) public userCredentialsRepository: UserCredentialsRepository,
     @inject(PasswordHasherBindings.PASSWORD_HASHER) public passwordHasher: PasswordHasher,
     // @inject(SecurityBindings.USER) public currentUserProfile: UserProfile
@@ -55,11 +60,42 @@ export class MyUserService implements UserService<User, Credentials> {
     return foundUser;
   }
 
+  async printCurrentUser(currentuser: UserProfile): Promise<UserInfoOutputModel> {
+    const userInfoOutputModel = new UserInfoOutputModel();
+
+    /*User Model*/
+    userInfoOutputModel.user = await this.userRepository.findOne({ where: { id: currentuser.id } }) ?? new User;
+
+    /*Groups List */
+    userInfoOutputModel.groups = [];
+    await this.userGroupRepository.find({ where: { userId: { like: currentuser.id } } }).then((result) => {
+      result.forEach((item) => {
+        this.groupRepository.findOne({ where: { id: item.groupId } }).then((groupItem) => {
+          if (groupItem) userInfoOutputModel.groups.push(groupItem);
+        });
+      })
+    });
+
+    /*Role List */
+    userInfoOutputModel.roles = [];
+    await this.userRoleRepository.find({ where: { userId: { like: currentuser.id } } }).then((result) => {
+      result.forEach((item) => {
+        this.roleRepository.findOne({ where: { id: item.roleId } }).then((roleItem) => {
+          if (roleItem) userInfoOutputModel.roles.push(roleItem);
+        });
+      })
+    });
+
+    return userInfoOutputModel;
+  }
+
   convertToUserProfile(user: User): UserProfile {
-    // since first name and lastName are optional, no error is thrown if not provided
-    let userName = '';
-    if (user.fullName) userName = `${user.fullName}`;
-    return { [securityId]: user.id, name: userName, id: user.id };
+    const userProfile = {
+      [securityId]: user.id,
+      name: user.fullName,
+      id: user.id
+    }
+    return userProfile;
   }
 
   public async emailCheck(email: string): Promise<boolean> {
