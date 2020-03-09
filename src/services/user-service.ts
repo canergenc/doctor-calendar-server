@@ -1,5 +1,5 @@
 import { UserService } from "@loopback/authentication";
-import { User, UserInfoOutputModel, Group } from "../models";
+import { User, UserInfoOutputModel } from "../models";
 import { Credentials, UserRepository } from "../repositories/user.repository";
 import { HttpErrors } from "@loopback/rest";
 import { repository } from "@loopback/repository";
@@ -18,16 +18,8 @@ export class MyUserService implements UserService<User, Credentials> {
     @repository(UserRoleRepository) public userRoleRepository: UserRoleRepository,
     @repository(RoleRepository) public roleRepository: RoleRepository,
     @repository(UserCredentialsRepository) public userCredentialsRepository: UserCredentialsRepository,
-    @inject(PasswordHasherBindings.PASSWORD_HASHER) public passwordHasher: PasswordHasher,
-    // @inject(SecurityBindings.USER) public currentUserProfile: UserProfile
+    @inject(PasswordHasherBindings.PASSWORD_HASHER) public passwordHasher: PasswordHasher
   ) { }
-
-  async updateById(id: string, user: User): Promise<void> {
-    user.updatedDate = new Date();
-    // user.updatedUserId = this.currentUserProfile[securityId];
-    // delete this.currentUserProfile[securityId];
-    await this.userRepository.updateById(id, user);
-  }
 
   async verifyCredentials(credentials: Credentials): Promise<User> {
     const invalidCredentialsError = 'Geçersiz email veya parola!';
@@ -70,6 +62,7 @@ export class MyUserService implements UserService<User, Credentials> {
     userInfoOutputModel.groups = [];
     await this.userGroupRepository.find({ where: { userId: { like: currentuser.id } } }).then((result) => {
       result.forEach((item) => {
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
         this.groupRepository.findOne({ where: { id: item.groupId } }).then((groupItem) => {
           if (groupItem) userInfoOutputModel.groups.push(groupItem);
         });
@@ -78,13 +71,18 @@ export class MyUserService implements UserService<User, Credentials> {
 
     /*Role List */
     userInfoOutputModel.roles = [];
-    await this.userRoleRepository.find({ where: { userId: { like: currentuser.id } } }).then((result) => {
-      result.forEach((item) => {
-        this.roleRepository.findOne({ where: { id: item.roleId } }).then((roleItem) => {
-          if (roleItem) userInfoOutputModel.roles.push(roleItem);
-        });
-      })
-    });
+
+    /*Geçici kodlama */
+    userInfoOutputModel.roles = userInfoOutputModel.user.roles;
+
+    //Orjinal kısım
+    // await this.userRoleRepository.find({ where: { userId: { like: currentuser.id } } }).then((result) => {
+    //   result.forEach((item) => {
+    //     this.roleRepository.findOne({ where: { id: item.roleId } }).then((roleItem) => {
+    //       if (roleItem) userInfoOutputModel.roles.push(roleItem);
+    //     });
+    //   })
+    // });
 
     return userInfoOutputModel;
   }

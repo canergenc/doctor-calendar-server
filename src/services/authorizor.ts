@@ -1,41 +1,63 @@
-import { Provider, inject } from '@loopback/core';
 import {
-  Authorizer,
   AuthorizationContext,
   AuthorizationMetadata,
-  AuthorizationRequest,
   AuthorizationDecision,
 } from '@loopback/authorization';
-import * as casbin from 'casbin';
+import _ from 'lodash';
+import { UserProfile, securityId } from '@loopback/security';
 
-// Class level authorizer
-export class CasbinAuthorizationProvider implements Provider<Authorizer> {
-  constructor(@inject('casbin.enforcer') private enforcer: casbin.Enforcer) { }
-
-  /**
-   * @returns authenticateFn
-   */
-  value(): Authorizer {
-    return this.authorize.bind(this);
+// Instance level authorizer
+// Can be also registered as an authorizer, depends on users' need.
+export async function authorization(
+  authorizationCtx: AuthorizationContext,
+  metadata: AuthorizationMetadata,
+): Promise<AuthorizationDecision> {
+  // No access if authorization details are missing
+  let currentUser: UserProfile;
+  if (authorizationCtx.principals.length > 0) {
+    const user = _.pick(authorizationCtx.principals[0], [
+      'id',
+      'name',
+      'roles',
+    ]);
+    currentUser = { [securityId]: user.id, name: user.name, roles: user.roles };
+  } else {
+    return AuthorizationDecision.DENY;
   }
 
-  async authorize(
-    authorizationCtx: AuthorizationContext,
-    metadata: AuthorizationMetadata,
+  if (!currentUser.roles) {
+    return AuthorizationDecision.DENY;
+  }
+
+  // Authorize everything that does not have a allowedRoles property
+  if (!metadata.allowedRoles) {
+    return AuthorizationDecision.ALLOW;
+  }
+
+  let roleIsAllowed = false;
+  for (const role of currentUser.roles) {
+    if (metadata.allowedRoles!.includes(role)) {
+      roleIsAllowed = true;
+      break;
+    }
+  }
+
+  if (!roleIsAllowed) {
+    return AuthorizationDecision.DENY;
+  }
+
+  // Admin and support accounts bypass id verification
+  if (
+    currentUser.roles.includes('admin') ||
+    currentUser.roles.includes('support')
   ) {
-    const request: AuthorizationRequest = {
-      subject: authorizationCtx.principals[0].name,
-      object: metadata.resource ?? authorizationCtx.resource,
-      action: (metadata.scopes && metadata.scopes[0]) || 'execute',
-    };
-
-    const allow = await this.enforcer.enforce(
-      request.subject,
-      request.object,
-      request.action,
-    );
-    if (allow) return AuthorizationDecision.ALLOW;
-    else if (allow === false) return AuthorizationDecision.DENY;
-    return AuthorizationDecision.ABSTAIN;
+    return AuthorizationDecision.ALLOW;
   }
+
+  // Allow access only to model owners
+  if (currentUser[securityId] === authorizationCtx.invocationContext.args[0]) {
+    return AuthorizationDecision.ALLOW;
+  }
+
+  return AuthorizationDecision.DENY;
 }

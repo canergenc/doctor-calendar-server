@@ -1,6 +1,6 @@
 export enum CalendarType {
-  "Nöbet" = 0,
-  "İzin" = 1,
+  "Nöbet" = 1,
+  "İzin" = 2,
   "Rapor" = 3,
   "Gebelik" = 4,
   "Resmi Tatil" = 5,

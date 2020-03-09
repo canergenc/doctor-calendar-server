@@ -1,23 +1,5 @@
-import {
-  Filter,
-  repository,
-  model,
-  property,
-  CountSchema,
-  Count,
-  Where,
-} from '@loopback/repository';
-import {
-  post,
-  param,
-  get,
-  getFilterSchemaFor,
-  getModelSchemaRef,
-  del,
-  requestBody,
-  HttpErrors,
-  getWhereSchemaFor,
-} from '@loopback/rest';
+import { Filter, repository, model, property, CountSchema, Count, Where } from '@loopback/repository';
+import { post, param, get, getFilterSchemaFor, getModelSchemaRef, del, requestBody, HttpErrors, getWhereSchemaFor } from '@loopback/rest';
 import { UserProfile, securityId, SecurityBindings } from '@loopback/security';
 import { User, UserInfoOutputModel } from '../models';
 import { UserRepository, Credentials } from '../repositories';
@@ -31,6 +13,7 @@ import _ from 'lodash';
 import { OPERATION_SECURITY_SPEC } from '../utils/security-spec';
 import isemail from 'isemail';
 import { MyUserService } from '../services/user-service';
+import { RoleType } from '../enums/roleType.enum';
 
 @model()
 export class NewUserRequest {
@@ -62,6 +45,12 @@ export class NewUserRequest {
     type: 'string',
   })
   deviceId?: string;
+
+  @property({
+    type: 'array',
+    itemType: 'string',
+  })
+  roles?: string[];
 }
 
 export class UserController {
@@ -103,6 +92,9 @@ export class UserController {
     })
     newUserRequest: NewUserRequest,
   ): Promise<User> {
+
+    // All new users have the "RoleType.User" role by default
+    newUserRequest.roles = [RoleType.User];
 
     newUserRequest.email = newUserRequest.email.trim().toLowerCase();
 
@@ -298,9 +290,19 @@ export class UserController {
       },
     })
     user: User,
+    @inject(SecurityBindings.USER)
+    currentUserProfile: UserProfile,
   ): Promise<void> {
-    user.updatedDate = new Date();
-    await this.myUserService.updateById(userId, user);
+    try {
+      // Only admin can assign roles
+      if (!currentUserProfile.roles.includes(RoleType.Admin)) {
+        delete user.roles;
+      }
+      user.updatedDate = new Date();
+      await this.userRepository.updateById(userId, user);
+    } catch (error) {
+      return error;
+    }
   }
 
   @del('/users/{userId}', {

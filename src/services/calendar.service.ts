@@ -21,9 +21,11 @@ export class CalendarService {
 
     /*calendar rest day control */
     const result = await this.calendarRepository.find({ where: { date: calendar.date, userId: { like: calendar.userId }, type: CalendarType.İzin } });
-    if (result) throw new HttpErrors.BadRequest('İlgili kullanıcının bu tarihe ait izin kaydı bulunmaktadır, takvime eklenemez!');
+    if (result && result.length > 0) throw new HttpErrors.BadRequest('İlgili kullanıcının bu tarihe ait izin kaydı bulunmaktadır, takvime eklenemez!');
 
-    return this.calendarRepository.create(calendar);
+    return calendar;
+
+    //return this.calendarRepository.create(calendar);
   }
 
   async updateById(id: string, calendar: Calendar): Promise<void> {

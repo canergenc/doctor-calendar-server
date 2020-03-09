@@ -51,6 +51,12 @@ export class User extends Entity {
   userCredentials: UserCredentials;
 
   @property({
+    type: 'array',
+    itemType: 'string',
+  })
+  roles?: string[];
+
+  @property({
     type: 'date',
     default: () => new Date(),
   })
@@ -66,6 +72,7 @@ export class User extends Entity {
     type: 'string',
   })
   updatedUserId?: string;
+
 
   constructor(data?: Partial<User>) {
     super(data);
@@ -111,8 +118,17 @@ export class UserInfoOutputModel {
   })
   groups: Group[];
 
+  /*Geçici Model */
   @property({
     type: 'array',
+    itemType: 'string',
   })
-  roles: Role[];
+  roles?: string[];
+
+  /*Orjinal Model */
+  /*
+    @property({
+      type: 'array',
+    })
+    roles: Role[];*/
 }
