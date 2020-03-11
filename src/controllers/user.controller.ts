@@ -152,7 +152,14 @@ export class UserController {
   })
   async login(
     @requestBody(CredentialsRequestBody) credentials: Credentials,
-  ): Promise<{ token: string }> {
+  ): Promise<{
+    TokenModel: {
+      token: string,
+      iat: number,
+      exp: number,
+      userId: string
+    }
+  }> {
     // ensure the user exists, and the password is correct
     const user = await this.userService.verifyCredentials(credentials);
 
@@ -162,7 +169,12 @@ export class UserController {
     // create a JSON Web Token based on the user profile
     const token = await this.jwtService.generateToken(userProfile);
 
-    return { token };
+    //Token iat and exp result
+    const decodeResult = await this.myUserService.decodeToken(token);
+
+    return {
+      TokenModel: { token: token, iat: decodeResult?.DecodeModel?.iat, exp: decodeResult?.DecodeModel?.exp, userId: decodeResult?.DecodeModel?.userId }
+    };
   }
 
   @get('/users/count', {

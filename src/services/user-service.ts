@@ -3,12 +3,16 @@ import { User, UserInfoOutputModel } from "../models";
 import { Credentials, UserRepository } from "../repositories/user.repository";
 import { HttpErrors } from "@loopback/rest";
 import { repository } from "@loopback/repository";
-import { PasswordHasherBindings } from '../keys';
+import { PasswordHasherBindings, TokenServiceBindings } from '../keys';
 import { PasswordHasher } from "./hash.password.bcryptjs";
 import { inject } from "@loopback/context";
 import { UserProfile, securityId } from '@loopback/security';
 import { UserCredentialsRepository } from "../repositories/user-credentials.repository";
 import { UserGroupRepository, UserRoleRepository, GroupRepository, RoleRepository } from "../repositories";
+import { promisify } from "util";
+
+const jwt = require('jsonwebtoken');
+const verifyAsync = promisify(jwt.verify);
 
 export class MyUserService implements UserService<User, Credentials> {
   constructor(
@@ -18,8 +22,28 @@ export class MyUserService implements UserService<User, Credentials> {
     @repository(UserRoleRepository) public userRoleRepository: UserRoleRepository,
     @repository(RoleRepository) public roleRepository: RoleRepository,
     @repository(UserCredentialsRepository) public userCredentialsRepository: UserCredentialsRepository,
-    @inject(PasswordHasherBindings.PASSWORD_HASHER) public passwordHasher: PasswordHasher
+    @inject(PasswordHasherBindings.PASSWORD_HASHER) public passwordHasher: PasswordHasher,
+    @inject(TokenServiceBindings.TOKEN_SECRET)
+    private jwtSecret: string,
   ) { }
+  /** İat and Exp times result */
+  async decodeToken(token: string): Promise<{
+    DecodeModel: {
+      userId: string,
+      iat: number,
+      exp: number
+    }
+  }> {
+    if (!token) { throw new HttpErrors.BadRequest("Token boş gönderilemez!") }
+    const result = await verifyAsync(token, this.jwtSecret);
+    return {
+      DecodeModel: {
+        userId: result?.id,
+        iat: result?.iat,
+        exp: result?.exp
+      }
+    };
+  }
 
   async verifyCredentials(credentials: Credentials): Promise<User> {
     const invalidCredentialsError = 'Geçersiz email veya parola!';
@@ -91,7 +115,8 @@ export class MyUserService implements UserService<User, Credentials> {
     const userProfile = {
       [securityId]: user.id,
       name: user.fullName,
-      id: user.id
+      id: user.id,
+      role: user.roles
     }
     return userProfile;
   }
