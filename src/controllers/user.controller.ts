@@ -153,7 +153,7 @@ export class UserController {
   async login(
     @requestBody(CredentialsRequestBody) credentials: Credentials,
   ): Promise<{
-    TokenModel: {
+    tokenModel: {
       token: string,
       iat: number,
       exp: number,
@@ -173,7 +173,7 @@ export class UserController {
     const decodeResult = await this.myUserService.decodeToken(token);
 
     return {
-      TokenModel: { token: token, iat: decodeResult?.DecodeModel?.iat, exp: decodeResult?.DecodeModel?.exp, userId: decodeResult?.DecodeModel?.userId }
+      tokenModel: { token: token, iat: decodeResult?.decodeModel?.iat, exp: decodeResult?.decodeModel?.exp, userId: decodeResult?.decodeModel?.userId }
     };
   }
 

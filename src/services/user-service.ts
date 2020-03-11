@@ -28,7 +28,7 @@ export class MyUserService implements UserService<User, Credentials> {
   ) { }
   /** İat and Exp times result */
   async decodeToken(token: string): Promise<{
-    DecodeModel: {
+    decodeModel: {
       userId: string,
       iat: number,
       exp: number
@@ -37,7 +37,7 @@ export class MyUserService implements UserService<User, Credentials> {
     if (!token) { throw new HttpErrors.BadRequest("Token boş gönderilemez!") }
     const result = await verifyAsync(token, this.jwtSecret);
     return {
-      DecodeModel: {
+      decodeModel: {
         userId: result?.id,
         iat: result?.iat,
         exp: result?.exp
