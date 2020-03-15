@@ -1,5 +1,5 @@
 import { UserService } from "@loopback/authentication";
-import { User, UserInfoOutputModel } from "../models";
+import { User, UserInfoOutputModel, Group, UserGroup } from "../models";
 import { Credentials, UserRepository } from "../repositories/user.repository";
 import { HttpErrors } from "@loopback/rest";
 import { repository } from "@loopback/repository";
@@ -83,15 +83,14 @@ export class MyUserService implements UserService<User, Credentials> {
     userInfoOutputModel.user = await this.userRepository.findOne({ where: { id: currentuser.id } }) ?? new User;
 
     /*Groups List */
+    const userGroupList = await this.userGroupRepository.find({ where: { userId: { like: currentuser.id } } });
     userInfoOutputModel.groups = [];
-    await this.userGroupRepository.find({ where: { userId: { like: currentuser.id } } }).then((result) => {
-      result.forEach((item) => {
-        // eslint-disable-next-line @typescript-eslint/no-floating-promises
-        this.groupRepository.findOne({ where: { id: item.groupId } }).then((groupItem) => {
-          if (groupItem) userInfoOutputModel.groups.push(groupItem);
-        });
-      })
-    });
+    for (const item of userGroupList) {
+      const groupModel = await this.groupRepository.findById(item.groupId);
+      if (groupModel) {
+        userInfoOutputModel.groups.push(groupModel)
+      }
+    }
 
     /*Role List */
     userInfoOutputModel.roles = [];
@@ -107,7 +106,6 @@ export class MyUserService implements UserService<User, Credentials> {
     //     });
     //   })
     // });
-
     return userInfoOutputModel;
   }
 

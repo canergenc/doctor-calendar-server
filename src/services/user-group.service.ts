@@ -19,9 +19,9 @@ export class UserGroupService {
     delete this.currentUserProfile[securityId];
 
     /*Duplicate Data Control*/
-    const foundDuplicateData = this.userGroupRepository.find({ where: { userId: { like: userGroup.userId }, groupId: { like: userGroup.groupId } } });
-    if (foundDuplicateData)
-      throw new HttpErrors.BadRequest('Daha önce ilişkilendirme yapılmış!');
+    const foundDuplicateData = await this.userGroupRepository.find({ where: { userId: { like: userGroup.userId }, groupId: { like: userGroup.groupId } } });
+
+    if (foundDuplicateData && foundDuplicateData.length > 0) throw new HttpErrors.BadRequest('Daha önce ilişkilendirme yapılmış!');
 
     return this.userGroupRepository.create(userGroup);
   }

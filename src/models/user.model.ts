@@ -87,34 +87,8 @@ export class UserInfoOutputModel {
   user: User;
 
   @property({
-    type: 'string',
-  })
-  id: string;
-
-  @property({
-    type: 'string',
-    format: 'email',
-  })
-  email: string;
-
-  @property({
-    type: 'string',
-    required: true,
-  })
-  fullName: string;
-
-  @property({
-    type: 'string'
-  })
-  title: string;
-
-  @property({
-    type: 'string',
-  })
-  deviceId?: string;
-
-  @property({
     type: 'array',
+    itemType: Group,
   })
   groups: Group[];
 
