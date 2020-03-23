@@ -307,13 +307,13 @@ export class UserController {
   ): Promise<void> {
     try {
       // Only admin can assign roles
-      if (!currentUserProfile.roles.includes(RoleType.Admin)) {
+      if (!currentUserProfile.roles?.includes(RoleType.Admin)) {
         delete user.roles;
       }
       user.updatedDate = new Date();
       await this.userRepository.updateById(userId, user);
     } catch (error) {
-      return error;
+      throw new HttpErrors.BadRequest(error.message);
     }
   }
 
