@@ -54,25 +54,36 @@ export class User extends Entity {
     type: 'array',
     itemType: 'string',
   })
-  roles?: string[];
+  roles: string[];
 
   @property({
     type: 'date',
     default: () => new Date(),
   })
-  createdDate?: Date;
+  createdDate: Date;
 
   @property({
     type: 'date',
     default: () => new Date(),
   })
-  updatedDate?: Date;
+  updatedDate: Date;
 
   @property({
     type: 'string',
   })
-  updatedUserId?: string;
+  updatedUserId: string;
 
+  @property({
+    type: 'boolean',
+    default: () => false,
+  })
+  isDeleted: boolean;
+
+  @property({
+    type: 'boolean',
+    default: () => false,
+  })
+  isActive: boolean;
 
   constructor(data?: Partial<User>) {
     super(data);

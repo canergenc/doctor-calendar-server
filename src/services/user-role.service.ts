@@ -25,4 +25,13 @@ export class UserRoleService {
 
     return this.userRoleRepository.create(userRole);
   }
+
+  async deleteById(id: string): Promise<void> {
+    await this.userRoleRepository.findOne({ where: { id: id } }).then(async result => {
+      if (result) {
+        result.isDeleted = true;
+        await this.userRoleRepository.updateById(id, result);
+      }
+    })
+  }
 }

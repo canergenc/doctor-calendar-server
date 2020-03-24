@@ -54,6 +54,52 @@ export class CalendarController {
     return this.calendarService.create(calendar);
   }
 
+  @post('/calendars/bulk', {
+    responses: {
+      '200': {
+        description: 'Calendars model instance',
+        content: {
+          'application/json': {
+            schema: {
+              'x-ts-type': {
+                type: 'array',
+                items: {
+                  type: 'array',
+                  items: {
+                    'x-ts-type': Calendar,
+                  },
+                },
+              }
+            }
+          }
+        },
+      },
+    },
+  })
+  async createBulk(
+    @requestBody({
+      content: {
+        'application/json': {
+          schema: {
+            'x-ts-type': {
+              type: 'array',
+              items: {
+                type: 'array',
+                items: {
+                  'x-ts-type': Calendar,
+                },
+              },
+            },
+            title: "New Calendar List Create"
+          }
+        }
+      }
+    })
+    calendars: Calendar[],
+  ): Promise<Calendar[]> {
+    return this.calendarService.createBulk(calendars);
+  }
+
   @get('/calendars/count', {
     responses: {
       '200': {
@@ -138,6 +184,6 @@ export class CalendarController {
     },
   })
   async deleteById(@param.path.string('id') id: string): Promise<void> {
-    await this.calendarRepository.deleteById(id);
+    await this.calendarService.deleteById(id);
   }
 }

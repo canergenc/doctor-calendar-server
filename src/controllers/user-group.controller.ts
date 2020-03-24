@@ -115,6 +115,6 @@ export class UserGroupController {
     },
   })
   async deleteById(@param.path.string('id') id: string): Promise<void> {
-    await this.userGroupRepository.deleteById(id);
+    await this.userGroupService.deleteById(id);
   }
 }

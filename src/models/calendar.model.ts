@@ -11,7 +11,7 @@ export class Calendar extends Entity {
     id: true,
     generated: true,
   })
-  id?: string;
+  id: string;
   @property({
     type: "date",
     required: true,
@@ -21,7 +21,7 @@ export class Calendar extends Entity {
   @property({
     type: "string",
   })
-  description?: string;
+  description: string;
 
   @property({
     type: "number",
@@ -58,6 +58,18 @@ export class Calendar extends Entity {
     type: 'string',
   })
   updatedUserId?: string;
+
+  @property({
+    type: 'boolean',
+    default: () => false,
+  })
+  isDraft?: boolean;
+
+  @property({
+    type: 'boolean',
+    default: () => false,
+  })
+  isDeleted?: boolean;
 
   constructor(data?: Partial<Calendar>) {
     super(data);

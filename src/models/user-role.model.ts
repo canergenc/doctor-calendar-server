@@ -21,23 +21,29 @@ export class UserRole extends Entity {
     type: 'date',
     default: () => new Date(),
   })
-  createdDate?: Date;
+  createdDate: Date;
 
   @property({
     type: 'date',
     default: () => new Date(),
   })
-  updatedDate?: Date;
+  updatedDate: Date;
 
   @property({
     type: 'string',
   })
-  createdUserId?: string;
+  createdUserId: string;
 
   @property({
     type: 'string',
   })
-  updatedUserId?: string;
+  updatedUserId: string;
+
+  @property({
+    type: 'boolean',
+    default: () => false,
+  })
+  isDeleted: boolean;
 
   constructor(data?: Partial<UserRole>) {
     super(data);

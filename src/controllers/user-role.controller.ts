@@ -115,6 +115,6 @@ export class UserRoleController {
     },
   })
   async deleteById(@param.path.string('id') id: string): Promise<void> {
-    await this.userRoleRepository.deleteById(id);
+    await this.userRoleService.deleteById(id);
   }
 }

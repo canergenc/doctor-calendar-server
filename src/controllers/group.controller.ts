@@ -136,6 +136,6 @@ export class GroupController {
     },
   })
   async deleteById(@param.path.string('id') id: string): Promise<void> {
-    await this.groupRepository.deleteById(id);
+    await this.groupService.deleteById(id);
   }
 }

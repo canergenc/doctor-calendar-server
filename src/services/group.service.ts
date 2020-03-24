@@ -23,4 +23,13 @@ export class GroupService {
     delete this.currentUserProfile[securityId];
     await this.groupRepository.updateById(id, group);
   }
+
+  async deleteById(id: string): Promise<void> {
+    await this.groupRepository.findOne({ where: { id: id } }).then(async result => {
+      if (result) {
+        result.isDeleted = true;
+        await this.groupRepository.updateById(id, result);
+      }
+    })
+  }
 }

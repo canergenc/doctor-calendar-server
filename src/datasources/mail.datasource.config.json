@@ -1,0 +1,16 @@
+{
+  "name": "mail",
+  "connector": "mail",
+  "transports": [
+    {
+      "type": "SMTP",
+      "host": "smtp.gmail.com",
+      "secure": true,
+      "port": 465,
+      "auth": {
+        "user": "wolfpackteamapps@gmail.com",
+        "pass": "1234@wolf"
+      }
+    }
+  ]
+}

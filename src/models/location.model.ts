@@ -19,10 +19,10 @@ export class Location extends Entity {
   @property({
     type: 'string',
   })
-  colorCode: string;
+  colorCode?: string;
 
   @belongsTo(() => Group)
-  groupId: string;
+  groupId?: string;
 
   @property({
     type: 'date',
@@ -45,6 +45,12 @@ export class Location extends Entity {
     type: 'string',
   })
   updatedUserId?: string;
+
+  @property({
+    type: 'boolean',
+    default: () => false,
+  })
+  isDeleted?: boolean;
 
   constructor(data?: Partial<Location>) {
     super(data);

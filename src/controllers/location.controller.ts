@@ -52,6 +52,51 @@ export class LocationController {
     return this.locationService.create(location);
   }
 
+  @post('/locations/bulk', {
+    responses: {
+      '200': {
+        description: 'Locations model instance',
+        content: {
+          'application/json': {
+            schema: {
+              'x-ts-type': {
+                type: 'array',
+                items: {
+                  type: 'array',
+                  items: {
+                    'x-ts-type': Location,
+                  },
+                },
+              }
+            }
+          }
+        },
+      },
+    },
+  })
+  async createBulk(
+    @requestBody({
+      content: {
+        'application/json': {
+          schema: {
+            'x-ts-type': {
+              type: 'array',
+              items: {
+                type: 'array',
+                items: {
+                  'x-ts-type': Location,
+                },
+              },
+            }
+          }
+        }
+      }
+    })
+    locations: Location[],
+  ): Promise<Location[]> {
+    return this.locationService.createBulk(locations);
+  }
+
   @get('/locations/count', {
     responses: {
       '200': {
@@ -135,6 +180,6 @@ export class LocationController {
     },
   })
   async deleteById(@param.path.string('id') id: string): Promise<void> {
-    await this.locationRepository.deleteById(id);
+    await this.locationService.deleteById(id);
   }
 }

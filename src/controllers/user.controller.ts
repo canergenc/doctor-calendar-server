@@ -123,7 +123,7 @@ export class UserController {
     } catch (error) {
 
       // MongoError 11000 duplicate key
-      if (error.code === 11000 && error.errmsg.includes('index: uniqueEmail')) {
+      if (error.code === 11000 && error.errmsg?.includes('index: uniqueEmail')) {
         throw new HttpErrors.BadRequest('Email daha önce kullanılmış!');
       } else {
         throw error;

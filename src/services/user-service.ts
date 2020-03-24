@@ -10,6 +10,8 @@ import { UserProfile, securityId } from '@loopback/security';
 import { UserCredentialsRepository } from "../repositories/user-credentials.repository";
 import { UserGroupRepository, UserRoleRepository, GroupRepository, RoleRepository } from "../repositories";
 import { promisify } from "util";
+import { EmailService } from './email.service';
+import { service } from '@loopback/core';
 
 const jwt = require('jsonwebtoken');
 const verifyAsync = promisify(jwt.verify);
@@ -25,7 +27,9 @@ export class MyUserService implements UserService<User, Credentials> {
     @inject(PasswordHasherBindings.PASSWORD_HASHER) public passwordHasher: PasswordHasher,
     @inject(TokenServiceBindings.TOKEN_SECRET)
     private jwtSecret: string,
+    @service(EmailService) private emailService: EmailService
   ) { }
+
   /** İat and Exp times result */
   async decodeToken(token: string): Promise<{
     decodeModel: {
@@ -77,6 +81,7 @@ export class MyUserService implements UserService<User, Credentials> {
   }
 
   async printCurrentUser(currentuser: UserProfile): Promise<UserInfoOutputModel> {
+    //this.emailService.SendMail();
     const userInfoOutputModel = new UserInfoOutputModel();
 
     /*User Model*/

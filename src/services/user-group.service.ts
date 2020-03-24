@@ -32,4 +32,13 @@ export class UserGroupService {
     delete this.currentUserProfile[securityId];
     await this.userGroupRepository.updateById(id, userGroup);
   }
+
+  async deleteById(id: string): Promise<void> {
+    await this.userGroupRepository.findOne({ where: { id: id } }).then(async result => {
+      if (result) {
+        result.isDeleted = true;
+        await this.userGroupRepository.updateById(id, result);
+      }
+    })
+  }
 }

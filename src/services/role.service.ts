@@ -24,4 +24,13 @@ export class RoleService {
     delete this.currentUserProfile[securityId];
     await this.roleRepository.updateById(id, role);
   }
+
+  async deleteById(id: string): Promise<void> {
+    await this.roleRepository.findOne({ where: { id: id } }).then(async result => {
+      if (result) {
+        result.isDeleted = true;
+        await this.roleRepository.updateById(id, result);
+      }
+    })
+  }
 }

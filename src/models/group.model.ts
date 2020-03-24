@@ -18,7 +18,7 @@ export class Group extends Entity {
   @property({
     type: 'string',
   })
-  parentId: string;
+  parentId?: string;
 
   @property({
     type: 'date',
@@ -41,6 +41,12 @@ export class Group extends Entity {
     type: 'string',
   })
   updatedUserId?: string;
+
+  @property({
+    type: 'boolean',
+    default: () => false,
+  })
+  isDeleted?: boolean;
 
   constructor(data?: Partial<Group>) {
     super(data);
