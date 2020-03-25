@@ -22,7 +22,6 @@ export class EmailService {
         pass: '1234@wolf'
       }
     });
-    //console.log(transporter);
     try {
       await transporter.sendMail({
         from: "wolfpackteamapps@gmail.com",

@@ -1,7 +1,14 @@
 import { Entity, model, property, belongsTo } from '@loopback/repository';
 import { Group } from './group.model';
 
-@model()
+@model({
+  settings: {
+    hiddenProperties: ['isDeleted'],
+    scope: {
+      where: { or: [{ isDeleted: false }, { isDeleted: undefined }] }
+    }
+  }
+})
 export class Location extends Entity {
   @property({
     type: 'string',

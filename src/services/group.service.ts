@@ -1,13 +1,16 @@
 import { bind, /* inject, */ BindingScope, inject } from '@loopback/core';
 import { Group } from '../models';
-import { GroupRepository } from '../repositories';
+import { GroupRepository, UserGroupRepository, LocationRepository } from '../repositories';
 import { SecurityBindings, UserProfile, securityId } from '@loopback/security';
 import { repository } from '@loopback/repository';
+import { HttpErrors } from '@loopback/rest';
 
 @bind({ scope: BindingScope.TRANSIENT })
 export class GroupService {
   constructor(
     @repository(GroupRepository) public groupRepository: GroupRepository,
+    @repository(UserGroupRepository) public userGroupRepository: UserGroupRepository,
+    @repository(LocationRepository) public locationRepository: LocationRepository,
     @inject(SecurityBindings.USER) public currentUserProfile: UserProfile
   ) { }
 
@@ -24,12 +27,20 @@ export class GroupService {
     await this.groupRepository.updateById(id, group);
   }
 
-  async deleteById(id: string): Promise<void> {
-    await this.groupRepository.findOne({ where: { id: id } }).then(async result => {
-      if (result) {
-        result.isDeleted = true;
-        await this.groupRepository.updateById(id, result);
-      }
-    })
+  async deleteById(groupId: string): Promise<void> {
+
+    await this.groupRepository.updateAll({ isDeleted: true }, { id: groupId }).then(async () => {
+
+      //#region User Group Delete
+      await this.userGroupRepository.updateAll({ isDeleted: true }, { groupId: { like: groupId } });
+      //#endregion
+
+      //#region Location Delete
+      await this.locationRepository.updateAll({ isDeleted: true }, { groupId: { like: groupId } });
+      //#endregion
+
+    }).catch(ex => {
+      throw new HttpErrors.NotFound(ex);
+    });
   }
 }

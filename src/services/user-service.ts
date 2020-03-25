@@ -8,7 +8,7 @@ import { PasswordHasher } from "./hash.password.bcryptjs";
 import { inject } from "@loopback/context";
 import { UserProfile, securityId } from '@loopback/security';
 import { UserCredentialsRepository } from "../repositories/user-credentials.repository";
-import { UserGroupRepository, UserRoleRepository, GroupRepository, RoleRepository } from "../repositories";
+import { UserGroupRepository, UserRoleRepository, GroupRepository, RoleRepository, CalendarRepository } from "../repositories";
 import { promisify } from "util";
 import { EmailService } from './email.service';
 import { service } from '@loopback/core';
@@ -21,6 +21,7 @@ export class MyUserService implements UserService<User, Credentials> {
     @repository(UserRepository) public userRepository: UserRepository,
     @repository(UserGroupRepository) public userGroupRepository: UserGroupRepository,
     @repository(GroupRepository) public groupRepository: GroupRepository,
+    @repository(CalendarRepository) public calendarRepository: CalendarRepository,
     @repository(UserRoleRepository) public userRoleRepository: UserRoleRepository,
     @repository(RoleRepository) public roleRepository: RoleRepository,
     @repository(UserCredentialsRepository) public userCredentialsRepository: UserCredentialsRepository,
@@ -59,12 +60,9 @@ export class MyUserService implements UserService<User, Credentials> {
     if (!foundUser) {
       throw new HttpErrors.BadRequest(invalidCredentialsError);
     }
-    /* Geçici çözüm olarak yapıldı. Düzeltme yapılacak.*/
-    const userCredentials = await this.userCredentialsRepository.find();
-    const credentialsFound = userCredentials.find(x => x.userId === foundUser.id);
-    /*const credentialsFound = await this.userRepository.findCredentials(
-      foundUser.id,
-    );*/
+
+    const credentialsFound = await this.userCredentialsRepository.findOne({ where: { userId: { like: foundUser.id } } });
+
     if (!credentialsFound) {
       throw new HttpErrors.BadRequest(invalidCredentialsError);
     }
@@ -132,4 +130,32 @@ export class MyUserService implements UserService<User, Credentials> {
       return true;
     return false;
   }
+
+  async deleteById(userId: typeof User.prototype.id): Promise<void> {
+
+    await this.userRepository.updateAll({ isDeleted: true }, { id: userId }).then(async () => {
+
+      //#region User Credential Delete
+      await this.userCredentialsRepository.updateAll({ isDeleted: true }, { userId: { like: userId } });
+      //#endregion
+
+      //#region User-Group Delete
+      await this.userGroupRepository.updateAll({ isDeleted: true }, { userId: { like: userId } });
+      //#endregion
+
+      //#region User-Role Delete
+      await this.userRoleRepository.updateAll({ isDeleted: true }, { userId: { like: userId } });
+      //#endregion
+
+      //#region Calendar Delete
+      await this.calendarRepository.updateAll({ isDeleted: true }, { userId: { like: userId } });
+      //#endregion
+
+    }).catch(ex => {
+      throw new HttpErrors.NotFound(ex);
+    });
+
+  }
+
 }
+

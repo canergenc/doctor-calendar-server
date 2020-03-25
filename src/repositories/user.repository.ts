@@ -49,25 +49,4 @@ export class UserRepository extends DefaultCrudRepository<
       return true;
     return false;
   }
-
-  async deleteByNavigation(userId: typeof User.prototype.id): Promise<void> {
-
-    await this.findOne({ where: { id: userId } }).then(async result => {
-      if (result) {
-        result.isDeleted = true;
-        await this.updateById(userId, result).catch(ex => {
-          throw new HttpErrors.NotFound(ex);
-        });
-      }
-    });
-    await this.userCredentialsRepository.findOne({ where: { userId: userId } }).then(async result => {
-      if (result) {
-        result.isDeleted = true;
-        await this.userCredentialsRepository.updateById(result.id, result);
-      }
-    }
-    ).catch(ex => {
-      throw new HttpErrors.NotFound(ex);
-    })
-  }
 }

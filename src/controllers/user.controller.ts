@@ -327,6 +327,6 @@ export class UserController {
   })
   @authenticate('jwt')
   async deleteById(@param.path.string('userId') userId: string): Promise<void> {
-    await this.userRepository.deleteByNavigation(userId);
+    await this.myUserService.deleteById(userId);
   }
 }

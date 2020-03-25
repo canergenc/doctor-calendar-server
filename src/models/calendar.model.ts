@@ -4,7 +4,14 @@ import { User } from './user.model';
 import { Group } from './group.model';
 import { Location } from './location.model';
 
-@model()
+@model({
+  settings: {
+    hiddenProperties: ['isDeleted'],
+    scope: {
+      where: { or: [{ isDeleted: false }, { isDeleted: undefined }] }
+    }
+  }
+})
 export class Calendar extends Entity {
   @property({
     type: "string",
@@ -25,6 +32,7 @@ export class Calendar extends Entity {
 
   @property({
     type: "number",
+    required: true
   })
   type?: number;
 

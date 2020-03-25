@@ -2,7 +2,14 @@ import { Entity, model, property, belongsTo } from '@loopback/repository';
 import { Group } from './group.model';
 import { User } from './user.model';
 
-@model()
+@model({
+  settings: {
+    hiddenProperties: ['isDeleted'],
+    scope: {
+      where: { or: [{ isDeleted: false }, { isDeleted: undefined }] }
+    }
+  }
+})
 export class UserGroup extends Entity {
   @property({
     type: 'string',

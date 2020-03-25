@@ -1,5 +1,5 @@
 import { bind, BindingScope, inject } from '@loopback/core';
-import { repository } from '@loopback/repository';
+import { repository, Filter } from '@loopback/repository';
 import { CalendarRepository } from '../repositories';
 import { Calendar } from '../models';
 import { UserProfile, SecurityBindings, securityId } from '@loopback/security';
@@ -45,18 +45,10 @@ export class CalendarService {
       where:
       {
         date: calendar.date,
-        userId: { like: calendar.userId },
-        type: calendar.type,
-        groupId: { like: calendar.groupId },
-        locationId: { like: calendar.locationId }
+        userId: { like: calendar.userId }
       }
     });
     if (duplicateResult) throw new HttpErrors.BadRequest('İlgili kullanıcının bu tarihe ait kaydı bulunmaktadır, takvime eklenemez!');
-
-    /*calendar rest day control */
-    const result = await this.calendarRepository.findOne({ where: { date: calendar.date, userId: { like: calendar.userId }, type: CalendarType.İzin } });
-    if (result) throw new HttpErrors.BadRequest('İlgili kullanıcının bu tarihe ait izin kaydı bulunmaktadır, takvime eklenemez!');
-
   }
 
   async updateById(id: string, calendar: Calendar): Promise<void> {

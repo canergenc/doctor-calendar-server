@@ -1,10 +1,13 @@
 import { Entity, model, property, hasOne } from '@loopback/repository';
 import { UserCredentials } from './user-credentials.model';
 import { Group } from './group.model';
-import { Role } from './role.model';
 
 @model({
   settings: {
+    hiddenProperties: ['isDeleted'],
+    scope: {
+      where: { or: [{ isDeleted: false }, { isDeleted: undefined }] }
+    },
     indexes: {
       uniqueEmail: {
         keys: {
