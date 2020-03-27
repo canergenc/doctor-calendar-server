@@ -46,6 +46,11 @@ export class Calendar extends Entity {
   locationId: string;
 
   @property({
+    type: "string",
+  })
+  calendarGroupId?: string;
+
+  @property({
     type: 'date',
     default: () => new Date(),
   })

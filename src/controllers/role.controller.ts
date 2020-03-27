@@ -14,12 +14,14 @@ import {
   del,
   requestBody,
   getWhereSchemaFor,
+  patch,
 } from '@loopback/rest';
 import { Role } from '../models';
 import { RoleRepository } from '../repositories';
 import { service } from '@loopback/core';
 import { RoleService } from '../services';
 import { authenticate } from '@loopback/authentication';
+import { OPERATION_SECURITY_SPEC } from '../utils/security-spec';
 
 @authenticate('jwt')
 export class RoleController {
@@ -30,6 +32,7 @@ export class RoleController {
   ) { }
 
   @post('/roles', {
+    security: OPERATION_SECURITY_SPEC,
     responses: {
       '200': {
         description: 'Role model instance',
@@ -107,10 +110,35 @@ export class RoleController {
     return this.roleRepository.findById(id, filter);
   }
 
-  @post('/roles/{id}', {
+  @patch('/roles', {
+    security: OPERATION_SECURITY_SPEC,
     responses: {
       '200': {
-        description: 'Role update success',
+        description: 'Role PATCH success count',
+        content: { 'application/json': { schema: CountSchema } },
+      },
+    },
+  })
+  async updateAll(
+    @requestBody({
+      content: {
+        'application/json': {
+          schema: getModelSchemaRef(Role, { partial: true }),
+        },
+      },
+    })
+    role: Role,
+    @param.query.object('where', getWhereSchemaFor(Role))
+    where?: Where<Role>,
+  ): Promise<Count> {
+    return this.roleRepository.updateAll(role, where);
+  }
+
+  @patch('/roles/{id}', {
+    security: OPERATION_SECURITY_SPEC,
+    responses: {
+      '204': {
+        description: 'Role patch success',
       },
     },
   })
@@ -129,6 +157,7 @@ export class RoleController {
   }
 
   @del('/roles/{id}', {
+    security: OPERATION_SECURITY_SPEC,
     responses: {
       '204': {
         description: 'Role DELETE success',

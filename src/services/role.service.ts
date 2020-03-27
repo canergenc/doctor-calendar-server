@@ -1,5 +1,5 @@
 import { bind, BindingScope, inject } from '@loopback/core';
-import { repository } from '@loopback/repository';
+import { repository, Where, Count } from '@loopback/repository';
 import { RoleRepository } from '../repositories';
 import { UserProfile, securityId, SecurityBindings } from '@loopback/security';
 import { Role } from '../models';
@@ -16,6 +16,12 @@ export class RoleService {
     role.createdUserId = role.updatedUserId = this.currentUserProfile[securityId];
     delete this.currentUserProfile[securityId];
     return this.roleRepository.create(role);
+  }
+
+  async updateAll(role: Role, where?: Where<Role>): Promise<Count> {
+    role.updatedDate = new Date();
+    role.updatedUserId = this.currentUserProfile[securityId];
+    return this.roleRepository.updateAll(role, where);
   }
 
   async updateById(id: string, role: Role): Promise<void> {

@@ -2,7 +2,7 @@ import { bind, /* inject, */ BindingScope, inject } from '@loopback/core';
 import { Group } from '../models';
 import { GroupRepository, UserGroupRepository, LocationRepository } from '../repositories';
 import { SecurityBindings, UserProfile, securityId } from '@loopback/security';
-import { repository } from '@loopback/repository';
+import { repository, Where, Count } from '@loopback/repository';
 import { HttpErrors } from '@loopback/rest';
 
 @bind({ scope: BindingScope.TRANSIENT })
@@ -25,6 +25,12 @@ export class GroupService {
     group.updatedUserId = this.currentUserProfile[securityId];
     delete this.currentUserProfile[securityId];
     await this.groupRepository.updateById(id, group);
+  }
+
+  async updateAll(group: Group, where?: Where<Group>): Promise<Count> {
+    group.updatedDate = new Date();
+    group.updatedUserId = this.currentUserProfile[securityId];
+    return this.groupRepository.updateAll(group, where);
   }
 
   async deleteById(groupId: string): Promise<void> {

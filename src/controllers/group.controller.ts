@@ -14,12 +14,14 @@ import {
   del,
   requestBody,
   getWhereSchemaFor,
+  patch,
 } from '@loopback/rest';
 import { Group } from '../models';
 import { GroupRepository } from '../repositories';
 import { service } from '@loopback/core';
 import { GroupService } from '../services';
 import { authenticate } from '@loopback/authentication';
+import { OPERATION_SECURITY_SPEC } from '../utils/security-spec';
 
 @authenticate('jwt')
 export class GroupController {
@@ -30,6 +32,7 @@ export class GroupController {
   ) { }
 
   @post('/groups', {
+    security: OPERATION_SECURITY_SPEC,
     responses: {
       '200': {
         description: 'Group model instance',
@@ -107,10 +110,35 @@ export class GroupController {
     return this.groupRepository.findById(id, filter);
   }
 
-  @post('/groups/{id}', {
+  @patch('/groups', {
+    security: OPERATION_SECURITY_SPEC,
     responses: {
       '200': {
-        description: 'Group update success',
+        description: 'Group PATCH success count',
+        content: { 'application/json': { schema: CountSchema } },
+      },
+    },
+  })
+  async updateAll(
+    @requestBody({
+      content: {
+        'application/json': {
+          schema: getModelSchemaRef(Group, { partial: true }),
+        },
+      },
+    })
+    group: Group,
+    @param.query.object('where', getWhereSchemaFor(Group))
+    where?: Where<Group>,
+  ): Promise<Count> {
+    return this.groupService.updateAll(group, where);
+  }
+
+  @patch('/groups/{id}', {
+    security: OPERATION_SECURITY_SPEC,
+    responses: {
+      '204': {
+        description: 'Group patch success',
       },
     },
   })
@@ -119,7 +147,7 @@ export class GroupController {
     @requestBody({
       content: {
         'application/json': {
-          schema: getModelSchemaRef(Group),
+          schema: getModelSchemaRef(Group, { partial: true }),
         },
       },
     }) group: Group,
@@ -129,6 +157,7 @@ export class GroupController {
   }
 
   @del('/groups/{id}', {
+    security: OPERATION_SECURITY_SPEC,
     responses: {
       '204': {
         description: 'Group DELETE success',

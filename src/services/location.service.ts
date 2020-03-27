@@ -2,7 +2,7 @@ import { bind, /* inject, */ BindingScope, inject } from '@loopback/core';
 import { Location } from '../models';
 import { LocationRepository } from '../repositories';
 import { SecurityBindings, UserProfile, securityId } from '@loopback/security';
-import { repository } from '@loopback/repository';
+import { repository, Where, Count } from '@loopback/repository';
 import { HttpErrors } from '@loopback/rest';
 
 @bind({ scope: BindingScope.TRANSIENT })
@@ -34,6 +34,12 @@ export class LocationService {
     location.updatedUserId = this.currentUserProfile[securityId];
     delete this.currentUserProfile[securityId];
     await this.locationRepository.updateById(id, location);
+  }
+
+  async updateAll(location: Location, where?: Where<Location>): Promise<Count> {
+    location.updatedDate = new Date();
+    location.updatedUserId = this.currentUserProfile[securityId];
+    return this.locationRepository.updateAll(location, where);
   }
 
   async deleteById(id: string): Promise<void> {

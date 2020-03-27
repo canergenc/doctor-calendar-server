@@ -1,5 +1,5 @@
 import { bind, BindingScope, inject } from '@loopback/core';
-import { repository, Filter } from '@loopback/repository';
+import { repository, Filter, Where, Count } from '@loopback/repository';
 import { CalendarRepository } from '../repositories';
 import { Calendar } from '../models';
 import { UserProfile, SecurityBindings, securityId } from '@loopback/security';
@@ -39,16 +39,24 @@ export class CalendarService {
   }
 
   private async dataControl(calendar: Calendar): Promise<void> {
+    if (calendar && calendar.date && calendar.userId) {
+      /* Duplicate Control */
+      const duplicateResult = await this.calendarRepository.findOne({
+        where:
+        {
+          date: calendar.date,
+          userId: { like: calendar.userId }
+        }
+      });
+      if (duplicateResult) throw new HttpErrors.BadRequest('İlgili kullanıcının bu tarihe ait kaydı bulunmaktadır, takvime eklenemez!');
+    }
+  }
 
-    /* Duplicate Control */
-    const duplicateResult = await this.calendarRepository.findOne({
-      where:
-      {
-        date: calendar.date,
-        userId: { like: calendar.userId }
-      }
-    });
-    if (duplicateResult) throw new HttpErrors.BadRequest('İlgili kullanıcının bu tarihe ait kaydı bulunmaktadır, takvime eklenemez!');
+  async updateAll(calendar: Calendar, where?: Where<Calendar>): Promise<Count> {
+    await this.dataControl(calendar);
+    calendar.updatedDate = new Date();
+    calendar.updatedUserId = this.currentUserProfile[securityId];
+    return this.calendarRepository.updateAll(calendar, where);
   }
 
   async updateById(id: string, calendar: Calendar): Promise<void> {

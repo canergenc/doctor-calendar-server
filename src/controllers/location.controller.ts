@@ -14,12 +14,14 @@ import {
   del,
   requestBody,
   getWhereSchemaFor,
+  patch,
 } from '@loopback/rest';
 import { Location } from '../models';
 import { LocationRepository } from '../repositories';
 import { service } from '@loopback/core';
 import { LocationService } from '../services';
 import { authenticate } from '@loopback/authentication';
+import { OPERATION_SECURITY_SPEC } from '../utils/security-spec';
 
 @authenticate('jwt')
 export class LocationController {
@@ -29,6 +31,7 @@ export class LocationController {
   ) { }
 
   @post('/locations', {
+    security: OPERATION_SECURITY_SPEC,
     responses: {
       '200': {
         description: 'Location model instance',
@@ -53,6 +56,7 @@ export class LocationController {
   }
 
   @post('/locations/bulk', {
+    security: OPERATION_SECURITY_SPEC,
     responses: {
       '200': {
         description: 'Locations model instance',
@@ -151,10 +155,34 @@ export class LocationController {
     return this.locationRepository.findById(id, filter);
   }
 
-  @post('/locations/{id}', {
+  @patch('/locations', {
+    security: OPERATION_SECURITY_SPEC,
     responses: {
       '200': {
-        description: 'Location update success'
+        description: 'Location PATCH success count',
+        content: { 'application/json': { schema: CountSchema } },
+      },
+    },
+  })
+  async updateAll(
+    @requestBody({
+      content: {
+        'application/json': {
+          schema: getModelSchemaRef(Location, { partial: true }),
+        },
+      },
+    })
+    location: Location,
+    @param.query.object('where', getWhereSchemaFor(Location))
+    where?: Where<Location>,
+  ): Promise<Count> {
+    return this.locationService.updateAll(location, where);
+  }
+
+  @patch('/locations/{id}', {
+    responses: {
+      '204': {
+        description: 'Location patch success'
       },
     },
   })
@@ -173,6 +201,7 @@ export class LocationController {
   }
 
   @del('/locations/{id}', {
+    security: OPERATION_SECURITY_SPEC,
     responses: {
       '204': {
         description: 'Location DELETE success',

@@ -20,6 +20,7 @@ import { UserGroupRepository } from '../repositories';
 import { UserGroupService } from '../services';
 import { service } from '@loopback/core';
 import { authenticate } from '@loopback/authentication';
+import { OPERATION_SECURITY_SPEC } from '../utils/security-spec';
 
 @authenticate('jwt')
 export class UserGroupController {
@@ -30,6 +31,7 @@ export class UserGroupController {
   ) { }
 
   @post('/user-groups', {
+    security: OPERATION_SECURITY_SPEC,
     responses: {
       '200': {
         description: 'UserGroup model instance',
@@ -108,6 +110,7 @@ export class UserGroupController {
   }
 
   @del('/user-groups/{id}', {
+    security: OPERATION_SECURITY_SPEC,
     responses: {
       '204': {
         description: 'UserGroup DELETE success',

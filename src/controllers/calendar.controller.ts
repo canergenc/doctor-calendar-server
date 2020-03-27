@@ -14,12 +14,14 @@ import {
   del,
   requestBody,
   getWhereSchemaFor,
+  patch,
 } from '@loopback/rest';
 import { Calendar } from '../models';
 import { CalendarRepository } from '../repositories';
 import { service } from '@loopback/core';
 import { authenticate } from '@loopback/authentication';
 import { CalendarService } from '../services';
+import { OPERATION_SECURITY_SPEC } from '../utils/security-spec';
 
 @authenticate('jwt')
 export class CalendarController {
@@ -31,6 +33,7 @@ export class CalendarController {
   ) { }
 
   @post('/calendars', {
+    security: OPERATION_SECURITY_SPEC,
     responses: {
       '200': {
         description: 'Calendar model instance',
@@ -55,6 +58,7 @@ export class CalendarController {
   }
 
   @post('/calendars/bulk', {
+    security: OPERATION_SECURITY_SPEC,
     responses: {
       '200': {
         description: 'Calendars model instance',
@@ -156,10 +160,35 @@ export class CalendarController {
     return this.calendarRepository.findById(id, filter);
   }
 
-  @post('/calendars/{id}', {
+  @patch('/calendars', {
+    security: OPERATION_SECURITY_SPEC,
     responses: {
       '200': {
-        description: 'Calendar update success',
+        description: 'Calendar PATCH success count',
+        content: { 'application/json': { schema: CountSchema } },
+      },
+    },
+  })
+  async updateAll(
+    @requestBody({
+      content: {
+        'application/json': {
+          schema: getModelSchemaRef(Calendar, { partial: true }),
+        },
+      },
+    })
+    calendar: Calendar,
+    @param.query.object('where', getWhereSchemaFor(Calendar))
+    where?: Where<Calendar>,
+  ): Promise<Count> {
+    return this.calendarService.updateAll(calendar, where);
+  }
+
+  @patch('/calendars/{id}', {
+    security: OPERATION_SECURITY_SPEC,
+    responses: {
+      '204': {
+        description: 'Calendar patch success',
       },
     },
   })
@@ -177,6 +206,7 @@ export class CalendarController {
   }
 
   @del('/calendars/{id}', {
+    security: OPERATION_SECURITY_SPEC,
     responses: {
       '204': {
         description: 'Calendar DELETE success',
