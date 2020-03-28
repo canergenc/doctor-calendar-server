@@ -25,11 +25,6 @@ export class Group extends Entity {
   @property({
     type: 'string',
   })
-  canerTest: string;
-
-  @property({
-    type: 'string',
-  })
   parentId?: string;
 
   @property({
