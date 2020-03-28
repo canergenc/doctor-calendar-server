@@ -79,6 +79,11 @@ export class Calendar extends Entity {
   isDraft?: boolean;
 
   @property({
+    type: "number"
+  })
+  status?: number;
+
+  @property({
     type: 'boolean',
     default: () => false,
   })
