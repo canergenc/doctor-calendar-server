@@ -3,9 +3,9 @@ import { Group } from './group.model';
 
 @model({
   settings: {
-    hiddenProperties: ['isDeleted'],
+    //hiddenProperties: ['isDeleted'],
     scope: {
-      where: { or: [{ isDeleted: false }, { isDeleted: undefined }] }
+      where: { isDeleted: false }
     }
   }
 })

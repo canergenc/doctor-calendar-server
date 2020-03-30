@@ -2,9 +2,9 @@ import { Entity, model, property } from '@loopback/repository';
 
 @model({
   settings: {
-    hiddenProperties: ['isDeleted'],
+    //hiddenProperties: ['isDeleted'],
     scope: {
-      where: { or: [{ isDeleted: false }, { isDeleted: undefined }] }
+      where: { isDeleted: false }
     }
   }
 })

@@ -5,8 +5,9 @@ import { Location } from './location.model';
 
 @model({
   settings: {
+    //hiddenProperties: ['isDeleted'],
     scope: {
-      where: { or: [{ isDeleted: false }, { isDeleted: undefined }] }
+      where: { isDeleted: false }
     }
   }
 })

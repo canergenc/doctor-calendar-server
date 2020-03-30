@@ -2,11 +2,10 @@ import { Entity, model, property } from '@loopback/repository';
 
 @model({
   settings: {
-    hiddenProperties: ['isDeleted'],
+    //hiddenProperties: ['isDeleted'],
     scope: {
-      where: { or: [{ isDeleted: false }, { isDeleted: undefined }] }
-    },
-    strict: false
+      where: { isDeleted: false }
+    }
   }
 })
 export class Role extends Entity {
