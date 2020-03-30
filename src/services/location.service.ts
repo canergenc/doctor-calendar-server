@@ -43,11 +43,12 @@ export class LocationService {
   }
 
   async deleteById(id: string): Promise<void> {
-    await this.locationRepository.findOne({ where: { id: id } }).then(async result => {
-      if (result) {
-        result.isDeleted = true;
-        await this.locationRepository.updateById(id, result);
-      }
-    })
+    await this.locationRepository.updateAll({
+      isDeleted: true,
+      updatedDate: new Date(),
+      updatedUserId: this.currentUserProfile[securityId]
+    }, { id: id }).catch(ex => {
+      throw new HttpErrors.NotFound(ex);
+    });
   }
 }

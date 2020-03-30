@@ -26,6 +26,17 @@ export class UserGroupService {
     return this.userGroupRepository.create(userGroup);
   }
 
+  async createBulk(userGroups: UserGroup[]): Promise<UserGroup[]> {
+    try {
+      for (const userGroup of userGroups) {
+        userGroup.createdUserId = userGroup.updatedUserId = this.currentUserProfile[securityId];
+      }
+      return await this.userGroupRepository.createAll(userGroups);
+    } catch (error) {
+      throw new HttpErrors.BadRequest(error.message);
+    }
+  }
+
   async updateById(id: string, userGroup: UserGroup): Promise<void> {
     userGroup.updatedDate = new Date();
     userGroup.updatedUserId = this.currentUserProfile[securityId];
@@ -34,11 +45,12 @@ export class UserGroupService {
   }
 
   async deleteById(id: string): Promise<void> {
-    await this.userGroupRepository.findOne({ where: { id: id } }).then(async result => {
-      if (result) {
-        result.isDeleted = true;
-        await this.userGroupRepository.updateById(id, result);
-      }
-    })
+    await this.userGroupRepository.updateAll({
+      isDeleted: true,
+      updatedDate: new Date(),
+      updatedUserId: this.currentUserProfile[securityId]
+    }, { id: id }).catch(ex => {
+      throw new HttpErrors.NotFound(ex);
+    });
   }
 }

@@ -27,11 +27,12 @@ export class UserRoleService {
   }
 
   async deleteById(id: string): Promise<void> {
-    await this.userRoleRepository.findOne({ where: { id: id } }).then(async result => {
-      if (result) {
-        result.isDeleted = true;
-        await this.userRoleRepository.updateById(id, result);
-      }
-    })
+    await this.userRoleRepository.updateAll({
+      isDeleted: true,
+      updatedDate: new Date(),
+      updatedUserId: this.currentUserProfile[securityId]
+    }, { id: id }).catch(ex => {
+      throw new HttpErrors.NotFound(ex);
+    });
   }
 }

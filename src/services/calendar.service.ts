@@ -67,11 +67,12 @@ export class CalendarService {
   }
 
   async deleteById(id: string): Promise<void> {
-    await this.calendarRepository.findOne({ where: { id: id } }).then(async result => {
-      if (result) {
-        result.isDeleted = true;
-        await this.calendarRepository.updateById(id, result);
-      }
-    })
+    await this.calendarRepository.updateAll({
+      isDeleted: true,
+      updatedDate: new Date(),
+      updatedUserId: this.currentUserProfile[securityId]
+    }, { id: id }).catch(ex => {
+      throw new HttpErrors.NotFound(ex);
+    });
   }
 }

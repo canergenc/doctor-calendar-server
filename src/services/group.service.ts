@@ -35,14 +35,14 @@ export class GroupService {
 
   async deleteById(groupId: string): Promise<void> {
 
-    await this.groupRepository.updateAll({ isDeleted: true }, { id: groupId }).then(async () => {
+    await this.groupRepository.updateAll({ isDeleted: true, updatedDate: new Date(), updatedUserId: this.currentUserProfile[securityId] }, { id: groupId }).then(async () => {
 
       //#region User Group Delete
-      await this.userGroupRepository.updateAll({ isDeleted: true }, { groupId: { like: groupId } });
+      await this.userGroupRepository.updateAll({ isDeleted: true, updatedDate: new Date(), updatedUserId: this.currentUserProfile[securityId] }, { groupId: { like: groupId } });
       //#endregion
 
       //#region Location Delete
-      await this.locationRepository.updateAll({ isDeleted: true }, { groupId: { like: groupId } });
+      await this.locationRepository.updateAll({ isDeleted: true, updatedDate: new Date(), updatedUserId: this.currentUserProfile[securityId] }, { groupId: { like: groupId } });
       //#endregion
 
     }).catch(ex => {

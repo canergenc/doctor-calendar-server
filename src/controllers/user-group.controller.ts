@@ -55,6 +55,53 @@ export class UserGroupController {
     return this.userGroupService.create(userGroup);
   }
 
+  @post('/user-groups/bulk', {
+    security: OPERATION_SECURITY_SPEC,
+    responses: {
+      '200': {
+        description: 'User Group model instance',
+        content: {
+          'application/json': {
+            schema: {
+              'x-ts-type': {
+                type: 'array',
+                items: {
+                  type: 'array',
+                  items: {
+                    'x-ts-type': UserGroup,
+                  },
+                },
+              }
+            }
+          }
+        },
+      },
+    },
+  })
+  async createBulk(
+    @requestBody({
+      content: {
+        'application/json': {
+          schema: {
+            'x-ts-type': {
+              type: 'array',
+              items: {
+                type: 'array',
+                items: {
+                  'x-ts-type': UserGroup,
+                },
+              },
+            },
+            title: "New UserGroup List Create"
+          }
+        }
+      }
+    })
+    userGroup: UserGroup[],
+  ): Promise<UserGroup[]> {
+    return this.userGroupService.createBulk(userGroup);
+  }
+
   @get('/user-groups/count', {
     responses: {
       '200': {

@@ -133,22 +133,22 @@ export class MyUserService implements UserService<User, Credentials> {
 
   async deleteById(userId: typeof User.prototype.id): Promise<void> {
 
-    await this.userRepository.updateAll({ isDeleted: true }, { id: userId }).then(async () => {
+    await this.userRepository.updateAll({ isDeleted: true, updatedDate: new Date(), updatedUserId: userId }, { id: userId }).then(async () => {
 
       //#region User Credential Delete
-      await this.userCredentialsRepository.updateAll({ isDeleted: true }, { userId: { like: userId } });
+      await this.userCredentialsRepository.updateAll({ isDeleted: true, updatedDate: new Date(), updatedUserId: userId }, { userId: { like: userId } });
       //#endregion
 
       //#region User-Group Delete
-      await this.userGroupRepository.updateAll({ isDeleted: true }, { userId: { like: userId } });
+      await this.userGroupRepository.updateAll({ isDeleted: true, updatedDate: new Date(), updatedUserId: userId }, { userId: { like: userId } });
       //#endregion
 
       //#region User-Role Delete
-      await this.userRoleRepository.updateAll({ isDeleted: true }, { userId: { like: userId } });
+      await this.userRoleRepository.updateAll({ isDeleted: true, updatedDate: new Date(), updatedUserId: userId }, { userId: { like: userId } });
       //#endregion
 
       //#region Calendar Delete
-      await this.calendarRepository.updateAll({ isDeleted: true }, { userId: { like: userId } });
+      await this.calendarRepository.updateAll({ isDeleted: true, updatedDate: new Date(), updatedUserId: userId }, { userId: { like: userId } });
       //#endregion
 
     }).catch(ex => {

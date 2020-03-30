@@ -3,6 +3,7 @@ import { repository, Where, Count } from '@loopback/repository';
 import { RoleRepository } from '../repositories';
 import { UserProfile, securityId, SecurityBindings } from '@loopback/security';
 import { Role } from '../models';
+import { HttpErrors } from '@loopback/rest';
 
 @bind({ scope: BindingScope.TRANSIENT })
 export class RoleService {
@@ -32,11 +33,12 @@ export class RoleService {
   }
 
   async deleteById(id: string): Promise<void> {
-    await this.roleRepository.findOne({ where: { id: id } }).then(async result => {
-      if (result) {
-        result.isDeleted = true;
-        await this.roleRepository.updateById(id, result);
-      }
-    })
+    await this.roleRepository.updateAll({
+      isDeleted: true,
+      updatedDate: new Date(),
+      updatedUserId: this.currentUserProfile[securityId]
+    }, { id: id }).catch(ex => {
+      throw new HttpErrors.NotFound(ex);
+    });
   }
 }
