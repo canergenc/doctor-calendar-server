@@ -4,9 +4,9 @@ import { User } from './user.model';
 
 @model({
   settings: {
-    //hiddenProperties: ['isDeleted'],
+    hiddenProperties: ['isDeleted'],
     scope: {
-      where: { isDeleted: false }
+      where: { or: [{ isDeleted: false }] }
     }
   }
 })

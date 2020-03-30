@@ -4,9 +4,9 @@ import { Group } from './group.model';
 
 @model({
   settings: {
-    //hiddenProperties: ['isDeleted'],
+    hiddenProperties: ['isDeleted'],
     scope: {
-      where: { isDeleted: false }
+      where: { or: [{ isDeleted: false }] }
     },
     indexes: {
       uniqueEmail: {
