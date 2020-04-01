@@ -61,6 +61,10 @@ export class MyUserService implements UserService<User, Credentials> {
       throw new HttpErrors.BadRequest(invalidCredentialsError);
     }
 
+    if (!foundUser.isActive) {
+      throw new HttpErrors.BadRequest("Kullanıcı aktif hale getirilmelidir. Lütfen sistem yöneticisine danışınız!");
+    }
+
     const credentialsFound = await this.userCredentialsRepository.findOne({ where: { userId: { like: foundUser.id } } });
 
     if (!credentialsFound) {

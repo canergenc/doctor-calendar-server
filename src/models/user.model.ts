@@ -88,6 +88,12 @@ export class User extends Entity {
   })
   isActive: boolean;
 
+  @property({
+    type: 'boolean',
+    default: () => false,
+  })
+  isEmailVerify: boolean;
+
   constructor(data?: Partial<User>) {
     super(data);
   }
