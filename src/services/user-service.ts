@@ -149,12 +149,12 @@ export class MyUserService implements UserService<User, Credentials> {
   }
 
   async printCurrentUser(currentuser: UserProfile): Promise<UserInfoOutputModel> {
-    const myToken = await this.generateVerifyToken('5e81d16b63226a009965dd47');
+    // const myToken = await this.generateVerifyToken('5e81d16b63226a009965dd47');
 
-    await this.sendMailRegisterUser(
-      'canergenc93@gmail.com',
-      'Caner Genç',
-      myToken)
+    // await this.sendMailRegisterUser(
+    //   'canergenc93@gmail.com',
+    //   'Caner Genç',
+    //   myToken)
 
     const userInfoOutputModel = new UserInfoOutputModel();
 

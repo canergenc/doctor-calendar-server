@@ -262,7 +262,7 @@ export class UserController {
     return this.myUserService.verifyEmail(key);
   }
 
-  @get('/users/re-verification', {
+  @post('/users/re-verification', {
     responses: {
       '200': {
         description: 'Activation Link Email re-verification.',
