@@ -11,12 +11,13 @@ import path from 'path';
 import { MyAuthenticationSequence } from './sequence';
 import { AuthenticationComponent, registerAuthenticationStrategy } from '@loopback/authentication';
 import { JWTAuthenticationStrategy } from './authentication-strategies/jwt-strategy';
-import { TokenServiceBindings, TokenServiceConstants, PasswordHasherBindings, UserServiceBindings } from './keys';
+import { TokenServiceBindings, TokenServiceConstants, PasswordHasherBindings, UserServiceBindings, EmailManagerBindings } from './keys';
 import { JWTService } from './services/jwt-service';
 import { BcryptHasher } from './services/hash.password.bcryptjs';
 import { SECURITY_SCHEME_SPEC } from './utils/security-spec';
 import { MyUserService } from './services/user-service';
 import { AuthorizationComponent } from '@loopback/authorization';
+import { EmailService } from './services/email.service';
 
 /**
  * Information from package.json
@@ -96,6 +97,14 @@ export class DoctorCalendarServerApplication extends BootMixin(
       TokenServiceConstants.TOKEN_EXPIRES_IN_VALUE,
     );
 
+    this.bind(TokenServiceBindings.VERIFY_TOKEN_SECRET_VALUE).to(
+      TokenServiceConstants.VERIFY_TOKEN_SECRET_VALUE,
+    );
+
+    this.bind(TokenServiceBindings.VERIFY_TOKEN_EXPIRES_IN_VALUE).to(
+      TokenServiceConstants.VERIFY_TOKEN_EXPIRES_IN_VALUE,
+    );
+
     this.bind(TokenServiceBindings.TOKEN_SERVICE).toClass(JWTService);
 
     // Bind bcrypt hash services - utilized by 'UserController' and 'MyUserService'
@@ -103,6 +112,8 @@ export class DoctorCalendarServerApplication extends BootMixin(
     this.bind(PasswordHasherBindings.PASSWORD_HASHER).toClass(BcryptHasher);
 
     this.bind(UserServiceBindings.USER_SERVICE).toClass(MyUserService);
+
+    this.bind(EmailManagerBindings.SEND_MAIL).toClass(EmailService);
 
   }
 }

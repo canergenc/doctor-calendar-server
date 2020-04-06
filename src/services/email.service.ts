@@ -1,39 +1,55 @@
-import { inject, BindingScope, bind } from '@loopback/core';
-import { juggler } from '@loopback/repository';
+import { BindingScope, bind } from '@loopback/core';
+import { EmailServiceConstants } from '../keys';
+import { Email } from '../models/email.model';
+import { MailType } from '../enums/mailType.enum';
 
 const nodemailer = require('nodemailer');
-let set: any;
+let subBodyModel = {
+  subject: "",
+  body: ""
+}
+export interface EmailManager<T = Object> {
+  sendMail(mailObj: Email): Promise<T>;
+  setMailModel(fullName: string, to: string, mailType: MailType, url?: string): Promise<Email>
+}
 
 @bind({ scope: BindingScope.TRANSIENT })
 export class EmailService {
-  constructor(
-    @inject('datasources.mail') dataSource: juggler.DataSource
-  ) {
-    set = dataSource;
+
+  constructor() { }
+
+  async sendMail(mailObj: Email): Promise<object> {
+
+    const transporter = nodemailer.createTransport(EmailServiceConstants.EMAIL_CONFIG);
+    return await transporter.sendMail(mailObj);
+    // {
+    //   from: "wolfpackteamapps@gmail.com",
+    //   to: "canergenc93@gmail.com",
+    //   subject: "Sand Calendar Info Message",
+    //   html: "Welcome to Sand Calendar! :)"
+    // }
   }
 
-  public async SendMail() {
+  async setMailModel(fullName: string, to: string, mailType: MailType, url?: string): Promise<Email> {
 
-    //console.log(set.settings);
-    var transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: 'wolfpackteamapps@gmail.com',
-        pass: '1234@wolf'
-      }
-    });
-    try {
-      await transporter.sendMail({
-        from: "wolfpackteamapps@gmail.com",
-        to: "canergenc93@gmail.com",
-        subject: "Sand Calendar Info Message",
-        html: "Welcome to Sand Calendar! :)"
-      });
-    } catch (error) {
-      console.log(error)
+    const emailModel = new Email();
+    emailModel.to = to;
+    emailModel.from = EmailServiceConstants.EMAIL_CONFIG.auth.user;
+
+    switch (mailType) {
+      case MailType.Register:
+        emailModel.subject = "Sayın " + fullName + " Calendar Uygulamasına Hoşgeldiniz!";
+        emailModel.html = "Hesabınızı aktifleştirmek için lütfen aktivasyon linkine tıklayınız. " + url;
+        break;
+      case MailType.PasswordReset:
+        emailModel.subject = "Calendar Hesap Parola Sıfırlama";
+        emailModel.html = "Hesabınızın parolasını sıfırlamak için lütfen parola sıfırlama linkine tıklayınız. "
+        break;
     }
-
+    return emailModel;
 
   }
+
+
 
 }

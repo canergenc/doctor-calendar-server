@@ -3,10 +3,27 @@ import { TokenService, UserService } from "@loopback/authentication";
 import { PasswordHasher } from "./services/hash.password.bcryptjs";
 import { User } from "./models";
 import { Credentials } from "./repositories/user.repository";
+import { EmailManager } from './services/email.service';
 
 export namespace TokenServiceConstants {
   export const TOKEN_SECRET_VALUE = 'myjwtDctrClndrs3cr3t';
   export const TOKEN_EXPIRES_IN_VALUE = '2592000';
+  export const VERIFY_TOKEN_SECRET_VALUE = 'V3RiFys3cr3t';
+  export const VERIFY_TOKEN_EXPIRES_IN_VALUE = '60'/*'1800'*/;
+}
+
+export namespace EmailManagerBindings {
+  export const SEND_MAIL = BindingKey.create<EmailManager>('services.email.send');
+}
+
+export namespace EmailServiceConstants {
+  export const EMAIL_CONFIG = {
+    service: 'gmail',
+    auth: {
+      user: 'wolfpackteamapps@gmail.com',
+      pass: '1234@wolf'
+    }
+  }
 }
 
 export namespace DataSourceName {
@@ -14,11 +31,18 @@ export namespace DataSourceName {
 }
 
 export namespace TokenServiceBindings {
+
   export const TOKEN_SECRET = BindingKey.create<string>(
     'authentication.jwt.secret',
   );
   export const TOKEN_EXPIRES_IN = BindingKey.create<string>(
     'authentication.jwt.expires.in.seconds',
+  );
+  export const VERIFY_TOKEN_SECRET_VALUE = BindingKey.create<string>(
+    'authentication.jwt.verify.secret',
+  );
+  export const VERIFY_TOKEN_EXPIRES_IN_VALUE = BindingKey.create<string>(
+    'authentication.jwt.verify.expires.in.seconds',
   );
   export const TOKEN_SERVICE = BindingKey.create<TokenService>(
     'services.authentication.jwt.tokenservice',

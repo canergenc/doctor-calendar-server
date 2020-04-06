@@ -197,7 +197,7 @@ export class CalendarController {
     @requestBody({
       content: {
         'application/json': {
-          schema: getModelSchemaRef(Calendar),
+          schema: getModelSchemaRef(Calendar, { partial: true }),
         },
       },
     }) calendar: Calendar,

@@ -1,5 +1,5 @@
 import { Filter, repository, model, property, CountSchema, Count, Where } from '@loopback/repository';
-import { post, param, get, getFilterSchemaFor, getModelSchemaRef, del, requestBody, HttpErrors, getWhereSchemaFor } from '@loopback/rest';
+import { post, param, get, getFilterSchemaFor, getModelSchemaRef, del, requestBody, HttpErrors, getWhereSchemaFor, patch } from '@loopback/rest';
 import { UserProfile, securityId, SecurityBindings } from '@loopback/security';
 import { User, UserInfoOutputModel } from '../models';
 import { UserRepository, Credentials } from '../repositories';
@@ -118,6 +118,10 @@ export class UserController {
       await this.userRepository
         .userCredentials(savedUser.id)
         .create({ password });
+
+      const token = await this.myUserService.generateVerifyToken(savedUser.id)
+
+      this.myUserService.sendMailRegisterUser(savedUser.email, savedUser.fullName, token);
 
       return savedUser;
     } catch (error) {
@@ -238,6 +242,46 @@ export class UserController {
     return this.myUserService.printCurrentUser(currentUserProfile);
   }
 
+  @post('/users/verification', {
+    responses: {
+      '200': {
+        description: 'Email verification.',
+        content: {
+          'application/json': {
+            schema: {
+              type: 'string',
+            },
+          },
+        },
+      },
+    },
+  })
+  async verification(
+    @param.query.string('key') key: string
+  ): Promise<Boolean> {
+    return this.myUserService.verifyEmail(key);
+  }
+
+  @get('/users/re-verification', {
+    responses: {
+      '200': {
+        description: 'Activation Link Email re-verification.',
+        content: {
+          'application/json': {
+            schema: {
+              type: 'string',
+            },
+          },
+        },
+      },
+    },
+  })
+  async reVerification(
+    @param.query.string('email') email: string
+  ): Promise<Boolean> {
+    return this.myUserService.reVerify(email);
+  }
+
   @get('/users/emailCheck', {
     parameters: [{ name: 'email', schema: { type: 'string' }, in: 'query', required: true }],
     responses: {
@@ -283,11 +327,11 @@ export class UserController {
     return this.userRepository.findById(userId, filter);
   }
 
-  @post('/users/{userId}', {
+  @patch('/users/{userId}', {
     security: OPERATION_SECURITY_SPEC,
     responses: {
-      '200': {
-        description: 'User update success',
+      '204': {
+        description: 'User patch success',
       },
     },
   })
@@ -297,7 +341,7 @@ export class UserController {
     @requestBody({
       content: {
         'application/json': {
-          schema: getModelSchemaRef(User),
+          schema: getModelSchemaRef(User, { partial: true }),
         },
       },
     })
