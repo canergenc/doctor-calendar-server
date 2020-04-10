@@ -50,6 +50,11 @@ export class User extends Entity {
   })
   deviceId?: string;
 
+  @property({
+    type: 'date'
+  })
+  workStartDate: Date;
+
   @hasOne(() => UserCredentials)
   userCredentials: UserCredentials;
 
@@ -84,7 +89,7 @@ export class User extends Entity {
 
   @property({
     type: 'boolean',
-    default: () => false,
+    default: () => true,
   })
   isActive: boolean;
 

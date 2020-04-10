@@ -70,8 +70,15 @@ export class MyUserService implements UserService<User, Credentials> {
       throw new HttpErrors.Unauthorized(`Token oluşturulamadı : ${error}`);
     }
     return token;
+  }
+
+  async resetPassword() {
 
   }
+
+  // async updateById(): Promise<> {
+
+  // }
 
   async verifyEmail(key: string): Promise<boolean> {
     const res = await this.decodeToken(key, this.jwtVerifySecret);
@@ -91,18 +98,18 @@ export class MyUserService implements UserService<User, Credentials> {
       throw new HttpErrors.BadRequest(invalidCredentialsError);
     }
 
-    if (!foundUser.isActive) {
-      throw new HttpErrors.BadRequest("Kullanıcı aktif hale getirilmelidir. Lütfen sistem yöneticisine danışınız!");
-    }
+    // if (!foundUser.isActive) {
+    //   throw new HttpErrors.BadRequest("Kullanıcı aktif hale getirilmelidir. Lütfen sistem yöneticisine danışınız!");
+    // }
     const credentialsFound = await this.userCredentialsRepository.findOne({ where: { userId: { like: foundUser.id } } });
 
     if (!credentialsFound) {
       throw new HttpErrors.BadRequest(invalidCredentialsError);
     }
 
-    if (!credentialsFound.emailVerified) {
-      throw new HttpErrors.BadRequest("Lütfen email doğrulaması yapınız!");
-    }
+    // if (!credentialsFound.emailVerified) {
+    //   throw new HttpErrors.BadRequest("Lütfen email doğrulaması yapınız!");
+    // }
 
     const passwordMatched = await this.passwordHasher.comparePassword(
       credentials.password,

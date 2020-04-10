@@ -1,4 +1,4 @@
-import { Entity, model, property } from '@loopback/repository';
+import { Entity, model, property, Model } from '@loopback/repository';
 
 @model({
   settings: {
@@ -29,14 +29,9 @@ export class UserCredentials extends Entity {
 
   @property({
     type: 'boolean',
-    default: () => false,
+    default: () => true,
   })
   emailVerified: boolean;
-
-  @property({
-    type: 'string'
-  })
-  emailVerificationToken: string;
 
   @property({
     type: 'date',
@@ -70,6 +65,21 @@ export class UserCredentials extends Entity {
   constructor(data?: Partial<UserCredentials>) {
     super(data);
   }
+}
+
+@model()
+export class ResetPassword extends Model {
+  @property({
+    type: 'string',
+    required: true,
+    jsonSchema: {
+      maxLength: 16,
+      minLength: 8,
+      errorMessage:
+        'parola minimum 8 karakter uzunluğunda olmalı!',
+    },
+  })
+  password: string;
 }
 
 export interface UserCredentialsRelations {

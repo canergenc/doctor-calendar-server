@@ -32,6 +32,11 @@ export class Location extends Entity {
   groupId?: string;
 
   @property({
+    type: 'number',
+  })
+  sortOrder?: Number;
+
+  @property({
     type: 'date',
     default: () => new Date(),
   })
@@ -57,7 +62,7 @@ export class Location extends Entity {
     type: 'boolean',
     default: () => false,
   })
-  isDeleted?: boolean;
+  isDeleted: boolean;
 
   constructor(data?: Partial<Location>) {
     super(data);

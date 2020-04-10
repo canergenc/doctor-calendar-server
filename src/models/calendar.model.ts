@@ -86,7 +86,7 @@ export class Calendar extends Entity {
     type: 'boolean',
     default: () => false,
   })
-  isDeleted?: boolean;
+  isDeleted: boolean;
 
   constructor(data?: Partial<Calendar>) {
     super(data);

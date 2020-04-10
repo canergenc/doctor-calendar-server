@@ -1,7 +1,7 @@
 import { Filter, repository, model, property, CountSchema, Count, Where } from '@loopback/repository';
 import { post, param, get, getFilterSchemaFor, getModelSchemaRef, del, requestBody, HttpErrors, getWhereSchemaFor, patch } from '@loopback/rest';
 import { UserProfile, securityId, SecurityBindings } from '@loopback/security';
-import { User, UserInfoOutputModel } from '../models';
+import { User, UserInfoOutputModel, ResetPassword } from '../models';
 import { UserRepository, Credentials } from '../repositories';
 import { authenticate, TokenService, UserService } from '@loopback/authentication';
 import { inject, service } from '@loopback/core';
@@ -16,41 +16,18 @@ import { MyUserService } from '../services/user-service';
 import { RoleType } from '../enums/roleType.enum';
 
 @model()
-export class NewUserRequest {
-  @property({
-    type: 'string',
-    format: 'email',
-    required: true,
-  })
-  email: string;
-
+export class NewUserRequest extends User {
   @property({
     type: 'string',
     required: true,
+    jsonSchema: {
+      maxLength: 16,
+      minLength: 8,
+      errorMessage:
+        'parola minimum 8 karakter uzunluğunda olmalı!',
+    },
   })
   password: string;
-
-  @property({
-    type: 'string',
-    required: true,
-  })
-  fullName: string;
-
-  @property({
-    type: 'string'
-  })
-  title: string;
-
-  @property({
-    type: 'string',
-  })
-  deviceId?: string;
-
-  @property({
-    type: 'array',
-    itemType: 'string',
-  })
-  roles?: string[];
 }
 
 export class UserController {
@@ -119,9 +96,9 @@ export class UserController {
         .userCredentials(savedUser.id)
         .create({ password });
 
-      const token = await this.myUserService.generateVerifyToken(savedUser.id)
+      // const token = await this.myUserService.generateVerifyToken(savedUser.id)
 
-      this.myUserService.sendMailRegisterUser(savedUser.email, savedUser.fullName, token);
+      // this.myUserService.sendMailRegisterUser(savedUser.email, savedUser.fullName, token);
 
       return savedUser;
     } catch (error) {
@@ -249,7 +226,12 @@ export class UserController {
         content: {
           'application/json': {
             schema: {
-              type: 'string',
+              type: 'boolean',
+              properties: {
+                success: {
+                  type: 'boolean',
+                },
+              }
             },
           },
         },
@@ -269,8 +251,13 @@ export class UserController {
         content: {
           'application/json': {
             schema: {
-              type: 'string',
-            },
+              type: 'boolean',
+              properties: {
+                success: {
+                  type: 'boolean',
+                },
+              }
+            }
           },
         },
       },
@@ -280,6 +267,65 @@ export class UserController {
     @param.query.string('email') email: string
   ): Promise<Boolean> {
     return this.myUserService.reVerify(email);
+  }
+
+  @post('/users/forgot', {
+    responses: {
+      '200': {
+        description: 'Account forgot password service',
+        content: {
+          'application/json': {
+            schema: {
+              type: 'boolean',
+              properties: {
+                success: {
+                  type: 'boolean',
+                },
+              }
+            },
+          },
+        },
+      },
+    },
+  })
+  async forgot(
+    @param.query.string('email') email: string
+  ): Promise<Boolean> {
+    return this.myUserService.verifyEmail(email);
+  }
+
+  @patch('/users/reset', {
+    responses: {
+      '200': {
+        description: 'Account reset password service',
+        content: {
+          'application/json': {
+            schema: {
+              type: 'boolean',
+              properties: {
+                success: {
+                  type: 'boolean',
+                },
+              }
+            },
+          },
+        },
+      },
+    },
+  })
+  @authenticate('jwt')
+  async reset(
+    @requestBody({
+      content: {
+        'application/json': {
+          schema: getModelSchemaRef(ResetPassword),
+        },
+      },
+    })
+    resetPassword: ResetPassword,
+  ): Promise<Boolean> {
+    //validatePassword(password.password);
+    return true; //this.myUserService.resetPassword(resetPassword);
   }
 
   @get('/users/emailCheck', {

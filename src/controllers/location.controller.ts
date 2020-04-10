@@ -45,7 +45,6 @@ export class LocationController {
         'application/json': {
           schema: getModelSchemaRef(Location, {
             title: 'NewLocation',
-
           }),
         },
       },
@@ -63,15 +62,10 @@ export class LocationController {
         content: {
           'application/json': {
             schema: {
-              'x-ts-type': {
-                type: 'array',
-                items: {
-                  type: 'array',
-                  items: {
-                    'x-ts-type': Location,
-                  },
-                },
-              }
+              type: 'array',
+              items: {
+                'x-ts-type': Location,
+              },
             }
           }
         },
@@ -83,22 +77,41 @@ export class LocationController {
       content: {
         'application/json': {
           schema: {
-            'x-ts-type': {
-              type: 'array',
-              items: {
-                type: 'array',
-                items: {
-                  'x-ts-type': Location,
-                },
-              },
-            }
+            type: 'array',
+            items: {
+              'x-ts-type': Location,
+            },
           }
         }
-      }
+      },
     })
     locations: Location[],
   ): Promise<Location[]> {
     return this.locationService.createBulk(locations);
+  }
+
+  @patch('/locations/bulk', {
+    security: OPERATION_SECURITY_SPEC,
+    responses: {
+      '204': {
+        description: 'Locations patch success'
+      },
+    },
+  })
+  async updateBulk(
+    @requestBody({
+      content: {
+        'application/json': {
+          schema: {
+            type: 'array',
+            items: getModelSchemaRef(Location, { partial: true })
+          }
+        }
+      },
+    })
+    locations: Location[],
+  ): Promise<void> {
+    await this.locationService.updateBulk(locations);
   }
 
   @get('/locations/count', {
@@ -191,7 +204,7 @@ export class LocationController {
     @requestBody({
       content: {
         'application/json': {
-          schema: getModelSchemaRef(Location),
+          schema: getModelSchemaRef(Location, { partial: true }),
         },
       },
     })

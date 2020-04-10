@@ -65,15 +65,10 @@ export class CalendarController {
         content: {
           'application/json': {
             schema: {
-              'x-ts-type': {
-                type: 'array',
-                items: {
-                  type: 'array',
-                  items: {
-                    'x-ts-type': Calendar,
-                  },
-                },
-              }
+              type: 'array',
+              items: {
+                'x-ts-type': Calendar,
+              },
             }
           }
         },
@@ -85,19 +80,13 @@ export class CalendarController {
       content: {
         'application/json': {
           schema: {
-            'x-ts-type': {
-              type: 'array',
-              items: {
-                type: 'array',
-                items: {
-                  'x-ts-type': Calendar,
-                },
-              },
+            type: 'array',
+            items: {
+              'x-ts-type': Calendar,
             },
-            title: "New Calendar List Create"
           }
         }
-      }
+      },
     })
     calendars: Calendar[],
   ): Promise<Calendar[]> {
