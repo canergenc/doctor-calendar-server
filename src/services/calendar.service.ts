@@ -20,7 +20,7 @@ export class CalendarService {
     delete this.currentUserProfile[securityId];
 
     /*calendar rest day control */
-    await this.dataControl(calendar);
+    await this.dataValidate(calendar);
 
     return this.calendarRepository.create(calendar);
   }
@@ -30,7 +30,7 @@ export class CalendarService {
       for (const calendar of calendars) {
         calendar.createdUserId = calendar.updatedUserId = this.currentUserProfile[securityId];
         /*calendar rest day control */
-        await this.dataControl(calendar);
+        await this.dataValidate(calendar);
       }
       return await this.calendarRepository.createAll(calendars);
     } catch (error) {
@@ -38,7 +38,7 @@ export class CalendarService {
     }
   }
 
-  private async dataControl(calendar: Calendar): Promise<void> {
+  private async dataValidate(calendar: Calendar): Promise<void> {
     if (calendar && calendar.date && calendar.userId) {
       /* Duplicate Control */
       const duplicateResult = await this.calendarRepository.findOne({
@@ -50,16 +50,18 @@ export class CalendarService {
       });
       if (duplicateResult) throw new HttpErrors.BadRequest('İlgili kullanıcının bu tarihe ait kaydı bulunmaktadır, takvime eklenemez!');
     }
+
   }
 
   async updateAll(calendar: Calendar, where?: Where<Calendar>): Promise<Count> {
-    await this.dataControl(calendar);
+    await this.dataValidate(calendar);
     calendar.updatedDate = new Date();
     calendar.updatedUserId = this.currentUserProfile[securityId];
     return this.calendarRepository.updateAll(calendar, where);
   }
 
   async updateById(id: string, calendar: Calendar): Promise<void> {
+    await this.dataValidate(calendar);
     calendar.updatedDate = new Date();
     calendar.updatedUserId = this.currentUserProfile[securityId];
     delete this.currentUserProfile[securityId];

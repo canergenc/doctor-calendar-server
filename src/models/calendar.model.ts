@@ -50,6 +50,12 @@ export class Calendar extends Entity {
   calendarGroupId?: string;
 
   @property({
+    type: "boolean",
+    default: false
+  })
+  weekendStatus?: boolean;
+
+  @property({
     type: 'date',
     default: () => new Date(),
   })

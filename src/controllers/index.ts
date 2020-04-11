@@ -13,3 +13,7 @@ export * from './user-group-user.controller';
 export * from './user-role-user.controller';
 export * from './user-role-role.controller';
 export * from './role.controller';
+export * from './error-log.controller';
+export * from './notification.controller';
+export * from './user-setting-user.controller';
+export * from './user-setting.controller';

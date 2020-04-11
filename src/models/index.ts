@@ -6,3 +6,6 @@ export * from './location.model';
 export * from './user-credentials.model';
 export * from './group.model';
 export * from './user-group.model';
+export * from './error-log.model';
+export * from './notification.model';
+export * from './user-setting.model';

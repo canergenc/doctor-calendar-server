@@ -6,3 +6,6 @@ export * from './calendar.repository';
 export * from './user-credentials.repository';
 export * from './group.repository';
 export * from './user-group.repository';
+export * from './error-log.repository';
+export * from './notification.repository';
+export * from './user-setting.repository';

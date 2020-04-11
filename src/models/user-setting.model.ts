@@ -1,5 +1,5 @@
 import { Entity, model, property, belongsTo } from '@loopback/repository';
-import { Group } from './group.model';
+import { User } from './user.model';
 
 @model({
   settings: {
@@ -9,54 +9,53 @@ import { Group } from './group.model';
     }
   }
 })
-export class Location extends Entity {
+export class UserSetting extends Entity {
   @property({
     type: 'string',
     id: true,
     generated: true,
   })
-  id: string;
+  id?: string;
 
-  @property({
-    type: 'string',
-    required: true,
-  })
-  name: string;
-
-  @property({
-    type: 'string',
-  })
-  colorCode?: string;
-
-  @belongsTo(() => Group)
-  groupId?: string;
+  @belongsTo(() => User)
+  userId: string;
 
   @property({
     type: 'number',
   })
-  sortOrder: number;
+  weekdayCountLimit?: number;
+
+  @property({
+    type: 'number',
+  })
+  weekendCountLimit?: number;
+
+  @property({
+    type: 'number',
+  })
+  sequentialCountLimit?: number;
 
   @property({
     type: 'date',
     default: () => new Date(),
   })
-  createdDate?: Date;
+  createdDate: Date;
 
   @property({
     type: 'date',
     default: () => new Date(),
   })
-  updatedDate?: Date;
+  updatedDate: Date;
 
   @property({
     type: 'string',
   })
-  createdUserId?: string;
+  createdUserId: string;
 
   @property({
     type: 'string',
   })
-  updatedUserId?: string;
+  updatedUserId: string;
 
   @property({
     type: 'boolean',
@@ -64,7 +63,13 @@ export class Location extends Entity {
   })
   isDeleted: boolean;
 
-  constructor(data?: Partial<Location>) {
+  constructor(data?: Partial<UserSetting>) {
     super(data);
   }
 }
+
+export interface UserSettingRelations {
+  // describe navigational properties here
+}
+
+export type UserSettingWithRelations = UserSetting & UserSettingRelations;

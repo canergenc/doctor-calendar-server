@@ -1,7 +1,6 @@
 import { inject } from "@loopback/core";
 import { PasswordHasherBindings } from "../keys";
-import { genSalt, hash } from 'bcryptjs';
-import { compare } from 'bcryptjs';
+import { genSalt, hash, compare } from 'bcryptjs';
 
 export interface PasswordHasher<T = string> {
   hashPassword(password: T): Promise<T>;

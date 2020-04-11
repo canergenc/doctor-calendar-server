@@ -55,6 +55,16 @@ export class User extends Entity {
   })
   workStartDate: Date;
 
+  @property({
+    type: 'number'
+  })
+  weekendCount: number;
+
+  @property({
+    type: 'number'
+  })
+  weekdayCount: number;
+
   @hasOne(() => UserCredentials)
   userCredentials: UserCredentials;
 
