@@ -1,5 +1,5 @@
 import { UserService } from "@loopback/authentication";
-import { User, UserInfoOutputModel } from "../models";
+import { User, UserInfoOutputModel, ResetPassword } from "../models";
 import { Credentials, UserRepository } from "../repositories/user.repository";
 import { HttpErrors } from "@loopback/rest";
 import { repository } from "@loopback/repository";
@@ -12,10 +12,15 @@ import { UserGroupRepository, UserRoleRepository, GroupRepository, RoleRepositor
 import { promisify } from "util";
 import { EmailManager } from './email.service';
 import { MailType } from '../enums/mailType.enum';
+import { RoleType } from '../enums/roleType.enum';
+import { NewUserRequest } from '../controllers';
+import isemail from 'isemail';
 
 const jwt = require('jsonwebtoken');
 const verifyAsync = promisify(jwt.verify);
 const signAsync = promisify(jwt.sign);
+
+const invalidCredentialsError = 'Geçersiz email veya parola!';
 
 export class MyUserService implements UserService<User, Credentials> {
   constructor(
@@ -72,23 +77,89 @@ export class MyUserService implements UserService<User, Credentials> {
     return token;
   }
 
-  async resetPassword() {
-
-  }
-
-  // async updateById(): Promise<> {
-
-  // }
-
   async verifyEmail(key: string): Promise<boolean> {
+    if (!key) {
+      throw new HttpErrors.BadRequest("Hatalı istek!");
+    }
     const res = await this.decodeToken(key, this.jwtVerifySecret);
-    console.log(res);
     const foundCredentialUserCount = await this.userCredentialsRepository.updateAll({ emailVerified: true }, { userId: { like: res?.decodeModel?.userId } });
     return foundCredentialUserCount.count > 0 ? true : false;
   }
 
+  async forgot(email: string): Promise<boolean> {
+    const foundUser = await this.userRepository.findOne({ where: { email: { like: email } } });
+    if (!foundUser) {
+      throw new HttpErrors.BadRequest("Bu adrese ait kayıtlı hesap bulunamadı!");
+    }
+    const token = await this.generateVerifyToken(foundUser.id);
+    if (!token) { throw new HttpErrors.BadRequest("Bir hata oluştu! Lütfen sistem yöneticisine danışınız!"); }
+    await this.sendMailForgotPassword(email, foundUser.fullName, token);
+    return true;
+  }
+
+  async resetPassword(key: string, resetPassword: ResetPassword): Promise<boolean> {
+    if (!key) {
+      throw new HttpErrors.BadRequest("Hatalı istek!");
+    }
+    const res = await this.decodeToken(key, this.jwtVerifySecret);
+    if (res.decodeModel.userId) {
+      const foundUser = await this.userRepository.findById(res.decodeModel.userId);
+      if (foundUser) {
+        await this.passwordUpdate(res.decodeModel.userId, resetPassword.password);
+      }
+      else {
+        throw new HttpErrors.BadRequest("Kullancı bulunamadı! Lütfen sistem yöneticisine danışınız!")
+      }
+    }
+    return true;
+  }
+
+  async updateById(id: string, user: NewUserRequest, currentUserProfile: UserProfile): Promise<void> {
+
+    if (!currentUserProfile.roles?.includes(RoleType.Admin)) {
+      delete user.roles;
+    }
+
+    user.updatedDate = new Date();
+    user.updatedUserId = currentUserProfile[securityId];
+
+    if (user.email) {
+      await this.validateEmail(id, user.email);
+    }
+
+    if (user.password) {
+      /**Password Update */
+      await this.passwordUpdate(id, user.password)
+    }
+
+    await this.userRepository.updateById(id, user);
+  }
+
+  private async passwordUpdate(userId: string, password: string): Promise<void> {
+    if (password.length >= 8 && password.length <= 16) {
+      const foundUserCredential = await this.userCredentialsRepository.findOne({ where: { userId: { like: userId } } });
+      if (foundUserCredential) {
+        /**Compare Password */
+        await this.comparePassword(password, foundUserCredential.password);
+
+        // encrypt the password
+        const hashNewPassword = await this.passwordHasher.hashPassword(
+          password,
+        );
+        if (hashNewPassword) {
+          await this.userCredentialsRepository.updateAll({ password: hashNewPassword }, { userId: userId });
+        } else {
+          throw new HttpErrors.BadRequest("Parola kayıt edilemedi! Lütfen sistem yöneticisine danışınız!");
+        }
+      } else {
+        throw new HttpErrors.BadRequest("Kullanıcı bulunamadı!");
+      }
+    } else {
+      throw new HttpErrors.BadRequest("Parola minimum 8 karakter uzunluğunda olmalı!");
+    }
+  }
+
   async verifyCredentials(credentials: Credentials): Promise<User> {
-    const invalidCredentialsError = 'Geçersiz email veya parola!';
 
     const foundUser = await this.userRepository.findOne({
       where: { email: credentials.email },
@@ -111,15 +182,35 @@ export class MyUserService implements UserService<User, Credentials> {
     //   throw new HttpErrors.BadRequest("Lütfen email doğrulaması yapınız!");
     // }
 
+    /**Compare Password */
+    await this.comparePassword(credentials.password, credentialsFound.password);
+
+
+    return foundUser;
+  }
+
+  async comparePassword(providedPass: string, storedPass: string): Promise<boolean> {
     const passwordMatched = await this.passwordHasher.comparePassword(
-      credentials.password,
-      credentialsFound.password,
+      providedPass,
+      storedPass,
     );
     if (!passwordMatched) {
       throw new HttpErrors.BadRequest(invalidCredentialsError);
     }
+    return passwordMatched;
+  }
 
-    return foundUser;
+  async validateEmail(userId: string, email: string): Promise<void> {
+    // Validate Email
+    if (!isemail.validate(email)) {
+      throw new HttpErrors.BadRequest('Hatalı email');
+    }
+    const foundUser = await this.userRepository.findOne({ where: { id: userId } });
+    if (foundUser?.email != email) {
+      const foundUserEmail = await this.userRepository.findEmail(email);
+      if (foundUserEmail)
+        throw new HttpErrors.BadRequest("Bu email daha önce kayıt edilmiş!");
+    }
   }
 
   async reVerify(email: string): Promise<boolean> {
@@ -136,9 +227,27 @@ export class MyUserService implements UserService<User, Credentials> {
     }
   }
 
+  async sendMailForgotPassword(email: string, fullName: string, token: string): Promise<void> {
+
+    const url = `http://localhost:3000/users/resetPassword/${token}`;
+
+    await this.emailManager.setMailModel(fullName, email, MailType.PasswordReset, url).then((response) => {
+
+      this.emailManager.sendMail(response).then((res) => {
+        console.log(res);
+        //return { message: `${email} adresine aktivasyon maili gönderilmiştir. Lütfen mailinizi kontrol ediniz.` };
+      }).catch((error) => {
+        console.log(error);
+        //throw new HttpErrors.UnprocessableEntity(`${email} adresine mail gönderiminde hata oluştu! Lütfen sistem yöneticisine danışınız!`);
+      });
+    }
+
+    )
+  }
+
   async sendMailRegisterUser(email: string, fullName: string, token: string): Promise<void> {
 
-    const url = `http://localhost:3000/users/verification?key=${token}`;
+    const url = `http://localhost:3000/users/verification/${token}`;
 
     await this.emailManager.setMailModel(fullName, email, MailType.Register, url).then((response) => {
 

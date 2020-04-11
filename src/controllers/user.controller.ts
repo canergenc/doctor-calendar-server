@@ -219,7 +219,7 @@ export class UserController {
     return this.myUserService.printCurrentUser(currentUserProfile);
   }
 
-  @post('/users/verification', {
+  @post('/users/verification/{key}', {
     responses: {
       '200': {
         description: 'Email verification.',
@@ -239,7 +239,7 @@ export class UserController {
     },
   })
   async verification(
-    @param.query.string('key') key: string
+    @param.path.string('key') key: string
   ): Promise<Boolean> {
     return this.myUserService.verifyEmail(key);
   }
@@ -291,10 +291,10 @@ export class UserController {
   async forgot(
     @param.query.string('email') email: string
   ): Promise<Boolean> {
-    return this.myUserService.verifyEmail(email);
+    return this.myUserService.forgot(email);
   }
 
-  @patch('/users/reset', {
+  @post('/users/resetPassword/{key}', {
     responses: {
       '200': {
         description: 'Account reset password service',
@@ -313,8 +313,8 @@ export class UserController {
       },
     },
   })
-  @authenticate('jwt')
   async reset(
+    @param.path.string('key') key: string,
     @requestBody({
       content: {
         'application/json': {
@@ -324,8 +324,7 @@ export class UserController {
     })
     resetPassword: ResetPassword,
   ): Promise<Boolean> {
-    //validatePassword(password.password);
-    return true; //this.myUserService.resetPassword(resetPassword);
+    return this.myUserService.resetPassword(key, resetPassword);
   }
 
   @get('/users/emailCheck', {
@@ -387,24 +386,15 @@ export class UserController {
     @requestBody({
       content: {
         'application/json': {
-          schema: getModelSchemaRef(User, { partial: true }),
+          schema: getModelSchemaRef(NewUserRequest, { partial: true }),
         },
       },
     })
-    user: User,
+    user: NewUserRequest,
     @inject(SecurityBindings.USER)
     currentUserProfile: UserProfile,
   ): Promise<void> {
-    try {
-      // Only admin can assign roles
-      if (!currentUserProfile.roles?.includes(RoleType.Admin)) {
-        delete user.roles;
-      }
-      user.updatedDate = new Date();
-      await this.userRepository.updateById(userId, user);
-    } catch (error) {
-      throw new HttpErrors.BadRequest(error.message);
-    }
+    await this.myUserService.updateById(userId, user, currentUserProfile);
   }
 
   @del('/users/{userId}', {
