@@ -24,7 +24,7 @@ export class CalendarService {
     delete this.currentUserProfile[securityId];
 
     /*calendar rest day control */
-    await this.dataValidate(calendar);
+    await this.dataValidate(calendar, true, true, true);
 
     return this.calendarRepository.create(calendar);
   }
@@ -34,7 +34,7 @@ export class CalendarService {
       for (const calendar of calendars) {
         calendar.createdUserId = calendar.updatedUserId = this.currentUserProfile[securityId];
         /*calendar rest day control */
-        await this.dataValidate(calendar);
+        await this.dataValidate(calendar, true, true, true);
       }
       return await this.calendarRepository.createAll(calendars);
     } catch (error) {
@@ -42,16 +42,19 @@ export class CalendarService {
     }
   }
 
-  private async dataValidate(calendar: Calendar): Promise<void> {
+  private async dataValidate(calendar: Calendar, userGroupValidate: boolean, duplicateValidate: boolean, groupSettingValidate: boolean): Promise<void> {
 
-    await this.userGroupRelationControl(calendar);
-    await this.duplicateControl(calendar);
-    await this.groupSettingValidate(calendar);
+    if (userGroupValidate)
+      await this.userGroupRelationControl(calendar);
+    if (duplicateValidate)
+      await this.duplicateValidate(calendar);
+    if (groupSettingValidate)
+      await this.groupSettingValidate(calendar);
 
   }
 
-  private async duplicateControl(calendar: Calendar): Promise<void> {
-    if (!calendar.date && !calendar.userId) return;
+  private async duplicateValidate(calendar: Calendar): Promise<void> {
+    if (!calendar.date || !calendar.userId) return;
     /* Duplicate Control */
     const duplicateResult = await this.calendarRepository.findOne({
       where:
@@ -65,7 +68,7 @@ export class CalendarService {
   }
 
   private async groupSettingValidate(calendar: Calendar): Promise<void> {
-    if (!calendar.groupId && !calendar.userId) return;
+    if (!calendar.groupId || !calendar.userId) return;
 
     const groupSetting = await this.groupSettingRepository.findOne({ where: { groupId: { like: calendar.groupId } } });
     const userData = await this.userRepository.findById(calendar.userId);
@@ -96,21 +99,35 @@ export class CalendarService {
   }
 
   private async userGroupRelationControl(calendar: Calendar): Promise<void> {
+    if (!calendar.userId || !calendar.groupId) return;
     const foundUserGroup = await this.userGroupRepository.findOne({ where: { userId: { like: calendar.userId }, groupId: { like: calendar.groupId } } });
     if (!foundUserGroup) {
       throw new HttpErrors.BadRequest('İlgili kullanıcının bu gruba ait ilişki bulunmaktadır. Kayıt atanamaz!');
     }
   }
 
+  private async updateValidateSet(id: string, calendar: Calendar): Promise<Calendar> {
+    const foundCalendar = await this.calendarRepository.findById(id);
+
+    if (!calendar.groupId) {
+      calendar.groupId = foundCalendar.groupId;
+    }
+    if (!calendar.userId) {
+      calendar.userId = foundCalendar.userId;
+    }
+    return calendar;
+  }
+
   async updateAll(calendar: Calendar, where?: Where<Calendar>): Promise<Count> {
-    await this.dataValidate(calendar);
+    await this.dataValidate(calendar, false, true, true);
     calendar.updatedDate = new Date();
     calendar.updatedUserId = this.currentUserProfile[securityId];
     return this.calendarRepository.updateAll(calendar, where);
   }
 
   async updateById(id: string, calendar: Calendar): Promise<void> {
-    await this.dataValidate(calendar);
+    calendar = await this.updateValidateSet(id, calendar);
+    await this.dataValidate(calendar, true, true, true);
     calendar.updatedDate = new Date();
     calendar.updatedUserId = this.currentUserProfile[securityId];
     delete this.currentUserProfile[securityId];
