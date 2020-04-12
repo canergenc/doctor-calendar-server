@@ -8,13 +8,23 @@ import { Group } from './group.model';
     scope: {
       where: { or: [{ isDeleted: false }] }
     }
-  }
+  },
+  indexes: {
+    uniqueGroup: {
+      keys: {
+        groupId: 1,
+      },
+      options: {
+        unique: true,
+      },
+    },
+  },
 })
 export class GroupSetting extends Entity {
   @property({
     type: 'string',
     id: true,
-    generated: true,
+    generated: true
   })
   id?: string;
   @property({

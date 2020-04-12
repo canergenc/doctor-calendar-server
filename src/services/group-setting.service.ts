@@ -17,13 +17,28 @@ export class GroupSettingService {
     return this.groupSettingRepository.create(groupSetting);
   }
 
+  async validateControl(groupSetting: GroupSetting): Promise<void> {
+    const foundGroupSetting = await this.groupSettingRepository.findOne({ where: { groupId: { like: groupSetting.groupId } } })
+    if (foundGroupSetting) {
+      throw new HttpErrors.BadRequest("Bu gruba ait daha önce ayar kayıt edilmiş! Kayıt atılamaz!")
+    }
+  }
+
+  async uniqueGroupValidate(groupSetting: GroupSetting): Promise<void> {
+    if (groupSetting.groupId) {
+      delete groupSetting.groupId
+    }
+  }
+
   async updateAll(groupSetting: GroupSetting, where?: Where<GroupSetting>): Promise<Count> {
+    await this.uniqueGroupValidate(groupSetting);
     groupSetting.updatedDate = new Date();
     groupSetting.updatedUserId = this.currentUserProfile[securityId];
     return this.groupSettingRepository.updateAll(groupSetting, where);
   }
 
   async updateById(id: string, groupSetting: GroupSetting): Promise<void> {
+    await this.uniqueGroupValidate(groupSetting);
     groupSetting.updatedDate = new Date();
     groupSetting.updatedUserId = this.currentUserProfile[securityId];
     await this.groupSettingRepository.updateById(id, groupSetting);
