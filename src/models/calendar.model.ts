@@ -51,9 +51,9 @@ export class Calendar extends Entity {
 
   @property({
     type: "boolean",
-    default: false
+    required: true
   })
-  weekendStatus?: boolean;
+  isWeekend?: boolean;
 
   @property({
     type: 'date',

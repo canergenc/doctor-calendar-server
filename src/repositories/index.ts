@@ -8,4 +8,4 @@ export * from './group.repository';
 export * from './user-group.repository';
 export * from './error-log.repository';
 export * from './notification.repository';
-export * from './user-setting.repository';
+export * from './group-setting.repository';

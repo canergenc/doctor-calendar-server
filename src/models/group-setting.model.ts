@@ -1,5 +1,6 @@
 import { Entity, model, property, belongsTo } from '@loopback/repository';
-import { User } from './user.model';
+import { Group } from './group.model';
+
 
 @model({
   settings: {
@@ -9,67 +10,65 @@ import { User } from './user.model';
     }
   }
 })
-export class UserSetting extends Entity {
+export class GroupSetting extends Entity {
   @property({
     type: 'string',
     id: true,
     generated: true,
   })
   id?: string;
-
-  @belongsTo(() => User)
-  userId: string;
-
   @property({
-    type: 'number',
+    type: 'boolean',
   })
-  weekdayCountLimit?: number;
-
-  @property({
-    type: 'number',
-  })
-  weekendCountLimit?: number;
-
-  @property({
-    type: 'number',
-  })
-  sequentialCountLimit?: number;
-
-  @property({
-    type: 'date',
-    default: () => new Date(),
-  })
-  createdDate: Date;
-
-  @property({
-    type: 'date',
-    default: () => new Date(),
-  })
-  updatedDate: Date;
-
-  @property({
-    type: 'string',
-  })
-  createdUserId: string;
-
-  @property({
-    type: 'string',
-  })
-  updatedUserId: string;
+  isWeekdayControl?: boolean;
 
   @property({
     type: 'boolean',
-    default: () => false,
   })
-  isDeleted: boolean;
+  isWeekendControl?: boolean;
 
-  constructor(data?: Partial<UserSetting>) {
+  @property({
+    type: 'number',
+  })
+  sequentialOrderLimitCount?: number;
+
+  @property({
+    type: 'date',
+    default: new Date(),
+  })
+  createdDate?: Date;
+
+  @property({
+    type: 'date',
+    default: new Date(),
+  })
+  updatedDate?: Date;
+
+  @property({
+    type: 'string',
+  })
+  createdUserId?: string;
+
+  @property({
+    type: 'string',
+  })
+  updatedUserId?: string;
+
+  @property({
+    type: 'boolean',
+  })
+  isDeleted?: boolean;
+
+  @belongsTo(() => Group)
+  groupId: string;
+
+  constructor(data?: Partial<GroupSetting>) {
     super(data);
   }
 }
 
-export interface UserSettingRelations {
+export interface GroupSettingRelations {
   // describe navigational properties here
 }
 
-export type UserSettingWithRelations = UserSetting & UserSettingRelations;
+export type GroupSettingWithRelations = GroupSetting & GroupSettingRelations;
