@@ -1,7 +1,7 @@
 import { bind, BindingScope, inject } from '@loopback/core';
-import { SecurityBindings, securityId, UserProfile } from '@loopback/authentication/node_modules/@loopback/security';
+import { UserProfile, securityId, SecurityBindings } from '@loopback/security';
 import { GroupSettingRepository } from '../repositories';
-import { repository, Where, Count } from '@loopback/boot/node_modules/@loopback/repository';
+import { repository, Where, Count } from '@loopback/repository';
 import { GroupSetting } from '../models';
 import { HttpErrors } from '@loopback/rest';
 
