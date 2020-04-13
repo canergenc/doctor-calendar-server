@@ -219,19 +219,15 @@ export class UserController {
     return this.myUserService.printCurrentUser(currentUserProfile);
   }
 
-  @post('/users/verification/{key}', {
+  @get('/users/verification/{key}', {
+    parameters: [{ name: 'key', schema: { type: 'string' }, in: 'path', required: true }],
     responses: {
       '200': {
-        description: 'Email verification.',
+        description: 'Account verify api.',
         content: {
           'application/json': {
             schema: {
-              type: 'boolean',
-              properties: {
-                success: {
-                  type: 'boolean',
-                },
-              }
+              type: 'boolean'
             },
           },
         },
@@ -244,20 +240,16 @@ export class UserController {
     return this.myUserService.verifyEmail(key);
   }
 
-  @post('/users/re-verification', {
+  @get('/users/re-verification', {
+    parameters: [{ name: 'email', schema: { type: 'string' }, in: 'query', required: true }],
     responses: {
       '200': {
-        description: 'Activation Link Email re-verification.',
+        description: 'Account re-verify api.',
         content: {
           'application/json': {
             schema: {
-              type: 'boolean',
-              properties: {
-                success: {
-                  type: 'boolean',
-                },
-              }
-            }
+              type: 'boolean'
+            },
           },
         },
       },
@@ -269,19 +261,15 @@ export class UserController {
     return this.myUserService.reVerify(email);
   }
 
-  @post('/users/forgot', {
+  @get('/users/forgot', {
+    parameters: [{ name: 'email', schema: { type: 'string' }, in: 'query', required: true }],
     responses: {
       '200': {
-        description: 'Account forgot password service',
+        description: 'Forgot api.',
         content: {
           'application/json': {
             schema: {
-              type: 'boolean',
-              properties: {
-                success: {
-                  type: 'boolean',
-                },
-              }
+              type: 'boolean'
             },
           },
         },

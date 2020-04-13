@@ -22,6 +22,8 @@ import { service } from '@loopback/core';
 import { authenticate } from '@loopback/authentication';
 import { CalendarService } from '../services';
 import { OPERATION_SECURITY_SPEC } from '../utils/security-spec';
+import { authorize } from '@loopback/authorization';
+import { authorization } from '../services/authorizor';
 
 @authenticate('jwt')
 export class CalendarController {
@@ -157,6 +159,10 @@ export class CalendarController {
         content: { 'application/json': { schema: CountSchema } },
       },
     },
+  })
+  @authorize({
+    allowedRoles: ['superadmin'],
+    voters: [authorization],
   })
   async updateAll(
     @requestBody({

@@ -74,27 +74,38 @@ export class CalendarService {
     const userData = await this.userRepository.findById(calendar.userId);
     const calendarList = await this.calendarRepository.find({ where: { userId: { like: calendar.userId }, groupId: { like: calendar.groupId }, type: CalendarType.Nöbet } });
 
-    if (groupSetting?.isWeekdayControl) {
+    if (groupSetting?.isWeekdayControl && !calendar.isWeekend) {
       if (!userData.weekdayCountLimit) {
         throw new HttpErrors.BadRequest(userData.fullName + " kullanıcısına ait haftaiçi nöbet sınır adedi belirtilmemiş! Kayıt atanamaz.");
       }
-      const calendarUserWeekdayCount = calendarList.filter(x => x.isWeekend = false);
-
-      if (calendarUserWeekdayCount?.length > userData.weekdayCountLimit) {
-        throw new HttpErrors.BadRequest(userData.fullName + " ait haftaiçi nöbet sınır adedi aşıldı! Kayıt atanamaz.")
+      const calendarUserWeekdayCount = await calendarList.filter(x => x.isWeekend == false);
+      if (calendarUserWeekdayCount?.length >= userData.weekdayCountLimit) {
+        throw new HttpErrors.BadRequest(userData.fullName + " kullanıcısına ait atanabilir haftaiçi nöbet sayısı " + userData.weekdayCountLimit + " ile sınırlıdır. Kayıt atanamaz!")
       }
     }
 
-    if (groupSetting?.isWeekendControl) {
+    if (groupSetting?.isWeekendControl && calendar.isWeekend) {
       if (!userData.weekendCountLimit) {
         throw new HttpErrors.BadRequest(userData.fullName + " kullanıcısına ait haftasonu nöbet sınır adedi belirtilmemiş! Kayıt atanamaz.");
       }
-      const calendarUserWeekendCount = calendarList.filter(x => x.isWeekend = true);
-
-      if (calendarUserWeekendCount?.length > userData.weekendCountLimit) {
-        throw new HttpErrors.BadRequest(userData.fullName + " ait haftasonu nöbet sınır adedi aşıldı! Kayıt atanamaz.")
+      const calendarUserWeekendCount = await calendarList.filter(x => x.isWeekend == true);
+      if (calendarUserWeekendCount?.length >= userData.weekendCountLimit) {
+        throw new HttpErrors.BadRequest(userData.fullName + " kullanıcısına ait atanabilir haftasonu nöbet sayısı " + userData.weekendCountLimit + " ile sınırlıdır. Kayıt atanamaz!")
       }
 
+    }
+
+    if (groupSetting?.sequentialOrderLimitCount) {
+      const dayLimit = groupSetting?.sequentialOrderLimitCount;
+      const lastDate = new Date(calendar.date);
+      const firstDate = new Date(lastDate.setDate(lastDate.getDate() - dayLimit));
+      const foundCalendarCount = calendarList.filter(x =>
+        x.date.getDate() >= firstDate.getDate() &&
+        x.date.getDate() <= new Date(calendar.date).getDate()
+      );
+      if (foundCalendarCount.length >= dayLimit) {
+        throw new HttpErrors.BadRequest(userData.fullName + " kullanıcısına ait ardışık nöbet miktarı " + dayLimit + " ile sınırlıdır. Kayıt atanamaz!")
+      }
     }
   }
 
@@ -119,7 +130,7 @@ export class CalendarService {
   }
 
   async updateAll(calendar: Calendar, where?: Where<Calendar>): Promise<Count> {
-    await this.dataValidate(calendar, false, true, true);
+    //await this.dataValidate(calendar, false, true, true);
     calendar.updatedDate = new Date();
     calendar.updatedUserId = this.currentUserProfile[securityId];
     return this.calendarRepository.updateAll(calendar, where);

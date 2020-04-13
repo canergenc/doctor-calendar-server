@@ -168,23 +168,27 @@ export class MyUserService implements UserService<User, Credentials> {
     if (!foundUser) {
       throw new HttpErrors.BadRequest(invalidCredentialsError);
     }
-
-    // if (!foundUser.isActive) {
-    //   throw new HttpErrors.BadRequest("Kullanıcı aktif hale getirilmelidir. Lütfen sistem yöneticisine danışınız!");
-    // }
     const credentialsFound = await this.userCredentialsRepository.findOne({ where: { userId: { like: foundUser.id } } });
 
     if (!credentialsFound) {
       throw new HttpErrors.BadRequest(invalidCredentialsError);
     }
-
-    // if (!credentialsFound.emailVerified) {
-    //   throw new HttpErrors.BadRequest("Lütfen email doğrulaması yapınız!");
-    // }
-
     /**Compare Password */
     await this.comparePassword(credentials.password, credentialsFound.password);
 
+    // if (!foundUser.isActive) {
+    //   throw new HttpErrors.BadRequest(`Sayın ${foundUser.fullName} hesabınız aktif gözükmemektedir. Lütfen sistem yöneticisine danışınız.`);
+    // }
+
+    // if (!credentialsFound.emailVerified) {
+    //   throw new HttpErrors.BadRequest(`Sayın ${foundUser.fullName} hesabınızın email doğrulaması yapılması gereklidir. Lütfen email kutunuzu kontrol ediniz. Doğrulama yapmanıza rağmen sorun devam etmekteyse lütfen sistem yöneticisine danışınız.`);
+    // }
+
+    const foundUserGroup = await this.userGroupRepository.findOne({ where: { userId: { like: foundUser.id } } });
+
+    if (!foundUserGroup) {
+      new HttpErrors.BadRequest(`Sayın ${foundUser.fullName} hesabınızın bağlı olduğu bir grup ilişkisi bulunmamaktadır. Lütfen sistem yöneticisine danışınız.`)
+    }
 
     return foundUser;
   }

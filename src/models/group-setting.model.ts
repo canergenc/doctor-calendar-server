@@ -66,6 +66,7 @@ export class GroupSetting extends Entity {
 
   @property({
     type: 'boolean',
+    default: false
   })
   isDeleted?: boolean;
 
