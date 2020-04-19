@@ -18,11 +18,6 @@ export class Calendar extends Entity {
     generated: true,
   })
   id: string;
-  @property({
-    type: "date",
-    required: true,
-  })
-  date: Date;
 
   @property({
     type: "string",
@@ -45,15 +40,22 @@ export class Calendar extends Entity {
   locationId: string;
 
   @property({
-    type: "string",
-  })
-  calendarGroupId?: string;
-
-  @property({
     type: "boolean",
     required: true
   })
   isWeekend?: boolean;
+
+  @property({
+    type: 'date',
+    required: true
+  })
+  startDate: Date;
+
+  @property({
+    type: 'date',
+    required: true
+  })
+  endDate: Date;
 
   @property({
     type: 'date',

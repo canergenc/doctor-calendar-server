@@ -1,7 +1,7 @@
 import { bind, BindingScope, inject } from '@loopback/core';
 import { repository, Filter, Where, Count } from '@loopback/repository';
 import { CalendarRepository, GroupSettingRepository, UserRepository, UserGroupRepository } from '../repositories';
-import { Calendar } from '../models';
+import { Calendar, User } from '../models';
 import { UserProfile, SecurityBindings, securityId } from '@loopback/security';
 import { CalendarType } from '../enums/calendarType.enum';
 import { HttpErrors } from '@loopback/rest';
@@ -42,24 +42,29 @@ export class CalendarService {
     }
   }
 
-  private async dataValidate(calendar: Calendar, userGroupValidate: boolean, duplicateValidate: boolean, groupSettingValidate: boolean): Promise<void> {
+  private async dataValidate(calendar: Calendar, userGroupValidate: boolean, duplicateValidate: boolean, groupSettingValidate: boolean, id?: string): Promise<void> {
 
     if (userGroupValidate)
       await this.userGroupRelationControl(calendar);
     if (duplicateValidate)
       await this.duplicateValidate(calendar);
     if (groupSettingValidate)
-      await this.groupSettingValidate(calendar);
+      await this.groupSettingValidate(calendar, id);
 
   }
 
   private async duplicateValidate(calendar: Calendar): Promise<void> {
-    if (!calendar.date || !calendar.userId) return;
+    if (!calendar.startDate || !calendar.endDate || !calendar.userId) return;
     /* Duplicate Control */
     const duplicateResult = await this.calendarRepository.findOne({
       where:
       {
-        date: calendar.date,
+        or: [{
+          startDate: { between: [calendar.startDate, calendar.endDate] }
+        },
+        {
+          endDate: { between: [calendar.startDate, calendar.endDate] }
+        }],
         userId: { like: calendar.userId }
       }
     });
@@ -67,12 +72,13 @@ export class CalendarService {
 
   }
 
-  private async groupSettingValidate(calendar: Calendar): Promise<void> {
-    if (!calendar.groupId || !calendar.userId) return;
-
+  private async groupSettingValidate(calendar: Calendar, id?: string): Promise<void> {
+    if (!calendar.groupId || !calendar.userId || calendar.type !== CalendarType.Nöbet) return;
     const groupSetting = await this.groupSettingRepository.findOne({ where: { groupId: { like: calendar.groupId } } });
     const userData = await this.userRepository.findById(calendar.userId);
-    const calendarList = await this.calendarRepository.find({ where: { userId: { like: calendar.userId }, groupId: { like: calendar.groupId }, type: CalendarType.Nöbet } });
+    let calendarList = await this.calendarRepository.find({ where: { userId: { like: calendar.userId }, groupId: { like: calendar.groupId }, type: CalendarType.Nöbet } });
+    if (id)
+      calendarList = calendarList.filter(x => x.id != id);
 
     if (groupSetting?.isWeekdayControl && !calendar.isWeekend) {
       if (!userData.weekdayCountLimit) {
@@ -97,15 +103,47 @@ export class CalendarService {
 
     if (groupSetting?.sequentialOrderLimitCount) {
       const dayLimit = groupSetting?.sequentialOrderLimitCount;
-      const lastDate = new Date(calendar.date);
-      const firstDate = new Date(lastDate.setDate(lastDate.getDate() - dayLimit));
-      const foundCalendarCount = calendarList.filter(x =>
-        x.date.getDate() >= firstDate.getDate() &&
-        x.date.getDate() <= new Date(calendar.date).getDate()
+      const calendarStartDate = new Date(calendar.startDate);
+      const calendarEndDate = new Date(calendar.endDate);
+      let calendarDayCount = 1;
+      calendarDayCount += calendarEndDate.getDay() - calendarStartDate.getDay();
+
+      await this.sequientalOrderLimitControlMessage(calendarDayCount, dayLimit, userData.fullName);
+
+
+      let foundEndCalendarCount = calendarList.filter(x =>
+        x.endDate.getDate() <= new Date(calendar.startDate).getDate() &&
+        x.endDate.getDate() >= new Date(calendar.startDate).getDate() - dayLimit
+
       );
-      if (foundCalendarCount.length >= dayLimit) {
-        throw new HttpErrors.BadRequest(userData.fullName + " kullanıcısına ait ardışık nöbet miktarı " + dayLimit + " ile sınırlıdır. Kayıt atanamaz!")
+
+      for (const item of foundEndCalendarCount) {
+        if (item.endDate.getDay() == item.startDate.getDay()) {
+          calendarDayCount++;
+        } else
+          calendarDayCount += (item.endDate.getDay() - item.startDate.getDay()) + 1;
       }
+      await this.sequientalOrderLimitControlMessage(calendarDayCount, dayLimit, userData.fullName);
+
+      /**End Date Limit Control */
+      const foundSecondEndCalendarCount = calendarList.filter(x =>
+        x.startDate.getDate() >= new Date(calendar.endDate).getDate() &&
+        x.startDate.getDate() <= new Date(calendar.endDate).getDate() + dayLimit
+      );
+
+      for (const item of foundSecondEndCalendarCount) {
+        if (item.endDate.getDay() == item.startDate.getDay()) {
+          calendarDayCount++;
+        } else
+          calendarDayCount += (item.endDate.getDay() - item.startDate.getDay()) + 1;
+      }
+      await this.sequientalOrderLimitControlMessage(calendarDayCount, dayLimit, userData.fullName);
+    }
+  }
+
+  private async sequientalOrderLimitControlMessage(count: number, dayLimit: number, fullName: string): Promise<void> {
+    if (count > dayLimit) {
+      throw new HttpErrors.BadRequest(fullName + " kullanıcısına ait ardışık nöbet miktarı " + dayLimit + " ile sınırlıdır. Kayıt atanamaz!")
     }
   }
 
@@ -126,6 +164,9 @@ export class CalendarService {
     if (!calendar.userId) {
       calendar.userId = foundCalendar.userId;
     }
+    if (!calendar.type) {
+      calendar.type = foundCalendar.type;
+    }
     return calendar;
   }
 
@@ -138,7 +179,7 @@ export class CalendarService {
 
   async updateById(id: string, calendar: Calendar): Promise<void> {
     calendar = await this.updateValidateSet(id, calendar);
-    await this.dataValidate(calendar, true, true, true);
+    await this.dataValidate(calendar, true, true, true, id);
     calendar.updatedDate = new Date();
     calendar.updatedUserId = this.currentUserProfile[securityId];
     delete this.currentUserProfile[securityId];

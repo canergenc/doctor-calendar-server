@@ -29,7 +29,32 @@ export class NewUserRequest extends User {
   })
   password: string;
 }
+@model()
+export class UpdateUserRequest extends User {
+  @property({
+    type: 'string',
+    required: true,
+    jsonSchema: {
+      maxLength: 16,
+      minLength: 8,
+      errorMessage:
+        'parola minimum 8 karakter uzunluğunda olmalı!',
+    },
+  })
+  oldPassword: string;
 
+  @property({
+    type: 'string',
+    required: true,
+    jsonSchema: {
+      maxLength: 16,
+      minLength: 8,
+      errorMessage:
+        'parola minimum 8 karakter uzunluğunda olmalı!',
+    },
+  })
+  currentPassword: string;
+}
 export class UserController {
   constructor(
     @repository(UserRepository)
@@ -374,11 +399,11 @@ export class UserController {
     @requestBody({
       content: {
         'application/json': {
-          schema: getModelSchemaRef(NewUserRequest, { partial: true }),
+          schema: getModelSchemaRef(UpdateUserRequest, { partial: true }),
         },
       },
     })
-    user: NewUserRequest,
+    user: UpdateUserRequest,
     @inject(SecurityBindings.USER)
     currentUserProfile: UserProfile,
   ): Promise<void> {

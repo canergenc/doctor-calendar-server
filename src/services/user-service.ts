@@ -13,7 +13,7 @@ import { promisify } from "util";
 import { EmailManager } from './email.service';
 import { MailType } from '../enums/mailType.enum';
 import { RoleType } from '../enums/roleType.enum';
-import { NewUserRequest } from '../controllers';
+import { NewUserRequest, UpdateUserRequest } from '../controllers';
 import isemail from 'isemail';
 
 const jwt = require('jsonwebtoken');
@@ -114,7 +114,7 @@ export class MyUserService implements UserService<User, Credentials> {
     return true;
   }
 
-  async updateById(id: string, user: NewUserRequest, currentUserProfile: UserProfile): Promise<void> {
+  async updateById(id: string, user: UpdateUserRequest, currentUserProfile: UserProfile): Promise<void> {
 
     if (!currentUserProfile.roles?.includes(RoleType.Admin)) {
       delete user.roles;
@@ -127,27 +127,29 @@ export class MyUserService implements UserService<User, Credentials> {
       await this.validateEmail(id, user.email);
     }
 
-    if (user.password) {
+    if (user.currentPassword && user.oldPassword) {
       /**Password Update */
-      await this.passwordUpdate(id, user.password)
+      await this.passwordUpdate(id, user.currentPassword, user.oldPassword)
     }
 
     await this.userRepository.updateById(id, user);
   }
 
-  private async passwordUpdate(userId: string, password: string): Promise<void> {
-    if (password.length >= 8 && password.length <= 16) {
+  private async passwordUpdate(userId: string, currentPassword: string, oldPassword?: string): Promise<void> {
+    if (currentPassword.length >= 8 && currentPassword.length <= 16) {
       const foundUserCredential = await this.userCredentialsRepository.findOne({ where: { userId: { like: userId } } });
       if (foundUserCredential) {
-        /**Compare Password */
-        await this.comparePassword(password, foundUserCredential.password);
+        if (oldPassword) {
+          /**Compare Password */
+          await this.comparePassword(oldPassword, foundUserCredential.password, "Parola eski parola ile uyuşmamaktadır!");
+        }
 
         // encrypt the password
         const hashNewPassword = await this.passwordHasher.hashPassword(
-          password,
+          currentPassword,
         );
         if (hashNewPassword) {
-          await this.userCredentialsRepository.updateAll({ password: hashNewPassword }, { userId: userId });
+          await this.userCredentialsRepository.updateAll({ password: hashNewPassword }, { userId: { like: userId } });
         } else {
           throw new HttpErrors.BadRequest("Parola kayıt edilemedi! Lütfen sistem yöneticisine danışınız!");
         }
@@ -184,22 +186,26 @@ export class MyUserService implements UserService<User, Credentials> {
     //   throw new HttpErrors.BadRequest(`Sayın ${foundUser.fullName} hesabınızın email doğrulaması yapılması gereklidir. Lütfen email kutunuzu kontrol ediniz. Doğrulama yapmanıza rağmen sorun devam etmekteyse lütfen sistem yöneticisine danışınız.`);
     // }
 
-    const foundUserGroup = await this.userGroupRepository.findOne({ where: { userId: { like: foundUser.id } } });
+    // const foundUserGroup = await this.userGroupRepository.findOne({ where: { userId: { like: foundUser.id } } });
 
-    if (!foundUserGroup) {
-      new HttpErrors.BadRequest(`Sayın ${foundUser.fullName} hesabınızın bağlı olduğu bir grup ilişkisi bulunmamaktadır. Lütfen sistem yöneticisine danışınız.`)
-    }
+    // if (!foundUserGroup) {
+    //   throw new HttpErrors.BadRequest(`Sayın ${foundUser.fullName} hesabınızın bağlı olduğu bir grup ilişkisi bulunmamaktadır. Lütfen sistem yöneticisine danışınız.`)
+    // }
 
     return foundUser;
   }
 
-  async comparePassword(providedPass: string, storedPass: string): Promise<boolean> {
+  async comparePassword(providedPass: string, storedPass: string, errorMessage?: string): Promise<boolean> {
     const passwordMatched = await this.passwordHasher.comparePassword(
       providedPass,
       storedPass,
     );
     if (!passwordMatched) {
-      throw new HttpErrors.BadRequest(invalidCredentialsError);
+      if (errorMessage)
+        throw new HttpErrors.BadRequest(errorMessage);
+      else
+        throw new HttpErrors.BadRequest(invalidCredentialsError);
+
     }
     return passwordMatched;
   }
