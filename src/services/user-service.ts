@@ -15,6 +15,7 @@ import { MailType } from '../enums/mailType.enum';
 import { RoleType } from '../enums/roleType.enum';
 import { NewUserRequest, UpdateUserRequest } from '../controllers';
 import isemail from 'isemail';
+import { PlatformType } from '../enums/platform.enum';
 
 const jwt = require('jsonwebtoken');
 const verifyAsync = promisify(jwt.verify);
@@ -186,11 +187,11 @@ export class MyUserService implements UserService<User, Credentials> {
     //   throw new HttpErrors.BadRequest(`Sayın ${foundUser.fullName} hesabınızın email doğrulaması yapılması gereklidir. Lütfen email kutunuzu kontrol ediniz. Doğrulama yapmanıza rağmen sorun devam etmekteyse lütfen sistem yöneticisine danışınız.`);
     // }
 
-    // const foundUserGroup = await this.userGroupRepository.findOne({ where: { userId: { like: foundUser.id } } });
+    const foundUserGroup = await this.userGroupRepository.findOne({ where: { userId: { like: foundUser.id } } });
 
-    // if (!foundUserGroup) {
-    //   throw new HttpErrors.BadRequest(`Sayın ${foundUser.fullName} hesabınızın bağlı olduğu bir grup ilişkisi bulunmamaktadır. Lütfen sistem yöneticisine danışınız.`)
-    // }
+    if (!foundUserGroup && foundUser.platform == PlatformType.Mobile) {
+      throw new HttpErrors.BadRequest(`Sayın ${foundUser.fullName} hesabınızın bağlı olduğu bir grup ilişkisi bulunmamaktadır. Lütfen sistem yöneticisine danışınız.`)
+    }
 
     return foundUser;
   }

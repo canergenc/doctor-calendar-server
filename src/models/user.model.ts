@@ -51,6 +51,13 @@ export class User extends Entity {
   deviceId?: string;
 
   @property({
+    type: 'number',
+    required: true,
+    default: 1
+  })
+  platform: number;
+
+  @property({
     type: 'date'
   })
   workStartDate: Date;
