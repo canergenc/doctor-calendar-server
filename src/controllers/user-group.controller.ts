@@ -14,6 +14,7 @@ import {
   del,
   requestBody,
   getWhereSchemaFor,
+  patch,
 } from '@loopback/rest';
 import { UserGroup } from '../models';
 import { UserGroupRepository } from '../repositories';
@@ -154,6 +155,51 @@ export class UserGroupController {
     @param.query.object('filter', getFilterSchemaFor(UserGroup)) filter?: Filter<UserGroup>
   ): Promise<UserGroup> {
     return this.userGroupRepository.findById(id, filter);
+  }
+
+  @patch('/user-groups', {
+    security: OPERATION_SECURITY_SPEC,
+    responses: {
+      '200': {
+        description: 'UserGroup PATCH success count',
+        content: { 'application/json': { schema: CountSchema } },
+      },
+    },
+  })
+  async updateAll(
+    @requestBody({
+      content: {
+        'application/json': {
+          schema: getModelSchemaRef(UserGroup, { partial: true }),
+        },
+      },
+    })
+    userGroup: UserGroup,
+    @param.query.object('where', getWhereSchemaFor(UserGroup))
+    where?: Where<UserGroup>,
+  ): Promise<Count> {
+    return this.userGroupService.updateAll(userGroup, where);
+  }
+
+  @patch('/user-groups/{id}', {
+    security: OPERATION_SECURITY_SPEC,
+    responses: {
+      '204': {
+        description: 'UserGroup patch success',
+      },
+    },
+  })
+  async updateById(
+    @param.path.string('id') id: string,
+    @requestBody({
+      content: {
+        'application/json': {
+          schema: getModelSchemaRef(UserGroup, { partial: true }),
+        },
+      },
+    }) userGroup: UserGroup,
+  ): Promise<void> {
+    await this.userGroupService.updateById(id, userGroup);
   }
 
   @del('/user-groups/{id}', {

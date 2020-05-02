@@ -37,6 +37,11 @@ export class Location extends Entity {
   sortOrder: number;
 
   @property({
+    type: 'number',
+  })
+  dayLimit: number;
+
+  @property({
     type: 'date',
     default: () => new Date(),
   })

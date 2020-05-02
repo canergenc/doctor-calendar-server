@@ -1,10 +1,11 @@
 import { bind, BindingScope, inject } from '@loopback/core';
 import { repository, Filter, Where, Count } from '@loopback/repository';
-import { CalendarRepository, GroupSettingRepository, UserRepository, UserGroupRepository } from '../repositories';
+import { CalendarRepository, GroupSettingRepository, UserRepository, UserGroupRepository, LocationRepository } from '../repositories';
 import { Calendar, User } from '../models';
 import { UserProfile, SecurityBindings, securityId } from '@loopback/security';
 import { CalendarType } from '../enums/calendarType.enum';
 import { HttpErrors } from '@loopback/rest';
+import { StatusType } from '../enums/status.enum';
 
 @bind({ scope: BindingScope.TRANSIENT })
 export class CalendarService {
@@ -14,6 +15,7 @@ export class CalendarService {
     @repository(UserRepository) private userRepository: UserRepository,
     @repository(GroupSettingRepository) private groupSettingRepository: GroupSettingRepository,
     @repository(UserGroupRepository) private userGroupRepository: UserGroupRepository,
+    @repository(LocationRepository) private locationRepository: LocationRepository,
 
     @inject(SecurityBindings.USER) public currentUserProfile: UserProfile
   ) { }
@@ -65,7 +67,8 @@ export class CalendarService {
         {
           endDate: { between: [calendar.startDate, calendar.endDate] }
         }],
-        userId: { like: calendar.userId }
+        userId: { like: calendar.userId },
+        status: { neq: StatusType.Rejected }
       }
     });
     if (duplicateResult) throw new HttpErrors.BadRequest('İlgili kullanıcının bu tarihe ait kaydı bulunmaktadır, takvime eklenemez!');
@@ -76,27 +79,28 @@ export class CalendarService {
     if (!calendar.groupId || !calendar.userId || calendar.type !== CalendarType.Nöbet) return;
     const groupSetting = await this.groupSettingRepository.findOne({ where: { groupId: { like: calendar.groupId } } });
     const userData = await this.userRepository.findById(calendar.userId);
+    const userGroupData = await this.userGroupRepository.findOne({ where: { userId: { like: calendar.userId }, groupId: { like: calendar.groupId } } });
     let calendarList = await this.calendarRepository.find({ where: { userId: { like: calendar.userId }, groupId: { like: calendar.groupId }, type: CalendarType.Nöbet } });
     if (id)
       calendarList = calendarList.filter(x => x.id != id);
 
     if (groupSetting?.isWeekdayControl && !calendar.isWeekend) {
-      if (!userData.weekdayCountLimit) {
+      if (!userGroupData?.weekdayCountLimit) {
         throw new HttpErrors.BadRequest(userData.fullName + " kullanıcısına ait haftaiçi nöbet sınır adedi belirtilmemiş! Kayıt atanamaz.");
       }
       const calendarUserWeekdayCount = await calendarList.filter(x => x.isWeekend == false);
-      if (calendarUserWeekdayCount?.length >= userData.weekdayCountLimit) {
-        throw new HttpErrors.BadRequest(userData.fullName + " kullanıcısına ait atanabilir haftaiçi nöbet sayısı " + userData.weekdayCountLimit + " ile sınırlıdır. Kayıt atanamaz!")
+      if (calendarUserWeekdayCount?.length >= userGroupData?.weekdayCountLimit) {
+        throw new HttpErrors.BadRequest(userData.fullName + " kullanıcısına ait atanabilir haftaiçi nöbet sayısı " + userGroupData.weekdayCountLimit + " ile sınırlıdır. Kayıt atanamaz!")
       }
     }
 
     if (groupSetting?.isWeekendControl && calendar.isWeekend) {
-      if (!userData.weekendCountLimit) {
+      if (!userGroupData?.weekendCountLimit) {
         throw new HttpErrors.BadRequest(userData.fullName + " kullanıcısına ait haftasonu nöbet sınır adedi belirtilmemiş! Kayıt atanamaz.");
       }
       const calendarUserWeekendCount = await calendarList.filter(x => x.isWeekend == true);
-      if (calendarUserWeekendCount?.length >= userData.weekendCountLimit) {
-        throw new HttpErrors.BadRequest(userData.fullName + " kullanıcısına ait atanabilir haftasonu nöbet sayısı " + userData.weekendCountLimit + " ile sınırlıdır. Kayıt atanamaz!")
+      if (calendarUserWeekendCount?.length >= userGroupData?.weekendCountLimit) {
+        throw new HttpErrors.BadRequest(userData.fullName + " kullanıcısına ait atanabilir haftasonu nöbet sayısı " + userGroupData.weekendCountLimit + " ile sınırlıdır. Kayıt atanamaz!")
       }
 
     }
@@ -139,6 +143,24 @@ export class CalendarService {
       }
       await this.sequientalOrderLimitControlMessage(calendarDayCount, dayLimit, userData.fullName);
     }
+
+    if (groupSetting?.locationDayLimit && calendar.locationId) {
+      const foundLocation = await this.locationRepository.findById(calendar.locationId);
+      if (foundLocation.dayLimit) {
+        throw new HttpErrors.BadRequest(foundLocation.name + " lokasyona ait nöbet sınır adedi belirtilmemiş! Kayıt atanamaz.");
+      }
+      const startDate = new Date(calendar.startDate);
+      const endDate = new Date(calendar.endDate);
+      const foundCalendar = calendarList.filter(
+        x => x.locationId == calendar.locationId
+          && x.startDate.getDate() >= startDate.getDate()
+          && x.endDate.getDate() <= endDate.getDate());
+
+      if (foundCalendar?.length >= foundLocation.dayLimit) {
+        throw new HttpErrors.BadRequest(foundLocation.name + " lokasyonuna ait nöbet sınır adedi: " + foundLocation.dayLimit + ". Daha fazla kayıt atanamaz.");
+      }
+    }
+
   }
 
   private async sequientalOrderLimitControlMessage(count: number, dayLimit: number, fullName: string): Promise<void> {
@@ -167,6 +189,9 @@ export class CalendarService {
     if (!calendar.type) {
       calendar.type = foundCalendar.type;
     }
+    if (!calendar.locationId) {
+      calendar.locationId = foundCalendar.locationId;
+    }
     return calendar;
   }
 
@@ -182,7 +207,6 @@ export class CalendarService {
     await this.dataValidate(calendar, true, true, true, id);
     calendar.updatedDate = new Date();
     calendar.updatedUserId = this.currentUserProfile[securityId];
-    delete this.currentUserProfile[securityId];
     await this.calendarRepository.updateById(id, calendar);
   }
 

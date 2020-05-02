@@ -24,6 +24,16 @@ export class UserGroup extends Entity {
   userId: string;
 
   @property({
+    type: 'number',
+  })
+  weekdayCountLimit?: number;
+
+  @property({
+    type: 'number',
+  })
+  weekendCountLimit?: number;
+
+  @property({
     type: 'date',
     default: () => new Date(),
   })
