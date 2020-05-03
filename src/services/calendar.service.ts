@@ -71,7 +71,10 @@ export class CalendarService {
         status: { neq: StatusType.Rejected }
       }
     });
-    if (duplicateResult) throw new HttpErrors.BadRequest('İlgili kullanıcının bu tarihe ait kaydı bulunmaktadır, takvime eklenemez!');
+    if (duplicateResult) {
+      const userData = await this.userRepository.findById(calendar.userId);
+      throw new HttpErrors.BadRequest(userData.fullName + ' kullanıcısının bu tarihe ait kaydı bulunmaktadır. Kayıt atanamaz!');
+    }
 
   }
 
@@ -80,7 +83,7 @@ export class CalendarService {
     const groupSetting = await this.groupSettingRepository.findOne({ where: { groupId: { like: calendar.groupId } } });
     const userData = await this.userRepository.findById(calendar.userId);
     const userGroupData = await this.userGroupRepository.findOne({ where: { userId: { like: calendar.userId }, groupId: { like: calendar.groupId } } });
-    let calendarList = await this.calendarRepository.find({ where: { userId: { like: calendar.userId }, groupId: { like: calendar.groupId }, type: CalendarType.Nöbet } });
+    let calendarList = await this.calendarRepository.find({ where: { groupId: { like: calendar.groupId }, type: CalendarType.Nöbet } });
     if (id)
       calendarList = calendarList.filter(x => x.id != id);
 
@@ -88,7 +91,7 @@ export class CalendarService {
       if (!userGroupData?.weekdayCountLimit) {
         throw new HttpErrors.BadRequest(userData.fullName + " kullanıcısına ait haftaiçi nöbet sınır adedi belirtilmemiş! Kayıt atanamaz.");
       }
-      const calendarUserWeekdayCount = await calendarList.filter(x => x.isWeekend == false);
+      const calendarUserWeekdayCount = await calendarList.filter(x => x.userId == calendar.userId && x.isWeekend == false);
       if (calendarUserWeekdayCount?.length >= userGroupData?.weekdayCountLimit) {
         throw new HttpErrors.BadRequest(userData.fullName + " kullanıcısına ait atanabilir haftaiçi nöbet sayısı " + userGroupData.weekdayCountLimit + " ile sınırlıdır. Kayıt atanamaz!")
       }
@@ -98,7 +101,7 @@ export class CalendarService {
       if (!userGroupData?.weekendCountLimit) {
         throw new HttpErrors.BadRequest(userData.fullName + " kullanıcısına ait haftasonu nöbet sınır adedi belirtilmemiş! Kayıt atanamaz.");
       }
-      const calendarUserWeekendCount = await calendarList.filter(x => x.isWeekend == true);
+      const calendarUserWeekendCount = await calendarList.filter(x => x.userId == calendar.userId && x.isWeekend == true);
       if (calendarUserWeekendCount?.length >= userGroupData?.weekendCountLimit) {
         throw new HttpErrors.BadRequest(userData.fullName + " kullanıcısına ait atanabilir haftasonu nöbet sayısı " + userGroupData.weekendCountLimit + " ile sınırlıdır. Kayıt atanamaz!")
       }
@@ -115,7 +118,7 @@ export class CalendarService {
       await this.sequientalOrderLimitControlMessage(calendarDayCount, dayLimit, userData.fullName);
 
 
-      let foundEndCalendarCount = calendarList.filter(x =>
+      let foundEndCalendarCount = calendarList.filter(x => x.userId == calendar.userId &&
         x.endDate.getDate() <= new Date(calendar.startDate).getDate() &&
         x.endDate.getDate() >= new Date(calendar.startDate).getDate() - dayLimit
 
@@ -130,7 +133,7 @@ export class CalendarService {
       await this.sequientalOrderLimitControlMessage(calendarDayCount, dayLimit, userData.fullName);
 
       /**End Date Limit Control */
-      const foundSecondEndCalendarCount = calendarList.filter(x =>
+      const foundSecondEndCalendarCount = calendarList.filter(x => x.userId == calendar.userId &&
         x.startDate.getDate() >= new Date(calendar.endDate).getDate() &&
         x.startDate.getDate() <= new Date(calendar.endDate).getDate() + dayLimit
       );
@@ -146,21 +149,34 @@ export class CalendarService {
 
     if (groupSetting?.locationDayLimit && calendar.locationId) {
       const foundLocation = await this.locationRepository.findById(calendar.locationId);
-      if (foundLocation.dayLimit) {
+      if (!foundLocation.dayLimit) {
         throw new HttpErrors.BadRequest(foundLocation.name + " lokasyona ait nöbet sınır adedi belirtilmemiş! Kayıt atanamaz.");
       }
       const startDate = new Date(calendar.startDate);
-      const endDate = new Date(calendar.endDate);
+      /*geçici çözüm olarak yapıldı daha sonra düzeltilecek. */
       const foundCalendar = calendarList.filter(
-        x => x.locationId == calendar.locationId
-          && x.startDate.getDate() >= startDate.getDate()
-          && x.endDate.getDate() <= endDate.getDate());
-
+        x => x.locationId == calendar.locationId && startDate <= x.startDate && startDate >= x.endDate
+      );
+      console.log(foundCalendar.length);
       if (foundCalendar?.length >= foundLocation.dayLimit) {
-        throw new HttpErrors.BadRequest(foundLocation.name + " lokasyonuna ait nöbet sınır adedi: " + foundLocation.dayLimit + ". Daha fazla kayıt atanamaz.");
+        throw new HttpErrors.BadRequest(foundLocation.name + " lokasyonuna ait günlük nöbet sınırı " + foundLocation.dayLimit + " adettir. Daha fazla kayıt atanamaz!");
       }
     }
 
+  }
+  /** Lokasyon gün sınırı için tarih aralığı dizisi oluşturuyor. */
+  private async getDaysArray(start: Date, end: Date) {
+    const addFn = Date.prototype.setDate;
+    const interval = 1;
+    let output = []
+    let current = new Date(start);
+    console.log(start)
+    console.log(end)
+    while (current <= end) {
+      output.push(new Date(current));
+      current = new Date(addFn.call(current, interval));
+    }
+    return output;
   }
 
   private async sequientalOrderLimitControlMessage(count: number, dayLimit: number, fullName: string): Promise<void> {
