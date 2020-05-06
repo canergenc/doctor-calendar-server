@@ -25,11 +25,17 @@ export class UserGroup extends Entity {
 
   @property({
     type: 'number',
+    jsonSchema: {
+      maxLength: 2
+    }
   })
   weekdayCountLimit?: number;
 
   @property({
     type: 'number',
+    jsonSchema: {
+      maxLength: 2
+    }
   })
   weekendCountLimit?: number;
 

@@ -3,8 +3,8 @@ export enum CalendarType {
   "İzin" = 2,
   "Rapor" = 3,
   "Gebelik" = 4,
-  "Resmi Tatil" = 5,
-  "İdari izin" = 6,
-  "Özel Durum" = 7,
+  "ResmiTatil" = 5,
+  "İdariİzin" = 6,
+  "ÖzelDurum" = 7,
   "Rotasyon" = 8
 }

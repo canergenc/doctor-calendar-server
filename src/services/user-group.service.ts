@@ -20,8 +20,8 @@ export class UserGroupService {
     userGroup.createdUserId = userGroup.updatedUserId = this.currentUserProfile[securityId];
     delete this.currentUserProfile[securityId];
 
-    /*Duplicate Data Control*/
-    await this.duplicateValidate(userGroup);
+    /*Data Control*/
+    await this.validate(userGroup);
 
     return this.userGroupRepository.create(userGroup);
   }
@@ -30,8 +30,8 @@ export class UserGroupService {
     try {
       for (const userGroup of userGroups) {
         userGroup.createdUserId = userGroup.updatedUserId = this.currentUserProfile[securityId];
-        /*Duplicate Data Control*/
-        await this.duplicateValidate(userGroup);
+        /*Data Control*/
+        await this.validate(userGroup);
       }
       return await this.userGroupRepository.createAll(userGroups);
     } catch (error) {
@@ -39,9 +39,12 @@ export class UserGroupService {
     }
   }
 
-  async duplicateValidate(userGroup: UserGroup): Promise<void> {
+  async duplicateValidate(userGroup: UserGroup, id?: string): Promise<void> {
     /*Duplicate Data Control*/
-    const foundDuplicateData = await this.userGroupRepository.findOne({ where: { userId: { like: userGroup.userId }, groupId: { like: userGroup.groupId } } });
+    let foundDuplicateData = await this.userGroupRepository.findOne({ where: { userId: { like: userGroup.userId }, groupId: { like: userGroup.groupId } } });
+
+    if (id)
+      foundDuplicateData = await this.userGroupRepository.findOne({ where: { id: { neq: id }, userId: { like: userGroup.userId }, groupId: { like: userGroup.groupId } } });
 
     if (foundDuplicateData) {
       const foundUser = await this.userRepository.findById(userGroup.userId);
@@ -54,9 +57,36 @@ export class UserGroupService {
 
   }
 
+  async limitValidate(userGroup: UserGroup): Promise<void> {
+    /** Count Limit Control */
+
+    if (userGroup.weekdayCountLimit && userGroup.weekdayCountLimit < 0 || userGroup.weekendCountLimit && userGroup.weekendCountLimit < 0) {
+      throw new HttpErrors.BadRequest("Limit minimum 0 girilebilir!");
+    }
+  }
+
+  async validate(userGroup: UserGroup, id?: string, ): Promise<void> {
+    await this.duplicateValidate(userGroup, id);
+    await this.limitValidate(userGroup);
+  }
+
+  private async updateValidateSet(id: string, userGroup: UserGroup): Promise<UserGroup> {
+    const foundUserGroup = await this.userGroupRepository.findById(id);
+
+    if (!foundUserGroup.groupId) {
+      userGroup.groupId = foundUserGroup.groupId;
+    }
+    if (!foundUserGroup.userId) {
+      userGroup.userId = foundUserGroup.userId;
+    }
+    return userGroup;
+  }
+
   async updateById(id: string, userGroup: UserGroup): Promise<void> {
     userGroup.updatedDate = new Date();
     userGroup.updatedUserId = this.currentUserProfile[securityId];
+    await this.updateValidateSet(id, userGroup);
+    await this.validate(userGroup, id);
     await this.userGroupRepository.updateById(id, userGroup);
   }
 

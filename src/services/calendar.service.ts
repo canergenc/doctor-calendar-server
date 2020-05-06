@@ -73,7 +73,8 @@ export class CalendarService {
     });
     if (duplicateResult) {
       const userData = await this.userRepository.findById(calendar.userId);
-      throw new HttpErrors.BadRequest(userData.fullName + ' kullanıcısının bu tarihe ait kaydı bulunmaktadır. Kayıt atanamaz!');
+      const message = await this.validateMessageSet(duplicateResult, userData);
+      throw new HttpErrors.BadRequest(message);
     }
 
   }
@@ -177,6 +178,37 @@ export class CalendarService {
       current = new Date(addFn.call(current, interval));
     }
     return output;
+  }
+
+  private async validateMessageSet(calendar: Calendar, user: User): Promise<string> {
+    let message = "";
+    switch (calendar.type) {
+      case CalendarType.Nöbet:
+        message = user.fullName + ' kullanıcısının bu tarihe ait nöbet kaydı bulunmaktadır. Kayıt atanamaz!'
+        break;
+      case CalendarType.Gebelik:
+        message = user.fullName + ' kullanıcısının bu tarihe ait gebelik kaydı bulunmaktadır. Kayıt atanamaz!'
+        break;
+      case CalendarType.Rapor:
+        message = user.fullName + ' kullanıcısının bu tarihe ait rapor kaydı bulunmaktadır. Kayıt atanamaz!'
+        break;
+      case CalendarType.ResmiTatil:
+        message = user.fullName + ' kullanıcısının bu tarihe ait resmi tatil kaydı bulunmaktadır. Kayıt atanamaz!'
+        break;
+      case CalendarType.Rotasyon:
+        message = user.fullName + ' kullanıcısının bu tarihe ait rotasyon kaydı bulunmaktadır. Kayıt atanamaz!'
+        break;
+      case CalendarType.ÖzelDurum:
+        message = user.fullName + ' kullanıcısının bu tarihe ait özel durum kaydı bulunmaktadır. Kayıt atanamaz!'
+        break;
+      case CalendarType.İdariİzin:
+        message = user.fullName + ' kullanıcısının bu tarihe ait idari izin kaydı bulunmaktadır. Kayıt atanamaz!'
+        break;
+      case CalendarType.İzin:
+        message = user.fullName + ' kullanıcısının bu tarihe ait izin kaydı bulunmaktadır. Kayıt atanamaz!'
+        break;
+    }
+    return message;
   }
 
   private async sequientalOrderLimitControlMessage(count: number, dayLimit: number, fullName: string): Promise<void> {
