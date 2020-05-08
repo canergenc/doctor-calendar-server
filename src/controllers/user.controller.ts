@@ -24,7 +24,7 @@ export class NewUserRequest extends User {
       maxLength: 16,
       minLength: 8,
       errorMessage:
-        'parola minimum 8 karakter uzunluğunda olmalı!',
+        'parola minimum 8 karakter uzunluğunda olmalı! ',
     },
   })
   password: string;
