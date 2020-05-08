@@ -29,8 +29,13 @@ export class User extends Entity {
 
   @property({
     type: 'string',
-    format: 'email',
     required: true,
+    jsonSchema: {
+      format: 'email',
+      minLength: 5,
+      maxLength: 50,
+      transform: ['toLowerCase'],
+    }
   })
   email: string;
 

@@ -179,7 +179,7 @@ export class UserController {
     const decodeResult = await this.myUserService.decodeToken(token);
 
     return {
-      tokenModel: { token: token, iat: decodeResult?.decodeModel?.iat, exp: decodeResult?.decodeModel?.exp, userId: decodeResult?.decodeModel?.userId }
+      tokenModel: { token: token, iat: decodeResult?.decodeModel?.iat, exp: decodeResult?.decodeModel?.exp, userId: decodeResult?.decodeModel?.id }
     };
   }
 

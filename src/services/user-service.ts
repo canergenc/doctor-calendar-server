@@ -41,7 +41,7 @@ export class MyUserService implements UserService<User, Credentials> {
   /** İat and Exp times result */
   async decodeToken(token: string, customSecretKey?: string): Promise<{
     decodeModel: {
-      userId: string,
+      id: string,
       iat: number,
       exp: number
     }
@@ -51,17 +51,16 @@ export class MyUserService implements UserService<User, Credentials> {
       const result = await verifyAsync(token, customSecretKey ? customSecretKey : this.jwtSecret);
       return {
         decodeModel: {
-          userId: result?.id,
+          id: result?.id,
           iat: result?.iat,
           exp: result?.exp
         }
       };
     } catch (error) {
       throw new HttpErrors.Unauthorized(
-        `Geçersiz Token : ${error.message}`,
+        `Geçersiz Token : ${error.message}`
       );
     }
-
   }
 
   async generateVerifyToken(value: string): Promise<string> {
@@ -83,7 +82,7 @@ export class MyUserService implements UserService<User, Credentials> {
       throw new HttpErrors.BadRequest("Hatalı istek!");
     }
     const res = await this.decodeToken(key, this.jwtVerifySecret);
-    const foundCredentialUserCount = await this.userCredentialsRepository.updateAll({ emailVerified: true }, { userId: { like: res?.decodeModel?.userId } });
+    const foundCredentialUserCount = await this.userCredentialsRepository.updateAll({ emailVerified: true }, { userId: { like: res?.decodeModel?.id } });
     return foundCredentialUserCount.count > 0 ? true : false;
   }
 
@@ -99,19 +98,21 @@ export class MyUserService implements UserService<User, Credentials> {
   }
 
   async resetPassword(key: string, resetPassword: ResetPassword): Promise<boolean> {
-    if (!key) {
-      throw new HttpErrors.BadRequest("Hatalı istek!");
-    }
+    if (!key) throw new HttpErrors.BadRequest("Hatalı istek!");
+
     const res = await this.decodeToken(key, this.jwtVerifySecret);
-    if (res.decodeModel.userId) {
-      const foundUser = await this.userRepository.findById(res.decodeModel.userId);
-      if (foundUser) {
-        await this.passwordUpdate(res.decodeModel.userId, resetPassword.password);
-      }
-      else {
-        throw new HttpErrors.BadRequest("Kullancı bulunamadı! Lütfen sistem yöneticisine danışınız!")
-      }
-    }
+    if (!res.decodeModel.id) throw new HttpErrors.BadRequest("Geçersiz işlem! Lütfen sistem yöneticisine danışınız!");
+
+    const foundUser = await this.userRepository.findById(res.decodeModel.id);
+
+    if (!foundUser)
+      throw new HttpErrors.BadRequest("Kullanıcı bulunamadı! Lütfen sistem yöneticisine danışınız!");
+
+    if (foundUser.email != resetPassword.email)
+      throw new HttpErrors.BadRequest(resetPassword.email + " adresine ait eşleşme bulunamadı! Lütfen sistem yöneticisine danışınız!");
+
+    await this.passwordUpdate(foundUser.id, resetPassword.password);
+
     return true;
   }
 

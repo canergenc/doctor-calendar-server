@@ -38,11 +38,11 @@ export class EmailService {
 
     switch (mailType) {
       case MailType.Register:
-        emailModel.subject = "Sayın " + fullName + " Calendar Uygulamasına Hoşgeldiniz!";
+        emailModel.subject = "Sayın " + fullName + " Omnicali Uygulamasına Hoşgeldiniz!";
         emailModel.html = "Hesabınızı aktifleştirmek için lütfen aktivasyon linkine tıklayınız. " + url;
         break;
       case MailType.PasswordReset:
-        emailModel.subject = "Calendar Hesap Parola Sıfırlama";
+        emailModel.subject = "Omnicali Hesap Parola Sıfırlama";
         emailModel.html = "Hesabınızın parolasını sıfırlamak için lütfen parola sıfırlama linkine tıklayınız. "
         break;
     }

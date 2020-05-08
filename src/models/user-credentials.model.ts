@@ -73,6 +73,20 @@ export class ResetPassword extends Model {
     type: 'string',
     required: true,
     jsonSchema: {
+      format: 'email',
+      minLength: 5,
+      maxLength: 50,
+      transform: ['toLowerCase'],
+      errorMessage:
+        'Email alanı format dışı!',
+    },
+  })
+  email: string;
+
+  @property({
+    type: 'string',
+    required: true,
+    jsonSchema: {
       maxLength: 16,
       minLength: 8,
       errorMessage:
