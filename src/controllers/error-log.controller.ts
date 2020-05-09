@@ -20,10 +20,11 @@ import {
 } from '@loopback/rest';
 import { ErrorLog } from '../models';
 import { ErrorLogRepository } from '../repositories';
-import { service } from '@loopback/boot/node_modules/@loopback/core';
+
 import { ErrorLogService } from '../services';
 import { authenticate } from '@loopback/authentication';
 import { OPERATION_SECURITY_SPEC } from '../utils/security-spec';
+import { service } from '@loopback/core';
 
 @authenticate('jwt')
 export class ErrorLogController {

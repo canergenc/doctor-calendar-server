@@ -17,3 +17,4 @@ export * from './error-log.controller';
 export * from './notification.controller';
 export * from './group-setting.controller';
 export * from './group-setting-group.controller';
+export * from './mail-template.controller';

@@ -3,17 +3,17 @@ import { User, UserInfoOutputModel, ResetPassword } from "../models";
 import { Credentials, UserRepository } from "../repositories/user.repository";
 import { HttpErrors } from "@loopback/rest";
 import { repository } from "@loopback/repository";
-import { PasswordHasherBindings, TokenServiceBindings, EmailManagerBindings } from '../keys';
+import { PasswordHasherBindings, TokenServiceBindings, EmailManagerBindings, BaseUrls } from '../keys';
 import { PasswordHasher } from "./hash.password.bcryptjs";
 import { inject } from "@loopback/context";
 import { UserProfile, securityId } from '@loopback/security';
 import { UserCredentialsRepository } from "../repositories/user-credentials.repository";
-import { UserGroupRepository, UserRoleRepository, GroupRepository, RoleRepository, CalendarRepository } from "../repositories";
+import { UserGroupRepository, UserRoleRepository, GroupRepository, RoleRepository, CalendarRepository, ErrorLogRepository } from "../repositories";
 import { promisify } from "util";
 import { EmailManager } from './email.service';
 import { MailType } from '../enums/mailType.enum';
 import { RoleType } from '../enums/roleType.enum';
-import { NewUserRequest, UpdateUserRequest } from '../controllers';
+import { UpdateUserRequest } from '../controllers';
 import isemail from 'isemail';
 import { PlatformType } from '../enums/platform.enum';
 
@@ -33,6 +33,7 @@ export class MyUserService implements UserService<User, Credentials> {
     @repository(GroupRepository) private groupRepository: GroupRepository,
     @repository(CalendarRepository) private calendarRepository: CalendarRepository,
     @repository(UserRoleRepository) private userRoleRepository: UserRoleRepository,
+    @repository(ErrorLogRepository) private errorLogRepository: ErrorLogRepository,
     @repository(UserCredentialsRepository) private userCredentialsRepository: UserCredentialsRepository,
     @inject(PasswordHasherBindings.PASSWORD_HASHER) private passwordHasher: PasswordHasher,
     @inject(EmailManagerBindings.SEND_MAIL) private emailManager: EmailManager,
@@ -242,15 +243,20 @@ export class MyUserService implements UserService<User, Credentials> {
 
   async sendMailForgotPassword(email: string, fullName: string, token: string): Promise<void> {
 
-    const url = `http://localhost:3000/users/resetPassword/${token}`;
+    const url = `${BaseUrls.UI_Base_Url}/auth/reset-password/${email}/${token}`;
 
     await this.emailManager.setMailModel(fullName, email, MailType.PasswordReset, url).then((response) => {
 
       this.emailManager.sendMail(response).then((res) => {
-        console.log(res);
+
         //return { message: `${email} adresine aktivasyon maili gönderilmiştir. Lütfen mailinizi kontrol ediniz.` };
       }).catch((error) => {
-        console.log(error);
+        this.errorLogRepository.create({
+          name: "User Servis Mail Hata " + error.command,
+          code: error.code,
+          methodName: "Forgot mail send function",
+          errorStack: error.response
+        });
         //throw new HttpErrors.UnprocessableEntity(`${email} adresine mail gönderiminde hata oluştu! Lütfen sistem yöneticisine danışınız!`);
       });
     }
@@ -260,15 +266,15 @@ export class MyUserService implements UserService<User, Credentials> {
 
   async sendMailRegisterUser(email: string, fullName: string, token: string): Promise<void> {
 
-    const url = `http://localhost:3000/users/verification/${token}`;
+    const url = `${BaseUrls.UI_Base_Url}/auth/validation/${email}/${token}`;
 
     await this.emailManager.setMailModel(fullName, email, MailType.Register, url).then((response) => {
 
       this.emailManager.sendMail(response).then((res) => {
-        console.log(res);
+
         //return { message: `${email} adresine aktivasyon maili gönderilmiştir. Lütfen mailinizi kontrol ediniz.` };
       }).catch((error) => {
-        console.log(error);
+
         //throw new HttpErrors.UnprocessableEntity(`${email} adresine mail gönderiminde hata oluştu! Lütfen sistem yöneticisine danışınız!`);
       });
     }

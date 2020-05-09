@@ -18,16 +18,22 @@ export namespace EmailManagerBindings {
 
 export namespace EmailServiceConstants {
   export const EMAIL_CONFIG = {
-    service: 'gmail',
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true,
     auth: {
       user: 'wolfpackteamapps@gmail.com',
-      pass: '1234@wolf'
+      pass: '1234@Wolf.'
     }
   }
 }
 
 export namespace DataSourceName {
   export const DATA_SOURCE_NAME = 'datasources.mongo';
+}
+
+export namespace BaseUrls {
+  export const UI_Base_Url = 'https://omnicali-demo.web.app';
 }
 
 export namespace TokenServiceBindings {

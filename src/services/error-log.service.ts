@@ -1,6 +1,6 @@
 import { bind, /* inject, */ BindingScope } from '@loopback/core';
-import { repository } from '@loopback/boot/node_modules/@loopback/repository';
 import { ErrorLogRepository } from '../repositories';
+import { repository } from '@loopback/repository';
 
 @bind({ scope: BindingScope.TRANSIENT })
 export class ErrorLogService {

@@ -9,3 +9,4 @@ export * from './user-group.model';
 export * from './error-log.model';
 export * from './notification.model';
 export * from './group-setting.model';
+export * from './mail-template.model';

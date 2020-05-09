@@ -1,5 +1,5 @@
 
 export enum MailType {
-  Register = 'Register',
-  PasswordReset = 'PasswordReset',
+  Register = 1,
+  PasswordReset = 2,
 }

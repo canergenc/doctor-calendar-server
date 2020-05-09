@@ -70,6 +70,8 @@ export class MyAuthenticationSequence implements SequenceHandler {
       ) {
         Object.assign(error, { statusCode: 401 /* Unauthorized */ });
       }
+      console.log("Sistem catch yakaladı")
+      console.log(error)
 
       this.reject(context, error);
       return;

@@ -2,6 +2,8 @@ import { BindingScope, bind } from '@loopback/core';
 import { EmailServiceConstants } from '../keys';
 import { Email } from '../models/email.model';
 import { MailType } from '../enums/mailType.enum';
+import { repository } from '@loopback/repository';
+import { MailTemplateRepository } from '../repositories/mail-template.repository';
 
 const nodemailer = require('nodemailer');
 let subBodyModel = {
@@ -16,18 +18,14 @@ export interface EmailManager<T = Object> {
 @bind({ scope: BindingScope.TRANSIENT })
 export class EmailService {
 
-  constructor() { }
+  constructor(
+    @repository(MailTemplateRepository) private mailTemplateRepository: MailTemplateRepository
+  ) { }
 
   async sendMail(mailObj: Email): Promise<object> {
 
-    const transporter = nodemailer.createTransport(EmailServiceConstants.EMAIL_CONFIG);
+    const transporter = await nodemailer.createTransport(EmailServiceConstants.EMAIL_CONFIG);
     return await transporter.sendMail(mailObj);
-    // {
-    //   from: "wolfpackteamapps@gmail.com",
-    //   to: "canergenc93@gmail.com",
-    //   subject: "Sand Calendar Info Message",
-    //   html: "Welcome to Sand Calendar! :)"
-    // }
   }
 
   async setMailModel(fullName: string, to: string, mailType: MailType, url?: string): Promise<Email> {
@@ -39,15 +37,38 @@ export class EmailService {
     switch (mailType) {
       case MailType.Register:
         emailModel.subject = "Sayın " + fullName + " Omnicali Uygulamasına Hoşgeldiniz!";
-        emailModel.html = "Hesabınızı aktifleştirmek için lütfen aktivasyon linkine tıklayınız. " + url;
+        emailModel.html = await this.getMailTemplate(MailType.Register, url || "", fullName);
         break;
       case MailType.PasswordReset:
-        emailModel.subject = "Omnicali Hesap Parola Sıfırlama";
-        emailModel.html = "Hesabınızın parolasını sıfırlamak için lütfen parola sıfırlama linkine tıklayınız. "
+        emailModel.subject = "Omnicali Hesap Parola Sıfırlama İsteği";
+        emailModel.html = await this.getMailTemplate(MailType.PasswordReset, url || "", fullName);
         break;
     }
     return emailModel;
 
+  }
+
+  async getMailTemplate(mailType: MailType, url: string, name: string): Promise<string> {
+    let html = "";
+    switch (mailType) {
+      case MailType.PasswordReset:
+        let templateResult = await this.mailTemplateRepository.findOne({ where: { mailType: MailType.PasswordReset } });
+        if (!templateResult) break;
+        templateResult.html = templateResult.html
+          .replace("$user", name)
+          .replace("$url", url)
+        html = templateResult.html
+        break;
+      case MailType.Register:
+        templateResult = await this.mailTemplateRepository.findOne({ where: { mailType: MailType.Register } });
+        if (!templateResult) break;
+        templateResult.html = templateResult.html
+          .replace("$user", name)
+          .replace("$url", url)
+        html = templateResult.html
+        break;
+    }
+    return html;
   }
 
 

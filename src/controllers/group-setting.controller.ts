@@ -22,8 +22,8 @@ import { GroupSetting } from '../models';
 import { GroupSettingRepository } from '../repositories';
 import { authenticate } from '@loopback/authentication';
 import { OPERATION_SECURITY_SPEC } from '../utils/security-spec';
-import { service } from '@loopback/boot/node_modules/@loopback/core';
 import { GroupSettingService } from '../services';
+import { service } from '@loopback/core';
 
 @authenticate('jwt')
 export class GroupSettingController {
