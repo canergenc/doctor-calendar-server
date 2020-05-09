@@ -87,6 +87,7 @@ export class MyUserService implements UserService<User, Credentials> {
   }
 
   async forgot(email: string): Promise<boolean> {
+    email = email.trim().toLowerCase();
     const foundUser = await this.userRepository.findOne({ where: { email: { like: email } } });
     if (!foundUser) {
       throw new HttpErrors.BadRequest("Bu adrese ait kayıtlı hesap bulunamadı!");
