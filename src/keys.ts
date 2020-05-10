@@ -9,7 +9,7 @@ export namespace TokenServiceConstants {
   export const TOKEN_SECRET_VALUE = 'myjwtDctrClndrs3cr3t';
   export const TOKEN_EXPIRES_IN_VALUE = '2592000';
   export const VERIFY_TOKEN_SECRET_VALUE = 'V3RiFys3cr3t';
-  export const VERIFY_TOKEN_EXPIRES_IN_VALUE = '60'/*'1800'*/;
+  export const VERIFY_TOKEN_EXPIRES_IN_VALUE = '1800';
 }
 
 export namespace EmailManagerBindings {

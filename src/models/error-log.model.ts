@@ -58,7 +58,7 @@ export class ErrorLog extends Entity {
 
   @property({
     type: 'date',
-    default: new Date(),
+    default: () => new Date(),
   })
   createdDate?: string;
 

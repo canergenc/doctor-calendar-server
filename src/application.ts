@@ -5,7 +5,7 @@ import {
   RestExplorerComponent,
 } from '@loopback/rest-explorer';
 import { RepositoryMixin } from '@loopback/repository';
-import { RestApplication } from '@loopback/rest';
+import { RestApplication, RestServer } from '@loopback/rest';
 import { ServiceMixin } from '@loopback/service-proxy';
 import path from 'path';
 import { MyAuthenticationSequence } from './sequence';
@@ -37,7 +37,6 @@ export class DoctorCalendarServerApplication extends BootMixin(
 ) {
   constructor(options: ApplicationConfig = {}) {
     super(options);
-
     /*
        This is a workaround until an extension point is introduced
        allowing extensions to contribute to the OpenAPI specification

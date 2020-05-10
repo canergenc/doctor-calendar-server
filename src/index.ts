@@ -1,7 +1,7 @@
-import {DoctorCalendarServerApplication} from './application';
-import {ApplicationConfig} from '@loopback/core';
+import { DoctorCalendarServerApplication } from './application';
+import { ApplicationConfig } from '@loopback/core';
 
-export {DoctorCalendarServerApplication};
+export { DoctorCalendarServerApplication };
 
 export async function main(options: ApplicationConfig = {}) {
   const app = new DoctorCalendarServerApplication(options);

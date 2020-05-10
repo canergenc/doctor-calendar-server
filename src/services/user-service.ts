@@ -255,7 +255,8 @@ export class MyUserService implements UserService<User, Credentials> {
           name: "User Servis Mail Hata " + error.command,
           code: error.code,
           methodName: "Forgot mail send function",
-          errorStack: error.response
+          errorStack: error.response,
+          description: `${email} adresine mail gönderiminde hata oluştu! Lütfen sistem yöneticisine danışınız!`
         });
         //throw new HttpErrors.UnprocessableEntity(`${email} adresine mail gönderiminde hata oluştu! Lütfen sistem yöneticisine danışınız!`);
       });
@@ -274,7 +275,13 @@ export class MyUserService implements UserService<User, Credentials> {
 
         //return { message: `${email} adresine aktivasyon maili gönderilmiştir. Lütfen mailinizi kontrol ediniz.` };
       }).catch((error) => {
-
+        this.errorLogRepository.create({
+          name: "User Servis Mail Hata " + error.command,
+          code: error.code,
+          methodName: "Validation mail send function",
+          description: `${email} adresine mail gönderiminde hata oluştu! Lütfen sistem yöneticisine danışınız!`,
+          errorStack: error.response
+        });
         //throw new HttpErrors.UnprocessableEntity(`${email} adresine mail gönderiminde hata oluştu! Lütfen sistem yöneticisine danışınız!`);
       });
     }
