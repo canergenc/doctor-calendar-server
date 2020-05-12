@@ -24,7 +24,6 @@ export class CalendarService {
   async create(calendar: Calendar): Promise<Calendar> {
     /*audit set */
     calendar.createdUserId = calendar.updatedUserId = this.currentUserProfile[securityId];
-    delete this.currentUserProfile[securityId];
 
     /*calendar rest day control */
     await this.dataValidate(calendar, true, true, true);
@@ -74,7 +73,7 @@ export class CalendarService {
 
     if (fromDate < currentDate)
       throw new HttpErrors.BadRequest("Geçmişe yönelik düzenleme yapabilmek için lütfen sistem yöneticisine danışınız!");
-
+    throw new HttpErrors.BadRequest("Ben yaptım");
   }
 
   private async duplicateValidate(calendar: Calendar): Promise<void> {
