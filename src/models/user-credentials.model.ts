@@ -34,6 +34,11 @@ export class UserCredentials extends Entity {
   emailVerified: boolean;
 
   @property({
+    type: 'string',
+  })
+  forgotCode: string;
+
+  @property({
     type: 'date',
     default: () => new Date(),
   })
@@ -82,6 +87,12 @@ export class ResetPassword extends Model {
     },
   })
   email: string;
+
+  @property({
+    type: 'string',
+    required: true
+  })
+  code: string;
 
   @property({
     type: 'string',

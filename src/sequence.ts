@@ -8,6 +8,7 @@ import {
   RestBindings,
   Send,
   SequenceHandler,
+  LogError,
 } from '@loopback/rest';
 import {
   AuthenticationBindings,
@@ -26,6 +27,7 @@ export class MyAuthenticationSequence implements SequenceHandler {
     @inject(SequenceActions.INVOKE_METHOD) protected invoke: InvokeMethod,
     @inject(SequenceActions.SEND) protected send: Send,
     @inject(SequenceActions.REJECT) protected reject: Reject,
+    @inject(SequenceActions.LOG_ERROR) protected log: LogError,
     @inject(AuthenticationBindings.AUTH_ACTION)
     protected authenticateRequest: AuthenticateFn,
   ) { }

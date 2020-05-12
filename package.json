@@ -60,6 +60,7 @@
     "@types/bcryptjs": "^2.4.2",
     "bcryptjs": "^2.4.3",
     "casbin": "^3.1.0",
+    "guid-typescript": "^1.0.9",
     "install": "^0.13.0",
     "isemail": "^3.2.0",
     "jsonwebtoken": "^8.5.1",

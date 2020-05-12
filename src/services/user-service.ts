@@ -1,4 +1,4 @@
-import { UserService } from "@loopback/authentication";
+import { UserService, TokenService } from "@loopback/authentication";
 import { User, UserInfoOutputModel, ResetPassword } from "../models";
 import { Credentials, UserRepository } from "../repositories/user.repository";
 import { HttpErrors } from "@loopback/rest";
@@ -16,6 +16,7 @@ import { RoleType } from '../enums/roleType.enum';
 import { UpdateUserRequest } from '../controllers';
 import isemail from 'isemail';
 import { PlatformType } from '../enums/platform.enum';
+import { Guid } from "guid-typescript";
 
 const jwt = require('jsonwebtoken');
 const verifyAsync = promisify(jwt.verify);
@@ -25,6 +26,7 @@ const invalidCredentialsError = 'Geçersiz email veya parola!';
 
 export class MyUserService implements UserService<User, Credentials> {
   constructor(
+    @inject(TokenServiceBindings.TOKEN_SERVICE) private tokenService: TokenService,
     @inject(TokenServiceBindings.TOKEN_SECRET) private jwtSecret: string,
     @inject(TokenServiceBindings.VERIFY_TOKEN_SECRET_VALUE) private jwtVerifySecret: string,
     @inject(TokenServiceBindings.VERIFY_TOKEN_EXPIRES_IN_VALUE) private jwtVerifyExpiresIn: string,
@@ -43,6 +45,7 @@ export class MyUserService implements UserService<User, Credentials> {
   async decodeToken(token: string, customSecretKey?: string): Promise<{
     decodeModel: {
       id: string,
+      code: string,
       iat: number,
       exp: number
     }
@@ -52,7 +55,8 @@ export class MyUserService implements UserService<User, Credentials> {
       const result = await verifyAsync(token, customSecretKey ? customSecretKey : this.jwtSecret);
       return {
         decodeModel: {
-          id: result?.id,
+          id: result?.attribute1,
+          code: result?.attribute2,
           iat: result?.iat,
           exp: result?.exp
         }
@@ -64,10 +68,12 @@ export class MyUserService implements UserService<User, Credentials> {
     }
   }
 
-  async generateVerifyToken(value: string): Promise<string> {
+  async generateVerifyToken(value: string, code?: string): Promise<string> {
     if (!value) return "";
     let token: string;
-    const myModel = { [securityId]: value, id: value };
+
+    const myModel = !code ? { [securityId]: value, attribute1: value } : { [securityId]: value, attribute1: value, attribute2: code };
+
     try {
       token = await signAsync(myModel, this.jwtVerifySecret, {
         expiresIn: Number(this.jwtVerifyExpiresIn),
@@ -93,19 +99,21 @@ export class MyUserService implements UserService<User, Credentials> {
     if (!foundUser) {
       throw new HttpErrors.BadRequest("Bu adrese ait kayıtlı hesap bulunamadı!");
     }
-    const token = await this.generateVerifyToken(foundUser.id);
+    const token = await this.generateVerifyToken(foundUser.id, Guid.raw());
+
     if (!token) { throw new HttpErrors.BadRequest("Bir hata oluştu! Lütfen sistem yöneticisine danışınız!"); }
     await this.sendMailForgotPassword(email, foundUser.fullName, token);
     return true;
   }
 
-  async resetPassword(key: string, resetPassword: ResetPassword): Promise<boolean> {
-    if (!key) throw new HttpErrors.BadRequest("Hatalı istek!");
+  async resetPassword(resetPassword: ResetPassword): Promise<boolean> {
+    if (!resetPassword.code) throw new HttpErrors.BadRequest("Hatalı istek!");
 
-    const res = await this.decodeToken(key, this.jwtVerifySecret);
+    const res = await this.decodeToken(resetPassword.code, this.jwtVerifySecret);
     if (!res.decodeModel.id) throw new HttpErrors.BadRequest("Geçersiz işlem! Lütfen sistem yöneticisine danışınız!");
+    const userId = res.decodeModel.id;
 
-    const foundUser = await this.userRepository.findById(res.decodeModel.id);
+    const foundUser = await this.userRepository.findById(userId);
 
     if (!foundUser)
       throw new HttpErrors.BadRequest("Kullanıcı bulunamadı! Lütfen sistem yöneticisine danışınız!");
@@ -113,7 +121,7 @@ export class MyUserService implements UserService<User, Credentials> {
     if (foundUser.email != resetPassword.email)
       throw new HttpErrors.BadRequest(resetPassword.email + " adresine ait eşleşme bulunamadı! Lütfen sistem yöneticisine danışınız!");
 
-    await this.passwordUpdate(foundUser.id, resetPassword.password);
+    await this.passwordUpdate(foundUser.id, resetPassword.password, undefined, res.decodeModel.code);
 
     return true;
   }
@@ -139,30 +147,34 @@ export class MyUserService implements UserService<User, Credentials> {
     await this.userRepository.updateById(id, user);
   }
 
-  private async passwordUpdate(userId: string, currentPassword: string, oldPassword?: string): Promise<void> {
-    if (currentPassword.length >= 8 && currentPassword.length <= 16) {
-      const foundUserCredential = await this.userCredentialsRepository.findOne({ where: { userId: { like: userId } } });
-      if (foundUserCredential) {
-        if (oldPassword) {
-          /**Compare Password */
-          await this.comparePassword(oldPassword, foundUserCredential.password, "Parola eski parola ile uyuşmamaktadır!");
-        }
-
-        // encrypt the password
-        const hashNewPassword = await this.passwordHasher.hashPassword(
-          currentPassword,
-        );
-        if (hashNewPassword) {
-          await this.userCredentialsRepository.updateAll({ password: hashNewPassword }, { userId: { like: userId } });
-        } else {
-          throw new HttpErrors.BadRequest("Parola kayıt edilemedi! Lütfen sistem yöneticisine danışınız!");
-        }
-      } else {
-        throw new HttpErrors.BadRequest("Kullanıcı bulunamadı!");
-      }
-    } else {
+  private async passwordUpdate(userId: string, currentPassword: string, oldPassword?: string, forgotCode?: string): Promise<void> {
+    if (!(currentPassword.length >= 8 && currentPassword.length <= 16))
       throw new HttpErrors.BadRequest("Parola minimum 8 karakter uzunluğunda olmalı!");
+
+    const foundUserCredential = await this.userCredentialsRepository.findOne({ where: { userId: { like: userId } } });
+    if (!foundUserCredential)
+      throw new HttpErrors.BadRequest("Kullanıcı bulunamadı!");
+
+    if (oldPassword) {
+      /**Compare Password */
+      await this.comparePassword(oldPassword, foundUserCredential.password, "Parola eski parola ile uyuşmamaktadır!");
     }
+
+
+    if (forgotCode && foundUserCredential.forgotCode && foundUserCredential.forgotCode == forgotCode) {
+      throw new HttpErrors.BadRequest("Bu işlem daha önce yapıldı! Lütfen yeni istek yapınız!");
+    }
+
+    // encrypt the password
+    const hashNewPassword = await this.passwordHasher.hashPassword(
+      currentPassword,
+    );
+    if (!hashNewPassword)
+      throw new HttpErrors.BadRequest("Parola kayıt edilemedi! Lütfen sistem yöneticisine danışınız!");
+
+    await this.userCredentialsRepository.updateAll({ password: hashNewPassword, updatedDate: new Date(), updatedUserId: userId, forgotCode: forgotCode }, { userId: { like: userId } });
+
+    this.sendMailPasswordUpdate(userId);
   }
 
   async verifyCredentials(credentials: Credentials): Promise<User> {
@@ -290,13 +302,28 @@ export class MyUserService implements UserService<User, Credentials> {
 
   }
 
-  async printCurrentUser(currentuser: UserProfile): Promise<UserInfoOutputModel> {
-    // const myToken = await this.generateVerifyToken('5e81d16b63226a009965dd47');
+  async sendMailPasswordUpdate(userId: string): Promise<void> {
+    const foundUser = await this.userRepository.findById(userId);
 
-    // await this.sendMailRegisterUser(
-    //   'canergenc93@gmail.com',
-    //   'Caner Genç',
-    //   myToken)
+    await this.emailManager.setMailModel(foundUser.fullName, foundUser.email, MailType.PasswordUpdate).then((response) => {
+      this.emailManager.sendMail(response).then((res) => {
+      }).catch((error) => {
+        this.errorLogRepository.create({
+          name: "User Servis Mail Hata " + error.command,
+          code: error.code,
+          methodName: "Password notification mail send function",
+          description: `${foundUser.email} adresine mail gönderiminde hata oluştu!`,
+          errorStack: error.response
+        });
+      });
+    }
+
+    )
+
+
+  }
+
+  async printCurrentUser(currentuser: UserProfile): Promise<UserInfoOutputModel> {
 
     const userInfoOutputModel = new UserInfoOutputModel();
 
@@ -367,4 +394,3 @@ export class MyUserService implements UserService<User, Credentials> {
   }
 
 }
-

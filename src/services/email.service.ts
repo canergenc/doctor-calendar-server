@@ -43,6 +43,10 @@ export class EmailService {
         emailModel.subject = "Omnicali Hesap Parola Sıfırlama İsteği";
         emailModel.html = await this.getMailTemplate(MailType.PasswordReset, url || "", fullName);
         break;
+      case MailType.PasswordUpdate:
+        emailModel.subject = "Omnicali Hesap Parolanız Değiştirildi";
+        emailModel.html = await this.getMailTemplate(MailType.PasswordUpdate, url || "", fullName);
+        break;
     }
     return emailModel;
 
@@ -50,9 +54,10 @@ export class EmailService {
 
   async getMailTemplate(mailType: MailType, url: string, name: string): Promise<string> {
     let html = "";
+    let templateResult = undefined;
     switch (mailType) {
       case MailType.PasswordReset:
-        let templateResult = await this.mailTemplateRepository.findOne({ where: { mailType: MailType.PasswordReset } });
+        templateResult = await this.mailTemplateRepository.findOne({ where: { mailType: MailType.PasswordReset } });
         if (!templateResult) break;
         templateResult.html = templateResult.html
           .replace("$user", name)
@@ -65,6 +70,13 @@ export class EmailService {
         templateResult.html = templateResult.html
           .replace("$user", name)
           .replace("$url", url)
+        html = templateResult.html
+        break;
+      case MailType.PasswordUpdate:
+        templateResult = await this.mailTemplateRepository.findOne({ where: { mailType: MailType.PasswordUpdate } });
+        if (!templateResult) break;
+        templateResult.html = templateResult.html
+          .replace("$user", name)
         html = templateResult.html
         break;
     }

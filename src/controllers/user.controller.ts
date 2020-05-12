@@ -307,7 +307,7 @@ export class UserController {
     return this.myUserService.forgot(email);
   }
 
-  @post('/users/resetPassword/{key}', {
+  @post('/users/resetPassword', {
     responses: {
       '200': {
         description: 'Account reset password service',
@@ -327,7 +327,6 @@ export class UserController {
     },
   })
   async reset(
-    @param.path.string('key') key: string,
     @requestBody({
       content: {
         'application/json': {
@@ -337,7 +336,7 @@ export class UserController {
     })
     resetPassword: ResetPassword,
   ): Promise<Boolean> {
-    return this.myUserService.resetPassword(key, resetPassword);
+    return this.myUserService.resetPassword(resetPassword);
   }
 
   @get('/users/emailCheck', {
