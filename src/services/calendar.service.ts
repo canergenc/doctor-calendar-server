@@ -73,7 +73,6 @@ export class CalendarService {
 
     if (fromDate < currentDate)
       throw new HttpErrors.BadRequest("Geçmişe yönelik düzenleme yapabilmek için lütfen sistem yöneticisine danışınız!");
-    throw new HttpErrors.BadRequest("Ben yaptım");
   }
 
   private async duplicateValidate(calendar: Calendar): Promise<void> {
@@ -183,17 +182,17 @@ export class CalendarService {
     }
 
     if (groupSetting?.locationDayLimit && calendar.locationId) {
-      const foundLocation = await this.locationRepository.findById(calendar.locationId);
-      if (!foundLocation.dayLimit) {
-        throw new HttpErrors.BadRequest(foundLocation.name + " lokasyona ait nöbet sınır adedi belirtilmemiş! Kayıt atanamaz.");
+
+      if (!groupSetting.locationDayLimitCount) {
+        throw new HttpErrors.BadRequest("Lokasyona günlük nöbet sınır adedi belirtilmemiş! Kayıt atanamaz.");
       }
       const startDate = new Date(calendar.startDate);
       /*geçici çözüm olarak yapıldı daha sonra düzeltilecek. */
       const foundCalendar = calendarList.filter(
         x => x.locationId == calendar.locationId && startDate <= x.startDate && startDate >= x.endDate
       );
-      if (foundCalendar?.length >= foundLocation.dayLimit) {
-        throw new HttpErrors.BadRequest(foundLocation.name + " lokasyonuna ait günlük nöbet sınırı " + foundLocation.dayLimit + " adettir. Daha fazla kayıt atanamaz!");
+      if (foundCalendar?.length >= groupSetting.locationDayLimitCount) {
+        throw new HttpErrors.BadRequest("Lokasyon günlük nöbet sınırı " + groupSetting.locationDayLimitCount + " adettir. Daha fazla kayıt atanamaz!");
       }
     }
   }

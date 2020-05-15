@@ -43,6 +43,11 @@ export class GroupSetting extends Entity {
   sequentialOrderLimitCount?: number;
 
   @property({
+    type: 'number',
+  })
+  locationDayLimitCount: number;
+
+  @property({
     type: 'boolean',
   })
   locationDayLimit?: boolean;
