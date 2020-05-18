@@ -55,7 +55,7 @@ export class MyUserService implements UserService<User, Credentials> {
       const result = await verifyAsync(token, customSecretKey ? customSecretKey : this.jwtSecret);
       return {
         decodeModel: {
-          id: result?.attribute1,
+          id: result?.attribute1 || result?.id,
           code: result?.attribute2,
           iat: result?.iat,
           exp: result?.exp
@@ -89,6 +89,8 @@ export class MyUserService implements UserService<User, Credentials> {
       throw new HttpErrors.BadRequest("Hatalı istek!");
     }
     const res = await this.decodeToken(key, this.jwtVerifySecret);
+    const foundUserCredential = await this.userCredentialsRepository.findOne({ where: { userId: { like: res?.decodeModel?.id } } });
+    if (foundUserCredential?.emailVerified) throw new HttpErrors.BadRequest("Hesap doğrulaması daha önce yapıldı!");
     const foundCredentialUserCount = await this.userCredentialsRepository.updateAll({ emailVerified: true }, { userId: { like: res?.decodeModel?.id } });
     return foundCredentialUserCount.count > 0 ? true : false;
   }
@@ -124,27 +126,6 @@ export class MyUserService implements UserService<User, Credentials> {
     await this.passwordUpdate(foundUser.id, resetPassword.password, undefined, res.decodeModel.code);
 
     return true;
-  }
-
-  async updateById(id: string, user: UpdateUserRequest, currentUserProfile: UserProfile): Promise<void> {
-
-    if (!currentUserProfile.roles?.includes(RoleType.Admin)) {
-      delete user.roles;
-    }
-
-    user.updatedDate = new Date();
-    user.updatedUserId = currentUserProfile[securityId];
-
-    if (user.email) {
-      await this.validateEmail(id, user.email);
-    }
-
-    if (user.currentPassword && user.oldPassword) {
-      /**Password Update */
-      await this.passwordUpdate(id, user.currentPassword, user.oldPassword)
-    }
-
-    await this.userRepository.updateById(id, user);
   }
 
   private async passwordUpdate(userId: string, currentPassword: string, oldPassword?: string, forgotCode?: string): Promise<void> {
@@ -224,19 +205,6 @@ export class MyUserService implements UserService<User, Credentials> {
 
     }
     return passwordMatched;
-  }
-
-  async validateEmail(userId: string, email: string): Promise<void> {
-    // Validate Email
-    if (!isemail.validate(email)) {
-      throw new HttpErrors.BadRequest('Hatalı email');
-    }
-    const foundUser = await this.userRepository.findOne({ where: { id: userId } });
-    if (foundUser?.email != email) {
-      const foundUserEmail = await this.userRepository.findEmail(email);
-      if (foundUserEmail)
-        throw new HttpErrors.BadRequest("Bu email daha önce kayıt edilmiş!");
-    }
   }
 
   async reVerify(email: string): Promise<boolean> {
@@ -367,6 +335,27 @@ export class MyUserService implements UserService<User, Credentials> {
     return userProfile;
   }
 
+  async updateById(id: string, user: UpdateUserRequest, currentUserProfile: UserProfile): Promise<void> {
+
+    if (!currentUserProfile.roles?.includes(RoleType.Admin)) {
+      delete user.roles;
+    }
+
+    user.updatedDate = new Date();
+    user.updatedUserId = currentUserProfile[securityId];
+
+    if (user.email) {
+      await this.foundValidateEmail(id, user.email);
+    }
+
+    if (user.currentPassword && user.oldPassword) {
+      /**Password Update */
+      await this.passwordUpdate(id, user.currentPassword, user.oldPassword)
+    }
+
+    await this.userRepository.updateById(id, user);
+  }
+
   async deleteById(userId: typeof User.prototype.id): Promise<void> {
 
     await this.userRepository.updateAll({ isDeleted: true, updatedDate: new Date(), updatedUserId: userId }, { id: userId }).then(async () => {
@@ -393,4 +382,16 @@ export class MyUserService implements UserService<User, Credentials> {
 
   }
 
+  async foundValidateEmail(userId: string, email: string): Promise<void> {
+    // Validate Email
+    if (!isemail.validate(email)) {
+      throw new HttpErrors.BadRequest('Hatalı email');
+    }
+    const foundUser = await this.userRepository.findOne({ where: { id: userId } });
+    if (foundUser?.email != email) {
+      const foundUserEmail = await this.userRepository.findEmail(email);
+      if (foundUserEmail)
+        throw new HttpErrors.BadRequest("Bu email daha önce kayıt edilmiş!");
+    }
+  }
 }

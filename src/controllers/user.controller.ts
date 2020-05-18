@@ -121,7 +121,7 @@ export class UserController {
         .userCredentials(savedUser.id)
         .create({ password });
 
-      // const token = await this.myUserService.generateVerifyToken(savedUser.id)
+      //const token = await this.myUserService.generateVerifyToken(savedUser.id)
 
       // this.myUserService.sendMailRegisterUser(savedUser.email, savedUser.fullName, token);
 
