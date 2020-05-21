@@ -11,8 +11,8 @@ import { UserCredentialsRepository } from "../repositories/user-credentials.repo
 import { UserGroupRepository, UserRoleRepository, GroupRepository, RoleRepository, CalendarRepository, ErrorLogRepository } from "../repositories";
 import { promisify } from "util";
 import { EmailManager } from './email.service';
-import { MailType } from '../enums/mailType.enum';
-import { RoleType } from '../enums/roleType.enum';
+import { MailType } from '../enums/mail-type.enum';
+import { RoleType } from '../enums/role-type.enum';
 import { UpdateUserRequest } from '../controllers';
 import isemail from 'isemail';
 import { PlatformType } from '../enums/platform.enum';

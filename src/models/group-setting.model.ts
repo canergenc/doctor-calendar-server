@@ -53,6 +53,42 @@ export class GroupSetting extends Entity {
   locationDayLimit?: boolean;
 
   @property({
+    type: 'number',
+    required: true
+  })
+  type: number;
+
+  @property({
+    type: 'string',
+  })
+  name: string;
+
+  @property({
+    type: 'number',
+  })
+  start: number;
+
+  @property({
+    type: 'number',
+  })
+  finish: number;
+
+  @property({
+    type: 'number',
+  })
+  timeType: number;
+
+  @property({
+    type: 'number',
+  })
+  defaultWeekDayDutyLimit: number;
+
+  @property({
+    type: 'number',
+  })
+  defaultWeekEndDutyLimit: number;
+
+  @property({
     type: 'date',
     default: new Date(),
   })

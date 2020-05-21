@@ -1,7 +1,7 @@
 import { BindingScope, bind } from '@loopback/core';
 import { EmailServiceConstants } from '../keys';
 import { Email } from '../models/email.model';
-import { MailType } from '../enums/mailType.enum';
+import { MailType } from '../enums/mail-type.enum';
 import { repository } from '@loopback/repository';
 import { MailTemplateRepository } from '../repositories/mail-template.repository';
 

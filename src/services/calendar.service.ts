@@ -3,10 +3,11 @@ import { repository, Filter, Where, Count } from '@loopback/repository';
 import { CalendarRepository, GroupSettingRepository, UserRepository, UserGroupRepository, LocationRepository } from '../repositories';
 import { Calendar, User } from '../models';
 import { UserProfile, SecurityBindings, securityId } from '@loopback/security';
-import { CalendarType } from '../enums/calendarType.enum';
+import { CalendarType } from '../enums/calendar-type.enum';
 import { HttpErrors } from '@loopback/rest';
 import { StatusType } from '../enums/status.enum';
-import { RoleType } from '../enums/roleType.enum';
+import { RoleType } from '../enums/role-type.enum';
+import { GroupSettingType } from '../enums/group-setting-type.enum';
 
 @bind({ scope: BindingScope.TRANSIENT })
 export class CalendarService {
@@ -101,7 +102,7 @@ export class CalendarService {
 
   private async groupSettingValidate(calendar: Calendar, id?: string): Promise<void> {
     if (!calendar.groupId || !calendar.userId || calendar.type !== CalendarType.Nöbet) return;
-    const groupSetting = await this.groupSettingRepository.findOne({ where: { groupId: { like: calendar.groupId } } });
+    const groupSetting = await this.groupSettingRepository.findOne({ where: { groupId: { like: calendar.groupId }, type: GroupSettingType.GeneralSetting } });
     const userData = await this.userRepository.findById(calendar.userId);
     const userGroupData = await this.userGroupRepository.findOne({ where: { userId: { like: calendar.userId }, groupId: { like: calendar.groupId } } });
     const calendarStartDate = new Date(calendar.startDate);

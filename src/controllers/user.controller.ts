@@ -13,7 +13,7 @@ import _ from 'lodash';
 import { OPERATION_SECURITY_SPEC } from '../utils/security-spec';
 import isemail from 'isemail';
 import { MyUserService } from '../services/user-service';
-import { RoleType } from '../enums/roleType.enum';
+import { RoleType } from '../enums/role-type.enum';
 
 @model()
 export class NewUserRequest extends User {
