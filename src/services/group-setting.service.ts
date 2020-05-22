@@ -16,7 +16,7 @@ export class GroupSettingService {
   async create(groupSetting: GroupSetting): Promise<GroupSetting> {
     groupSetting.createdUserId = groupSetting.updatedUserId = this.currentUserProfile[securityId];
     await this.userGroupRelationControl(groupSetting);
-    await this.validateControl(groupSetting);
+    //await this.validateControl(groupSetting);
     return this.groupSettingRepository.create(groupSetting);
   }
 
@@ -61,7 +61,7 @@ export class GroupSettingService {
     groupSetting.updatedUserId = this.currentUserProfile[securityId];
     groupSetting = await this.updateValidateSet(id, groupSetting);
     await this.userGroupRelationControl(groupSetting);
-    await this.validateControl(groupSetting);
+    //await this.validateControl(groupSetting);
     await this.groupSettingRepository.updateById(id, groupSetting);
   }
 
