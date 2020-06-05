@@ -64,6 +64,13 @@ export class Location extends Entity {
   })
   isDeleted: boolean;
 
+  @property({
+    type: 'boolean',
+    default: () => true,
+  })
+  isActive: boolean;
+
+
   constructor(data?: Partial<Location>) {
     super(data);
   }

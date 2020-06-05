@@ -53,17 +53,17 @@ export class LocationService {
 
   async deleteById(id: string): Promise<void> {
     await this.locationRepository.updateAll({
-      isDeleted: true,
+      isActive: false,
       updatedDate: new Date(),
       updatedUserId: this.currentUserProfile[securityId]
     }, { id: id }).then(async () => {
 
-      /**Calendar Delete */
-      await this.calendarRepository.updateAll({
-        isDeleted: true,
-        updatedDate: new Date(),
-        updatedUserId: this.currentUserProfile[securityId]
-      }, { locationId: { like: id } });
+      /**Calendar Delete Daha sonra düşünülecek*/
+      // await this.calendarRepository.updateAll({
+      //   isDeleted: true,
+      //   updatedDate: new Date(),
+      //   updatedUserId: this.currentUserProfile[securityId]
+      // }, { locationId: { like: id } });
 
     }).catch(ex => {
       throw new HttpErrors.NotFound(ex);
