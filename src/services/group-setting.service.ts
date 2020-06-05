@@ -35,7 +35,7 @@ export class GroupSettingService {
     if (!groupSetting.groupId) throw new HttpErrors.BadRequest('Lütfen grup belirtiniz. Kayıt atanamaz!');
     const foundUserGroup = await this.userGroupRepository.findOne({ where: { userId: { like: this.currentUserProfile[securityId] }, groupId: { like: groupSetting.groupId } } });
     if (!foundUserGroup) {
-      throw new HttpErrors.BadRequest('İlgili kullanıcının bu gruba ait ilişki bulunmaktadır. Kayıt atanamaz!');
+      throw new HttpErrors.BadRequest('İlgili kullanıcının bu gruba ait ilişki bulunmamaktadır. Kayıt atanamaz!');
     }
   }
 
