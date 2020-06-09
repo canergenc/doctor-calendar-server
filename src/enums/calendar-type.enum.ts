@@ -6,5 +6,6 @@ export enum CalendarType {
   "ResmiTatil" = 5,
   "İdariİzin" = 6,
   "ÖzelDurum" = 7,
-  "Rotasyon" = 8
+  "Rotasyon" = 8,
+  "Publish" = 9
 }
