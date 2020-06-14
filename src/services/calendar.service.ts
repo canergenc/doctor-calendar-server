@@ -272,6 +272,12 @@ export class CalendarService {
     if (!calendar.locationId) {
       calendar.locationId = foundCalendar.locationId;
     }
+    if (!calendar.startDate) {
+      calendar.startDate = foundCalendar.startDate;
+    }
+    if (!calendar.endDate) {
+      calendar.endDate = foundCalendar.endDate;
+    }
     return calendar;
   }
 
