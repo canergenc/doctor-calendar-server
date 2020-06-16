@@ -1,5 +1,5 @@
 import { Filter, repository, model, property, CountSchema, Count, Where } from '@loopback/repository';
-import { post, param, get, getFilterSchemaFor, getModelSchemaRef, del, requestBody, HttpErrors, getWhereSchemaFor, patch } from '@loopback/rest';
+import { post, param, get, getFilterSchemaFor, getModelSchemaRef, del, requestBody, HttpErrors, getWhereSchemaFor, patch, RequestContext } from '@loopback/rest';
 import { UserProfile, securityId, SecurityBindings } from '@loopback/security';
 import { User, UserInfoOutputModel, ResetPassword } from '../models';
 import { UserRepository, Credentials } from '../repositories';
@@ -65,7 +65,8 @@ export class UserController {
     public jwtService: TokenService,
     @inject(UserServiceBindings.USER_SERVICE)
     public userService: UserService<User, Credentials>,
-    @service(MyUserService) public myUserService: MyUserService
+    @service(MyUserService) public myUserService: MyUserService,
+    @inject.context() public context: RequestContext
   ) { }
 
   @post('/users', {
@@ -123,7 +124,7 @@ export class UserController {
 
       //const token = await this.myUserService.generateVerifyToken(savedUser.id)
 
-      // this.myUserService.sendMailRegisterUser(savedUser.email, savedUser.fullName, token);
+      // this.myUserService.sendMailRegisterUser(savedUser.email, savedUser.fullName, token, this.context.request.headers["origin"];);
 
       return savedUser;
     } catch (error) {
@@ -283,7 +284,7 @@ export class UserController {
   async reVerification(
     @param.query.string('email') email: string
   ): Promise<Boolean> {
-    return this.myUserService.reVerify(email);
+    return this.myUserService.reVerify(email, this.context.request.headers["origin"]);
   }
 
   @get('/users/forgot', {
@@ -304,7 +305,8 @@ export class UserController {
   async forgot(
     @param.query.string('email') email: string
   ): Promise<Boolean> {
-    return this.myUserService.forgot(email);
+    const link = this.context.request.headers["origin"];
+    return this.myUserService.forgot(email, link);
   }
 
   @post('/users/resetPassword', {

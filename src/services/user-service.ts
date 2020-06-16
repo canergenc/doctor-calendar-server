@@ -95,7 +95,8 @@ export class MyUserService implements UserService<User, Credentials> {
     return foundCredentialUserCount.count > 0 ? true : false;
   }
 
-  async forgot(email: string): Promise<boolean> {
+  async forgot(email: string, link?: any): Promise<boolean> {
+
     email = email.trim().toLowerCase();
     const foundUser = await this.userRepository.findOne({ where: { email: { like: email } } });
     if (!foundUser) {
@@ -104,7 +105,7 @@ export class MyUserService implements UserService<User, Credentials> {
     const token = await this.generateVerifyToken(foundUser.id, Guid.raw());
 
     if (!token) { throw new HttpErrors.BadRequest("Bir hata oluştu! Lütfen sistem yöneticisine danışınız!"); }
-    await this.sendMailForgotPassword(email, foundUser.fullName, token);
+    await this.sendMailForgotPassword(email, foundUser.fullName, token, link);
     return true;
   }
 
@@ -207,23 +208,25 @@ export class MyUserService implements UserService<User, Credentials> {
     return passwordMatched;
   }
 
-  async reVerify(email: string): Promise<boolean> {
+  async reVerify(email: string, link?: any): Promise<boolean> {
     const foundUser = await this.userRepository.findOne({ where: { email: { like: email } } });
     if (!foundUser) { throw new HttpErrors.NotFound("Böyle bir hesap bulunamadı") }
     const foundUserCredential = await this.userCredentialsRepository.findOne({ where: { userId: { like: foundUser.id }, emailVerified: true } });
     if (foundUserCredential) { throw new HttpErrors.NotFound("Daha önce hesap doğrulaması yapıldı!") }
     try {
       const token = await this.generateVerifyToken(foundUser.id);
-      await this.sendMailRegisterUser(foundUser.id, foundUser.fullName, token);
+      await this.sendMailRegisterUser(foundUser.id, foundUser.fullName, token, link);
       return true;
     } catch (error) {
       throw new HttpErrors.NotFound(error);
     }
   }
 
-  async sendMailForgotPassword(email: string, fullName: string, token: string): Promise<void> {
+  async sendMailForgotPassword(email: string, fullName: string, token: string, link?: string): Promise<void> {
 
-    const url = `${BaseUrls.UI_Base_Url}/auth/reset-password/${email}/${token}`;
+    let url = `${BaseUrls.UI_Base_Url}/auth/reset-password/${email}/${token}`;
+    if (link)
+      url = `${link}/auth/reset-password/${email}/${token}`;
 
     await this.emailManager.setMailModel(fullName, email, MailType.PasswordReset, url).then((response) => {
 
@@ -245,9 +248,11 @@ export class MyUserService implements UserService<User, Credentials> {
     )
   }
 
-  async sendMailRegisterUser(email: string, fullName: string, token: string): Promise<void> {
+  async sendMailRegisterUser(email: string, fullName: string, token: string, link?: any): Promise<void> {
 
-    const url = `${BaseUrls.UI_Base_Url}/auth/validation/${email}/${token}`;
+    let url = `${BaseUrls.UI_Base_Url}/auth/validation/${email}/${token}`;
+    if (link)
+      url = `${link}/auth/validation/${email}/${token}`;
 
     await this.emailManager.setMailModel(fullName, email, MailType.Register, url).then((response) => {
 
