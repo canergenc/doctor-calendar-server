@@ -92,7 +92,8 @@ export class CalendarService {
         status: { neq: StatusType.Rejected },
       }
     });
-    if (duplicateResult && (id && duplicateResult.id != id)) {
+
+    if (duplicateResult && duplicateResult.id != id) {
       const userData = await this.userRepository.findById(calendar.userId);
       const message = await this.validateMessageSet(duplicateResult, userData);
       throw new HttpErrors.BadRequest(message);
