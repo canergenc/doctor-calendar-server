@@ -52,7 +52,7 @@ export class CalendarService {
     if (userGroupValidate)
       await this.userGroupRelationControl(calendar);
     if (duplicateValidate)
-      await this.duplicateValidate(calendar);
+      await this.duplicateValidate(calendar, id);
     if (groupSettingValidate)
       await this.groupSettingValidate(calendar, id);
 
@@ -76,7 +76,7 @@ export class CalendarService {
       throw new HttpErrors.BadRequest("Geçmişe yönelik düzenleme yapabilmek için lütfen sistem yöneticisine danışınız!");
   }
 
-  private async duplicateValidate(calendar: Calendar): Promise<void> {
+  private async duplicateValidate(calendar: Calendar, id?: string): Promise<void> {
     if (!calendar.startDate || !calendar.endDate || !calendar.userId) return;
     /* Duplicate Control */
     const duplicateResult = await this.calendarRepository.findOne({
@@ -89,10 +89,11 @@ export class CalendarService {
           endDate: { between: [calendar.startDate, calendar.endDate] }
         }],
         userId: { like: calendar.userId },
-        status: { neq: StatusType.Rejected }
+        status: { neq: StatusType.Rejected },
       }
     });
-    if (duplicateResult) {
+
+    if (duplicateResult && duplicateResult.id != id) {
       const userData = await this.userRepository.findById(calendar.userId);
       const message = await this.validateMessageSet(duplicateResult, userData);
       throw new HttpErrors.BadRequest(message);

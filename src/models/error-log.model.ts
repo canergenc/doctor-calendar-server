@@ -42,6 +42,11 @@ export class ErrorLog extends Entity {
   methodName?: string;
 
   @property({
+    type: 'object',
+  })
+  methodInput?: object;
+
+  @property({
     type: 'string',
   })
   errorStack?: string;

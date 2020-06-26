@@ -240,7 +240,8 @@ export class MyUserService implements UserService<User, Credentials> {
           code: error.code,
           methodName: "Forgot mail send function",
           errorStack: error.response,
-          description: `${email} adresine mail gönderiminde hata oluştu! Lütfen sistem yöneticisine danışınız!`
+          description: `${email} adresine mail gönderiminde hata oluştu! Lütfen sistem yöneticisine danışınız!`,
+          methodInput: response
         });
         //throw new HttpErrors.UnprocessableEntity(`${email} adresine mail gönderiminde hata oluştu! Lütfen sistem yöneticisine danışınız!`);
       });
@@ -251,14 +252,11 @@ export class MyUserService implements UserService<User, Credentials> {
 
   async sendMailRegisterUser(email: string, fullName: string, token: string, link?: any): Promise<void> {
 
-    let url = `${BaseUrls.UI_Base_Url}/auth/validation/${email}/${token}`;
+    let url = `${BaseUrls.UI_Base_Url}/auth/confirm-email/${email}/${token}`;
     if (link)
-      url = `${link}/auth/validation/${email}/${token}`;
-
+      url = `${link}/auth/confirm-email/${email}/${token}`;
     await this.emailManager.setMailModel(fullName, email, MailType.Register, url).then((response) => {
-
       this.emailManager.sendMail(response).then((res) => {
-
         //return { message: `${email} adresine aktivasyon maili gönderilmiştir. Lütfen mailinizi kontrol ediniz.` };
       }).catch((error) => {
         this.errorLogRepository.create({
@@ -266,7 +264,8 @@ export class MyUserService implements UserService<User, Credentials> {
           code: error.code,
           methodName: "Validation mail send function",
           description: `${email} adresine mail gönderiminde hata oluştu! Lütfen sistem yöneticisine danışınız!`,
-          errorStack: error.response
+          errorStack: error,
+          methodInput: response
         });
         //throw new HttpErrors.UnprocessableEntity(`${email} adresine mail gönderiminde hata oluştu! Lütfen sistem yöneticisine danışınız!`);
       });
