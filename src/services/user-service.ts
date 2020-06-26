@@ -85,12 +85,13 @@ export class MyUserService implements UserService<User, Credentials> {
   }
 
   async verifyEmail(key: string): Promise<boolean> {
-    if (!key) {
+    if (!key)
       throw new HttpErrors.BadRequest("Hatalı istek!");
-    }
     const res = await this.decodeToken(key, this.jwtVerifySecret);
+    if (!res) throw new HttpErrors.BadRequest("Key Hatası. Lütfen Tekrar Deneyiniz!");
     const foundUserCredential = await this.userCredentialsRepository.findOne({ where: { userId: { like: res?.decodeModel?.id } } });
-    if (foundUserCredential?.emailVerified) throw new HttpErrors.BadRequest("Hesap doğrulaması daha önce yapıldı!");
+    if (!foundUserCredential) throw new HttpErrors.BadRequest("Hesap bulunamadı!");
+    if (foundUserCredential?.emailVerified) throw new HttpErrors.Conflict("Hesap doğrulaması daha önce yapıldı!");
     const foundCredentialUserCount = await this.userCredentialsRepository.updateAll({ emailVerified: true }, { userId: { like: res?.decodeModel?.id } });
     return foundCredentialUserCount.count > 0 ? true : false;
   }
@@ -212,10 +213,10 @@ export class MyUserService implements UserService<User, Credentials> {
     const foundUser = await this.userRepository.findOne({ where: { email: { like: email } } });
     if (!foundUser) { throw new HttpErrors.NotFound("Böyle bir hesap bulunamadı") }
     const foundUserCredential = await this.userCredentialsRepository.findOne({ where: { userId: { like: foundUser.id }, emailVerified: true } });
-    if (foundUserCredential) { throw new HttpErrors.NotFound("Daha önce hesap doğrulaması yapıldı!") }
+    if (foundUserCredential) { throw new HttpErrors.Conflict("Daha önce hesap doğrulaması yapıldı!") }
     try {
       const token = await this.generateVerifyToken(foundUser.id);
-      await this.sendMailRegisterUser(foundUser.id, foundUser.fullName, token, link);
+      await this.sendMailRegisterUser(foundUser.email, foundUser.fullName, token, link);
       return true;
     } catch (error) {
       throw new HttpErrors.NotFound(error);
