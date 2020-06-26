@@ -284,7 +284,8 @@ export class UserController {
   async reVerification(
     @param.query.string('email') email: string
   ): Promise<Boolean> {
-    return this.myUserService.reVerify(email, this.context.request.headers["origin"]);
+    const link = this.context?.request?.headers["origin"];
+    return this.myUserService.reVerify(email, link ?? undefined);
   }
 
   @get('/users/forgot', {
