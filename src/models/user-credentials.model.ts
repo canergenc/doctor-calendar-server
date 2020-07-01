@@ -28,8 +28,7 @@ export class UserCredentials extends Entity {
   userId: string;
 
   @property({
-    type: 'boolean',
-    default: () => true,
+    type: 'boolean'
   })
   emailVerified: boolean;
 

@@ -91,7 +91,7 @@ export class MyUserService implements UserService<User, Credentials> {
     if (!res) throw new HttpErrors.BadRequest("Key Hatası. Lütfen Tekrar Deneyiniz!");
     const foundUserCredential = await this.userCredentialsRepository.findOne({ where: { userId: { like: res?.decodeModel?.id } } });
     if (!foundUserCredential) throw new HttpErrors.BadRequest("Hesap bulunamadı!");
-    if (foundUserCredential?.emailVerified) throw new HttpErrors.Conflict("Hesap doğrulaması daha önce yapıldı!");
+    if (foundUserCredential.emailVerified) throw new HttpErrors.Conflict("Hesap doğrulaması daha önce yapıldı!");
     const foundCredentialUserCount = await this.userCredentialsRepository.updateAll({ emailVerified: true }, { userId: { like: res?.decodeModel?.id } });
     return foundCredentialUserCount.count > 0 ? true : false;
   }
@@ -355,7 +355,9 @@ export class MyUserService implements UserService<User, Credentials> {
 
     if (user.currentPassword && user.oldPassword) {
       /**Password Update */
-      await this.passwordUpdate(id, user.currentPassword, user.oldPassword)
+      await this.passwordUpdate(id, user.currentPassword, user.oldPassword);
+      delete user.currentPassword;
+      delete user.oldPassword;
     }
 
     await this.userRepository.updateById(id, user);
