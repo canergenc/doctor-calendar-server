@@ -79,32 +79,9 @@ export class CalendarService {
   private async duplicateValidate(calendar: Calendar, id?: string): Promise<void> {
     if (!calendar.startDate || !calendar.endDate || !calendar.userId) return;
     /* Duplicate Control */
-    // const duplicateResult = await this.calendarRepository.findOne({
-    //   where:
-    //   {
-    //     or: [
-    //       {
-    //         and: [{
-    //           startDate: { gte: new Date(calendar.startDate) },
-    //           endDate: { lte: new Date(calendar.startDate) }
-    //         }]
-    //       },
-    //       {
-    //         and: [{
-    //           startDate: { gte: new Date(calendar.endDate) },
-    //           endDate: { lte: new Date(calendar.endDate) }
-    //         }]
-    //       }
-    //     ],
-    //     userId: { like: calendar.userId },
-    //     status: { neq: StatusType.Rejected },
-    //   }
-    // });
-
     const calendars = await this.calendarRepository.find({
       where:
       {
-        //id: { neq: id },
         userId: { like: calendar.userId },
         status: { neq: StatusType.Rejected },
       }
