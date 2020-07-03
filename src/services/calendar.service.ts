@@ -79,27 +79,48 @@ export class CalendarService {
   private async duplicateValidate(calendar: Calendar, id?: string): Promise<void> {
     if (!calendar.startDate || !calendar.endDate || !calendar.userId) return;
     /* Duplicate Control */
-    const duplicateResult = await this.calendarRepository.findOne({
+    // const duplicateResult = await this.calendarRepository.findOne({
+    //   where:
+    //   {
+    //     or: [
+    //       {
+    //         and: [{
+    //           startDate: { gte: new Date(calendar.startDate) },
+    //           endDate: { lte: new Date(calendar.startDate) }
+    //         }]
+    //       },
+    //       {
+    //         and: [{
+    //           startDate: { gte: new Date(calendar.endDate) },
+    //           endDate: { lte: new Date(calendar.endDate) }
+    //         }]
+    //       }
+    //     ],
+    //     userId: { like: calendar.userId },
+    //     status: { neq: StatusType.Rejected },
+    //   }
+    // });
+
+    const calendars = await this.calendarRepository.find({
       where:
       {
-        or: [{
-          startDate: { between: [calendar.startDate, calendar.endDate] }
-        },
-        {
-          endDate: { between: [calendar.startDate, calendar.endDate] }
-        }],
+        //id: { neq: id },
         userId: { like: calendar.userId },
         status: { neq: StatusType.Rejected },
       }
-    });
-    console.log(duplicateResult);
+    })
+    const duplicateResult = calendars.find(item =>
+
+      (item.startDate <= new Date(calendar.startDate) && item.endDate >= new Date(calendar.startDate)) ||
+      (item.startDate <= new Date(calendar.endDate) && item.endDate >= new Date(calendar.endDate))
+
+    );
     if (duplicateResult) {
       if (id && duplicateResult.id == id) return;
       const userData = await this.userRepository.findById(calendar.userId);
       const message = await this.validateMessageSet(duplicateResult, userData);
       throw new HttpErrors.BadRequest(message);
     }
-    throw new HttpErrors.BadRequest("ben yaptım");
   }
 
   private async groupSettingValidate(calendar: Calendar, id?: string): Promise<void> {
