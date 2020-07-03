@@ -92,13 +92,14 @@ export class CalendarService {
         status: { neq: StatusType.Rejected },
       }
     });
-
-    if (duplicateResult && duplicateResult.id != id) {
+    console.log(duplicateResult);
+    if (duplicateResult) {
+      if (id && duplicateResult.id == id) return;
       const userData = await this.userRepository.findById(calendar.userId);
       const message = await this.validateMessageSet(duplicateResult, userData);
       throw new HttpErrors.BadRequest(message);
     }
-
+    throw new HttpErrors.BadRequest("ben yaptım");
   }
 
   private async groupSettingValidate(calendar: Calendar, id?: string): Promise<void> {
