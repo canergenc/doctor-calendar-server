@@ -56,6 +56,8 @@ export class CalendarService {
     if (groupSettingValidate)
       await this.groupSettingValidate(calendar, id);
 
+    await this.locationValidate(calendar);
+
   }
 
   private async dateValidate(calendar: Calendar): Promise<void> {
@@ -197,14 +199,20 @@ export class CalendarService {
       }
     }
   }
+
+  private async locationValidate(calendar: Calendar): Promise<void> {
+    if (!calendar.locationId) return;
+    const location = await this.locationRepository.findById(calendar.locationId);
+    if (location.isActive == false)
+      throw new HttpErrors.BadRequest(location.name + " lokasyonu pasif olarak işaretlendiği için işlem yapılamaz!");
+  }
+
   /** Lokasyon gün sınırı için tarih aralığı dizisi oluşturuyor. */
   private async getDaysArray(start: Date, end: Date) {
     const addFn = Date.prototype.setDate;
     const interval = 1;
     let output = []
     let current = new Date(start);
-    console.log(start)
-    console.log(end)
     while (current <= end) {
       output.push(new Date(current));
       current = new Date(addFn.call(current, interval));
