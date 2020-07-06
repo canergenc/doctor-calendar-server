@@ -25,6 +25,11 @@ export class Calendar extends Entity {
   description: string;
 
   @property({
+    type: 'string',
+  })
+  note: string;
+
+  @property({
     type: "number",
     required: true
   })
