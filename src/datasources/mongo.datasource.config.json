@@ -1,8 +1,8 @@
 {
   "name": "mongo",
   "connector": "mongodb",
-  "url": "mongodb+srv://mongoUser:mongoUser1@cluster0.spanqao.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0",
-  "host": "mongodb+srv://mongoUser:mongoUser1@cluster0.spanqao.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0",
+  "url": "mongodb+srv://mongoUser:mongoUser1@cluster0.spanqao.mongodb.net/doctorcalendar",
+  "host": "mongodb+srv://mongoUser:mongoUser1@cluster0.spanqao.mongodb.net/doctorcalendar",
   "port": 27017,
   "user": "",
   "password": "",
